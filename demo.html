@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDFSmaller Components Demo</title>
+    <link rel="stylesheet" href="static/css/components.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .demo-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .demo-header h1 {
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        
+        .demo-header p {
+            color: #6b7280;
+            font-size: 18px;
+        }
+        
+        .component-demo {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        
+        .component-header {
+            background: #f8fafc;
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .component-header h2 {
+            margin: 0;
+            color: #1f2937;
+        }
+        
+        .component-content {
+            padding: 20px;
+        }
+        
+        .demo-controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .demo-controls h3 {
+            margin: 0 0 15px 0;
+            color: #374151;
+            font-size: 16px;
+        }
+        
+        .control-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        
+        .status {
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .status.authenticated {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status.guest {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1>PDFSmaller Components Demo</h1>
+            <p>Test the new authentication, profile, settings, and subscription components</p>
+        </div>
+
+        <!-- Authentication Demo -->
+        <div class="component-demo">
+            <div class="component-header">
+                <h2>Authentication Panel</h2>
+            </div>
+            <div class="component-content">
+                <div class="demo-controls">
+                    <h3>Demo Controls</h3>
+                    <div class="control-group">
+                        <button class="btn btn-primary" onclick="setAuthState(true)">Set Authenticated</button>
+                        <button class="btn btn-secondary" onclick="setAuthState(false)">Set Guest</button>
+                        <button class="btn btn-secondary" onclick="switchAuthMode()">Switch Mode</button>
+                        <span class="status" id="authStatus">Guest</span>
+                    </div>
+                </div>
+                <auth-panel id="authDemo"></auth-panel>
+            </div>
+        </div>
+
+        <!-- Profile Demo -->
+        <div class="component-demo">
+            <div class="component-header">
+                <h2>Profile Panel</h2>
+            </div>
+            <div class="component-content">
+                <div class="demo-controls">
+                    <h3>Demo Controls</h3>
+                    <div class="control-group">
+                        <button class="btn btn-primary" onclick="loadDemoUser()">Load Demo User</button>
+                        <button class="btn btn-secondary" onclick="clearUser()">Clear User</button>
+                        <button class="btn btn-secondary" onclick="toggleEditMode()">Toggle Edit Mode</button>
+                    </div>
+                </div>
+                <profile-panel id="profileDemo"></profile-panel>
+            </div>
+        </div>
+
+        <!-- Settings Demo -->
+        <div class="component-demo">
+            <div class="component-header">
+                <h2>Enhanced Settings Panel</h2>
+            </div>
+            <div class="component-content">
+                <div class="demo-controls">
+                    <h3>Demo Controls</h3>
+                    <div class="control-group">
+                        <button class="btn btn-primary" onclick="loadDemoSettings()">Load Demo Settings</button>
+                        <button class="btn btn-secondary" onclick="resetSettings()">Reset Settings</button>
+                        <button class="btn btn-secondary" onclick="switchSettingsTab('preferences')">Preferences Tab</button>
+                        <button class="btn btn-secondary" onclick="switchSettingsTab('compression')">Compression Tab</button>
+                    </div>
+                </div>
+                <enhanced-settings-panel id="settingsDemo"></enhanced-settings-panel>
+            </div>
+        </div>
+
+        <!-- Subscription Demo -->
+        <div class="component-demo">
+            <div class="component-header">
+                <h2>Subscription Panel</h2>
+            </div>
+            <div class="component-content">
+                <div class="demo-controls">
+                    <h3>Demo Controls</h3>
+                    <div class="control-group">
+                        <button class="btn btn-primary" onclick="loadDemoSubscription()">Load Demo Subscription</button>
+                        <button class="btn btn-secondary" onclick="clearSubscription()">Clear Subscription</button>
+                        <button class="btn btn-secondary" onclick="loadDemoPlans()">Load Demo Plans</button>
+                    </div>
+                </div>
+                <subscription-panel id="subscriptionDemo"></subscription-panel>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import components -->
+    <script type="module" src="js/components/auth-panel.js"></script>
+    <script type="module" src="js/components/profile-panel.js"></script>
+    <script type="module" src="js/components/subscription-panel.js"></script>
+    <script type="module" src="js/components/enhanced-settings-panel.js"></script>
+
+    <script>
+        // Demo functionality
+        let isAuthenticated = false;
+        let currentUser = null;
+
+        // Demo user data
+        const demoUser = {
+            id: 1,
+            name: 'John Doe',
+            email: 'john.doe@example.com',
+            plan: 'premium',
+            created_at: '2024-01-15T10:30:00Z',
+            updated_at: '2024-01-20T14:45:00Z',
+            is_active: true,
+            daily_usage_count: 3,
+            total_compressions: 45
+        };
+
+        // Demo subscription data
+        const demoSubscription = {
+            id: 1,
+            plan: 'premium',
+            status: 'active',
+            billing_cycle: 'monthly',
+            current_period_start: '2024-01-01T00:00:00Z',
+            current_period_end: '2024-02-01T00:00:00Z'
+        };
+
+        // Demo plans data
+        const demoPlans = [
+            {
+                id: 1,
+                name: 'free',
+                display_name: 'Free Plan',
+                description: 'Basic PDF compression features',
+                price_monthly: 0,
+                price_yearly: 0,
+                daily_compression_limit: 5,
+                max_file_size_mb: 10,
+                bulk_processing: false,
+                priority_processing: false,
+                api_access: false
+            },
+            {
+                id: 2,
+                name: 'premium',
+                display_name: 'Premium Plan',
+                description: 'Advanced features including bulk processing and OCR',
+                price_monthly: 9.99,
+                price_yearly: 99.99,
+                daily_compression_limit: 100,
+                max_file_size_mb: 100,
+                bulk_processing: true,
+                priority_processing: true,
+                api_access: false
+            },
+            {
+                id: 3,
+                name: 'pro',
+                display_name: 'Pro Plan',
+                description: 'Full access to all features with API access',
+                price_monthly: 19.99,
+                price_yearly: 199.99,
+                daily_compression_limit: 500,
+                max_file_size_mb: 500,
+                bulk_processing: true,
+                priority_processing: true,
+                api_access: true
+            }
+        ];
+
+        // Demo usage data
+        const demoUsage = {
+            daily_usage_count: 3,
+            monthly_usage_count: 45,
+            total_compressions: 156
+        };
+
+        // Demo settings data
+        const demoSettings = {
+            compression: {
+                compressionLevel: 'high',
+                imageQuality: 75,
+                targetSize: 'small',
+                optimizationStrategy: 'size'
+            },
+            preferences: {
+                theme: 'dark',
+                language: 'en',
+                notifications: true,
+                autoSave: false
+            }
+        };
+
+        // Authentication controls
+        function setAuthState(authenticated) {
+            isAuthenticated = authenticated;
+            currentUser = authenticated ? demoUser : null;
+            
+            const authPanel = document.getElementById('authDemo');
+            const authStatus = document.getElementById('authStatus');
+            
+            if (authPanel) {
+                authPanel.setAuthState(authenticated, currentUser);
+            }
+            
+            if (authStatus) {
+                authStatus.textContent = authenticated ? 'Authenticated' : 'Guest';
+                authStatus.className = `status ${authenticated ? 'authenticated' : 'guest'}`;
+            }
+        }
+
+        function switchAuthMode() {
+            const authPanel = document.getElementById('authDemo');
+            if (authPanel) {
+                const currentMode = authPanel.getState('currentMode');
+                const newMode = currentMode === 'login' ? 'register' : 'login';
+                authPanel.setMode(newMode);
+            }
+        }
+
+        // Profile controls
+        function loadDemoUser() {
+            const profilePanel = document.getElementById('profileDemo');
+            if (profilePanel) {
+                profilePanel.setUser(demoUser);
+            }
+        }
+
+        function clearUser() {
+            const profilePanel = document.getElementById('profileDemo');
+            if (profilePanel) {
+                profilePanel.setUser(null);
+            }
+        }
+
+        function toggleEditMode() {
+            const profilePanel = document.getElementById('profileDemo');
+            if (profilePanel) {
+                const isEditing = profilePanel.getState('isEditing');
+                profilePanel.setState({ isEditing: !isEditing });
+                profilePanel.scheduleRender();
+            }
+        }
+
+        // Settings controls
+        function loadDemoSettings() {
+            const settingsPanel = document.getElementById('settingsDemo');
+            if (settingsPanel) {
+                settingsPanel.setSettings(demoSettings);
+            }
+        }
+
+        function resetSettings() {
+            const settingsPanel = document.getElementById('settingsDemo');
+            if (settingsPanel) {
+                settingsPanel.setState({ settings: settingsPanel.settings });
+                settingsPanel.scheduleRender();
+            }
+        }
+
+        function switchSettingsTab(tab) {
+            const settingsPanel = document.getElementById('settingsDemo');
+            if (settingsPanel) {
+                settingsPanel.setActiveTab(tab);
+            }
+        }
+
+        // Subscription controls
+        function loadDemoSubscription() {
+            const subscriptionPanel = document.getElementById('subscriptionDemo');
+            if (subscriptionPanel) {
+                subscriptionPanel.setSubscription(demoSubscription);
+                subscriptionPanel.setUsageStats(demoUsage);
+            }
+        }
+
+        function clearSubscription() {
+            const subscriptionPanel = document.getElementById('subscriptionDemo');
+            if (subscriptionPanel) {
+                subscriptionPanel.setSubscription(null);
+                subscriptionPanel.setUsageStats(null);
+            }
+        }
+
+        function loadDemoPlans() {
+            const subscriptionPanel = document.getElementById('subscriptionDemo');
+            if (subscriptionPanel) {
+                subscriptionPanel.setPlans(demoPlans);
+            }
+        }
+
+        // Initialize demo when components are ready
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set initial state
+            setAuthState(false);
+            
+            // Load demo data
+            loadDemoUser();
+            loadDemoSettings();
+            loadDemoSubscription();
+            loadDemoPlans();
+        });
+    </script>
+</body>
+</html>

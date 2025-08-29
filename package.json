@@ -1,0 +1,47 @@
+{
+  "name": "pdfsmaller-frontend",
+  "version": "1.0.0",
+  "description": "Modern vanilla JavaScript frontend for PDFSmaller with ES6 modules",
+  "type": "module",
+  "main": "index.html",
+  "scripts": {
+    "dev": "node scripts/dev-server.js",
+    "build": "echo 'No build required - static files only'",
+    "serve": "node scripts/serve.js",
+    "lint": "eslint js/**/*.js",
+    "lint:fix": "eslint js/**/*.js --fix",
+    "test": "node scripts/test-runner.js",
+    "test:watch": "node scripts/test-runner.js --watch"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "terser": "^5.24.0",
+    "chokidar": "^3.5.3",
+    "ws": "^8.14.2",
+    "mime-types": "^2.1.35"
+  },
+  "dependencies": {
+    "pdf-lib": "^1.17.1"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ],
+  "keywords": [
+    "pdf",
+    "compression",
+    "javascript",
+    "es6",
+    "modules",
+    "web-components",
+    "vanilla-js",
+    "static"
+  ],
+  "author": "PDFSmaller Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

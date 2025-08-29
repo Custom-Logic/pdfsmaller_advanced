@@ -1,0 +1,76 @@
+/* Component-specific styles for new components */
+
+/* Profile Container */
+.profile-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Settings Container */
+.settings-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Subscription Container */
+.subscription-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Tab Panel Styles */
+.tab-panel {
+    display: none;
+    padding: 20px;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Profile Tab Button */
+#profileTabBtn {
+    display: none;
+}
+
+#profileTabBtn.visible {
+    display: inline-block;
+}
+
+/* Subscription Tab Button */
+#subscriptionTabBtn {
+    display: none;
+}
+
+#subscriptionTabBtn.visible {
+    display: inline-block;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .profile-container,
+    .settings-container,
+    .subscription-container {
+        padding: 10px;
+        margin: 0;
+    }
+    
+    .tab-panel {
+        padding: 15px;
+    }
+}
