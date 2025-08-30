@@ -217,7 +217,7 @@ export class ResultsDisplay extends BaseComponent {
             .results-display {
                 background: white;
                 border-radius: 12px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 4px 6px rgba(59, 130, 246, 0.1);
                 overflow: hidden;
                 transition: all 0.3s ease;
                 border: 1px solid #e2e8f0;
@@ -229,7 +229,7 @@ export class ResultsDisplay extends BaseComponent {
             
             .results-display.compact {
                 border-radius: 8px;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
             }
             
             .results-display.error {

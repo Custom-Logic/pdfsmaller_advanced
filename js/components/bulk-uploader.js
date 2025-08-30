@@ -28,7 +28,7 @@ export class BulkUploader extends BaseComponent {
                     display: block;
                     background: #ffffff;
                     border-radius: 8px;
-                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
                     padding: 20px;
                     margin: 20px 0;
                 }

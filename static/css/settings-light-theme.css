@@ -1,0 +1,241 @@
+/* Settings Light Theme - Remove Dark Backgrounds */
+/* Task 3: Remove Dark Backgrounds from Settings Component */
+
+/* Ensure content-card has light background */
+.content-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    padding: 0;
+    margin: 0;
+    /* Ensure no dark overlays */
+    position: relative;
+    z-index: 1;
+}
+
+/* Settings Tab Panel - Light Theme Only */
+#settingsTab {
+    background: transparent;
+    /* Ensure no dark backgrounds */
+}
+
+#settingsTab .content-card {
+    background: #ffffff;
+    /* Override any potential dark backgrounds */
+}
+
+/* Enhanced Settings Panel - Light Theme Overrides */
+enhanced-settings-panel {
+    display: block;
+    background: transparent;
+    /* Ensure component background is light */
+}
+
+/* Remove any potential dark overlays from settings */
+enhanced-settings-panel::before,
+enhanced-settings-panel::after {
+    display: none !important;
+}
+
+/* Ensure all settings controls have light backgrounds */
+enhanced-settings-panel input,
+enhanced-settings-panel select,
+enhanced-settings-panel textarea,
+enhanced-settings-panel button {
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    color: #374151;
+}
+
+/* Focus states with proper contrast */
+enhanced-settings-panel input:focus,
+enhanced-settings-panel select:focus,
+enhanced-settings-panel textarea:focus,
+enhanced-settings-panel button:focus {
+    background: #ffffff;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    outline: none;
+}
+
+/* Hover states with light backgrounds */
+enhanced-settings-panel input:hover,
+enhanced-settings-panel select:hover,
+enhanced-settings-panel textarea:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+}
+
+/* Ensure no dark backgrounds in any interactive state */
+enhanced-settings-panel .mode-option {
+    background: transparent;
+    color: #6b7280;
+}
+
+enhanced-settings-panel .mode-option.active {
+    background: #ffffff;
+    color: #3b82f6;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+enhanced-settings-panel .mode-option:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.5);
+    color: #374151;
+}
+
+/* Checkbox containers with light backgrounds */
+enhanced-settings-panel .checkbox-container {
+    background: transparent;
+}
+
+enhanced-settings-panel .checkbox-container:hover {
+    background: #f9fafb;
+}
+
+/* Navigation items with light backgrounds */
+enhanced-settings-panel .nav-item {
+    background: transparent;
+    color: #6b7280;
+}
+
+enhanced-settings-panel .nav-item:hover {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+enhanced-settings-panel .nav-item.active {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+/* Settings sections with light backgrounds */
+enhanced-settings-panel .settings-tab {
+    background: transparent;
+}
+
+enhanced-settings-panel .setting-group {
+    background: transparent;
+}
+
+/* Account card with light background */
+enhanced-settings-panel .account-card {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+}
+
+/* Summary sections with light backgrounds */
+enhanced-settings-panel .current-settings-summary {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+enhanced-settings-panel .summary-item {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+}
+
+/* Save status with light backgrounds */
+enhanced-settings-panel .save-status.success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+enhanced-settings-panel .save-status.error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+/* Button overrides for light theme */
+enhanced-settings-panel .btn-primary {
+    background: #3b82f6;
+    color: white;
+    border: none;
+}
+
+enhanced-settings-panel .btn-primary:hover {
+    background: #2563eb;
+}
+
+enhanced-settings-panel .btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
+enhanced-settings-panel .btn-secondary:hover {
+    background: #e5e7eb;
+}
+
+/* Ensure proper text contrast */
+enhanced-settings-panel .settings-header h2 {
+    color: #1f2937;
+}
+
+enhanced-settings-panel .settings-header p {
+    color: #6b7280;
+}
+
+enhanced-settings-panel .settings-tab h3 {
+    color: #1f2937;
+}
+
+enhanced-settings-panel .settings-description {
+    color: #6b7280;
+}
+
+enhanced-settings-panel .setting-label {
+    color: #374151;
+}
+
+enhanced-settings-panel .setting-help {
+    color: #6b7280;
+}
+
+/* Mobile responsive overrides */
+@media (max-width: 768px) {
+    .content-card {
+        margin: 16px;
+        border-radius: 8px;
+    }
+    
+    enhanced-settings-panel .settings-nav {
+        background: #f9fafb;
+        padding: 8px;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .content-card {
+        border: 2px solid #374151;
+    }
+    
+    enhanced-settings-panel input,
+    enhanced-settings-panel select,
+    enhanced-settings-panel textarea {
+        border: 2px solid #374151;
+    }
+    
+    enhanced-settings-panel input:focus,
+    enhanced-settings-panel select:focus,
+    enhanced-settings-panel textarea:focus {
+        border: 2px solid #1d4ed8;
+        box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.2);
+    }
+}
+
+/* Ensure no dark backgrounds in print mode */
+@media print {
+    .content-card,
+    enhanced-settings-panel,
+    enhanced-settings-panel * {
+        background: white !important;
+        color: black !important;
+        box-shadow: none !important;
+    }
+}

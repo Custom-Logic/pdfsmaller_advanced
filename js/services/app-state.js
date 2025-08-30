@@ -219,7 +219,8 @@ export class AppStateManager {
             imageQuality: settings.imageQuality || this.state.imageQuality,
             useServerProcessing: settings.useServerProcessing !== undefined
                 ? settings.useServerProcessing
-                : this.state.useServerProcessing
+                : this.state.useServerProcessing,
+            processingMode: settings.processingMode || this.state.processingMode
         });
     }
 

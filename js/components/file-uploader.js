@@ -26,7 +26,7 @@ export class FileUploader extends BaseComponent {
         this.updateProp('multiple', this.hasAttribute('multiple'));
         this.updateProp('max-size', this.getAttribute('max-size') || '50MB');
         this.updateProp('disabled', this.hasAttribute('disabled'));
-        
+
         this.setState({
             isDragOver: false,
             isProcessing: false,
@@ -40,14 +40,14 @@ export class FileUploader extends BaseComponent {
         const isDisabled = this.getProp('disabled', false);
         const isProcessing = state.isProcessing;
         const multiple = this.getProp('multiple', false);
-        
+
         const uploaderClasses = [
             'file-uploader',
             state.isDragOver ? 'drag-over' : '',
             isDisabled ? 'disabled' : '',
             isProcessing ? 'processing' : ''
         ].filter(Boolean).join(' ');
-        
+
         return `
             <div class="${uploaderClasses}">
                 <div class="upload-area" 
@@ -136,7 +136,7 @@ export class FileUploader extends BaseComponent {
                 text-align: center;
                 cursor: pointer;
                 transition: all var(--duration-300) var(--ease-out);
-                background: var(--bg-secondary);
+                background: #fefefe;
                 min-height: 240px;
                 display: flex;
                 flex-direction: column;
@@ -145,8 +145,7 @@ export class FileUploader extends BaseComponent {
                 gap: var(--space-4);
                 position: relative;
                 overflow: hidden;
-            }
-            
+            }            
             .upload-area::before {
                 content: '';
                 position: absolute;
@@ -154,7 +153,7 @@ export class FileUploader extends BaseComponent {
                 left: 0;
                 right: 0;
                 bottom: 0;
-                background: var(--gradient-glass);
+                background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(59, 130, 246, 0.02) 100%);
                 opacity: 0;
                 transition: opacity var(--duration-300) var(--ease-out);
                 pointer-events: none;
@@ -184,9 +183,9 @@ export class FileUploader extends BaseComponent {
             
             .file-uploader.drag-over .upload-area {
                 border-color: var(--color-primary);
-                background: var(--primary-50);
+                background: var(--primary-100);
                 transform: scale(1.02) translateY(-4px);
-                box-shadow: var(--shadow-xl), 0 0 0 4px var(--primary-100);
+                box-shadow: var(--shadow-xl), 0 0 0 4px var(--primary-200);
                 border-style: solid;
             }
             
@@ -197,7 +196,7 @@ export class FileUploader extends BaseComponent {
             .file-uploader.disabled .upload-area {
                 opacity: 0.6;
                 cursor: not-allowed;
-                background: var(--gray-100);
+                background: var(--gray-50);
                 border-color: var(--gray-200);
             }
             
@@ -259,9 +258,9 @@ export class FileUploader extends BaseComponent {
                 padding: var(--space-4);
                 margin-top: var(--space-4);
                 background: var(--error-50);
-                border: 1px solid var(--error-200);
+                border: 2px solid var(--error-200);
                 border-radius: var(--radius-lg);
-                color: var(--error-700);
+                color: var(--error-800);
                 animation: slideIn var(--duration-300) var(--ease-out);
             }
             
@@ -293,7 +292,7 @@ export class FileUploader extends BaseComponent {
                 border: 1px solid var(--gray-200);
                 border-radius: var(--radius-xl);
                 overflow: hidden;
-                background: white;
+                background: var(--bg-primary);
                 box-shadow: var(--shadow-sm);
                 animation: slideIn var(--duration-300) var(--ease-out);
             }
@@ -444,6 +443,8 @@ export class FileUploader extends BaseComponent {
             .file-uploader.processing .upload-area {
                 pointer-events: none;
                 opacity: 0.8;
+                background: var(--gray-50);
+                border-color: var(--gray-300);
             }
             
             .file-uploader.processing .upload-icon {
@@ -618,72 +619,52 @@ export class FileUploader extends BaseComponent {
         `;
     }
 
-    // setupEventListeners() {
-    //     const uploadArea = this.$('.upload-area');
-    //     const fileInput = this.$('.file-input');
-    //
-    //     // Drag and drop events
-    //     this.addEventListener(uploadArea, 'dragenter', this.handleDragEnter.bind(this));
-    //     this.addEventListener(uploadArea, 'dragleave', this.handleDragLeave.bind(this));
-    //     this.addEventListener(uploadArea, 'dragover', this.handleDragOver.bind(this));
-    //     this.addEventListener(uploadArea, 'drop', this.handleDrop.bind(this));
-    //
-    //     // Click to select files
-    //     this.addEventListener(uploadArea, 'click', this.handleAreaClick.bind(this));
-    //     this.addEventListener(uploadArea, 'keydown', this.handleAreaKeydown.bind(this));
-    //
-    //     // File input change
-    //     this.addEventListener(fileInput, 'change', this.handleFileInputChange.bind(this));
-    //
-    //     // File list interactions
-    //     this.addEventListener(this, 'click', this.handleFileListClick.bind(this));
-    // }
 
-setupEventListeners() {
-    // Don't setup listeners here - wait for onRendered
-}
-
-onRendered() {
-    // Setup listeners after render is complete
-    const uploadArea = this.$('.upload-area');
-    const fileInput = this.$('.file-input');
-
-    if (!uploadArea || !fileInput) {
-        console.warn('FileUploader: Required elements not found');
-        return;
+    setupEventListeners() {
+        // Don't setup listeners here - wait for onRendered
     }
 
-    // Clear existing listeners before adding new ones
-    this.removeAllEventListeners();
+    onRendered() {
+        // Setup listeners after render is complete
+        const uploadArea = this.$('.upload-area');
+        const fileInput = this.$('.file-input');
 
-    // Add event listeners safely
-    this.addEventListener(uploadArea, 'dragenter', this.handleDragEnter.bind(this));
-    this.addEventListener(uploadArea, 'dragleave', this.handleDragLeave.bind(this));
-    this.addEventListener(uploadArea, 'dragover', this.handleDragOver.bind(this));
-    this.addEventListener(uploadArea, 'drop', this.handleDrop.bind(this));
-    this.addEventListener(uploadArea, 'click', this.handleAreaClick.bind(this));
-    this.addEventListener(uploadArea, 'keydown', this.handleAreaKeydown.bind(this));
-    this.addEventListener(fileInput, 'change', this.handleFileInputChange.bind(this));
-    this.addEventListener(this, 'click', this.handleFileListClick.bind(this));
-    console.log("File Uploader event listeners hooked up");
-}
+        if (!uploadArea || !fileInput) {
+            console.warn('FileUploader: Required elements not found');
+            return;
+        }
+
+        // Clear existing listeners before adding new ones
+        this.removeAllEventListeners();
+
+        // Add event listeners safely
+        this.addEventListener(uploadArea, 'dragenter', this.handleDragEnter.bind(this));
+        this.addEventListener(uploadArea, 'dragleave', this.handleDragLeave.bind(this));
+        this.addEventListener(uploadArea, 'dragover', this.handleDragOver.bind(this));
+        this.addEventListener(uploadArea, 'drop', this.handleDrop.bind(this));
+        this.addEventListener(uploadArea, 'click', this.handleAreaClick.bind(this));
+        this.addEventListener(uploadArea, 'keydown', this.handleAreaKeydown.bind(this));
+        this.addEventListener(fileInput, 'change', this.handleFileInputChange.bind(this));
+        this.addEventListener(this, 'click', this.handleFileListClick.bind(this));
+        console.log("File Uploader event listeners hooked up");
+    }
 
     handleDragEnter(e) {
         e.preventDefault();
         e.stopPropagation();
-        
+
         if (this.getProp('disabled') || this.getState('isProcessing')) return;
-        
+
         this.dragCounter++;
-        
+
         // Add visual feedback with smooth transition
         if (this.dragCounter === 1) {
             this.setState({ isDragOver: true });
-            
+
             // Emit drag enter event for external listeners
-            this.emit('drag-enter', { 
+            this.emit('drag-enter', {
                 event: e,
-                files: e.dataTransfer.files.length 
+                files: e.dataTransfer.files.length
             });
         }
     }
@@ -691,13 +672,13 @@ onRendered() {
     handleDragLeave(e) {
         e.preventDefault();
         e.stopPropagation();
-        
+
         this.dragCounter--;
-        
+
         // Only remove drag over state when completely leaving the component
         if (this.dragCounter === 0) {
             this.setState({ isDragOver: false });
-            
+
             // Emit drag leave event
             this.emit('drag-leave', { event: e });
         }
@@ -706,40 +687,40 @@ onRendered() {
     handleDragOver(e) {
         e.preventDefault();
         e.stopPropagation();
-        
+
         if (this.getProp('disabled') || this.getState('isProcessing')) {
             e.dataTransfer.dropEffect = 'none';
             return;
         }
-        
+
         // Set appropriate drop effect
         e.dataTransfer.dropEffect = 'copy';
-        
+
         // Emit drag over event for continuous feedback
-        this.emit('drag-over', { 
+        this.emit('drag-over', {
             event: e,
-            files: e.dataTransfer.files.length 
+            files: e.dataTransfer.files.length
         });
     }
 
     handleDrop(e) {
         e.preventDefault();
         e.stopPropagation();
-        
+
         if (this.getProp('disabled') || this.getState('isProcessing')) return;
-        
+
         // Reset drag state
         this.dragCounter = 0;
         this.setState({ isDragOver: false });
-        
+
         const files = Array.from(e.dataTransfer.files);
-        
+
         // Emit drop event before processing
-        this.emit('drop', { 
+        this.emit('drop', {
             event: e,
-            files: files 
+            files: files
         });
-        
+
         // Add slight delay for visual feedback
         setTimeout(() => {
             this.processFiles(files);
@@ -777,24 +758,24 @@ onRendered() {
 
     async processFiles(files) {
         if (this.getProp('disabled') || this.getState('isProcessing')) return;
-        
+
         // Clear previous errors and set processing state
         this.setState({ error: null, isProcessing: true });
-        
+
         // Emit processing start event
         this.emit('processing-start', { files });
-        
+
         try {
             const validFiles = [];
             const errors = [];
             const warnings = [];
-            
+
             // Validate each file
             for (const file of files) {
                 const validation = await this.validateFile(file);
                 if (validation.isValid) {
                     validFiles.push(file);
-                    
+
                     // Check for warnings (e.g., large files)
                     if (validation.warnings && validation.warnings.length > 0) {
                         warnings.push(`${file.name}: ${validation.warnings.join(', ')}`);
@@ -803,31 +784,31 @@ onRendered() {
                     errors.push(`${file.name}: ${validation.errors.join(', ')}`);
                 }
             }
-            
+
             // Handle validation results
             if (errors.length > 0) {
-                const errorMessage = errors.length === 1 
-                    ? errors[0] 
+                const errorMessage = errors.length === 1
+                    ? errors[0]
                     : `${errors.length} files failed validation:\n${errors.join('\n')}`;
                 this.setState({ error: errorMessage });
-                
+
                 // Emit validation error event
                 this.emit('validation-error', { errors, files });
             }
-            
+
             // Show warnings if any (but don't block processing)
             if (warnings.length > 0 && validFiles.length > 0) {
                 console.warn('File upload warnings:', warnings);
                 this.emit('validation-warning', { warnings, files: validFiles });
             }
-            
+
             // Add valid files
             if (validFiles.length > 0) {
                 this.addFiles(validFiles);
-                
+
                 // Emit success event
-                this.emit('files-processed', { 
-                    validFiles, 
+                this.emit('files-processed', {
+                    validFiles,
                     totalFiles: files.length,
                     errors: errors.length,
                     warnings: warnings.length
@@ -836,37 +817,37 @@ onRendered() {
                 // No files were processed and no errors - might be empty selection
                 this.setState({ error: 'No valid files were selected.' });
             }
-            
+
         } catch (error) {
             const errorMessage = `Processing error: ${error.message}`;
             this.setState({ error: errorMessage });
-            
+
             // Emit processing error event
             this.emit('processing-error', { error, files });
-            
+
             console.error('File processing error:', error);
         } finally {
             this.setState({ isProcessing: false });
-            
+
             // Emit processing complete event
             this.emit('processing-complete', { files });
         }
     }
 
     async validateFile(file) {
-        const validation = { 
-            isValid: true, 
-            errors: [], 
-            warnings: [] 
+        const validation = {
+            isValid: true,
+            errors: [],
+            warnings: []
         };
-        
+
         // Basic file checks
         if (!file || !file.name) {
             validation.isValid = false;
             validation.errors.push('Invalid file object');
             return validation;
         }
-        
+
         // Check file size
         const maxSize = this.parseFileSize(this.getProp('max-size', '50MB'));
         if (file.size > maxSize) {
@@ -876,14 +857,14 @@ onRendered() {
             // Warning for files close to the limit
             validation.warnings.push(`Large file size (${this.formatFileSize(file.size)}). Processing may take longer.`);
         }
-        
+
         // Check for empty files
         if (file.size === 0) {
             validation.isValid = false;
             validation.errors.push('File is empty');
             return validation;
         }
-        
+
         // Check file type
         const acceptedTypes = this.getProp('accept', '.pdf').split(',').map(t => t.trim());
         const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
@@ -894,27 +875,27 @@ onRendered() {
                 return file.type === type || file.type.startsWith(type.split('/')[0] + '/');
             }
         });
-        
+
         if (!isAccepted) {
             validation.isValid = false;
-            const acceptedDisplay = acceptedTypes.map(type => 
+            const acceptedDisplay = acceptedTypes.map(type =>
                 type.startsWith('.') ? type.toUpperCase() : type
             ).join(', ');
             validation.errors.push(`File type "${fileExtension.toUpperCase()}" not supported. Accepted types: ${acceptedDisplay}`);
         }
-        
+
         // Check file name length
         if (file.name.length > 255) {
             validation.isValid = false;
             validation.errors.push('File name is too long (maximum 255 characters)');
         }
-        
+
         // Check for potentially problematic characters in filename
         const problematicChars = /[<>:"|?*\x00-\x1f]/;
         if (problematicChars.test(file.name)) {
             validation.warnings.push('File name contains special characters that may cause issues');
         }
-        
+
         // Additional PDF-specific validation if it's a PDF file
         if (fileExtension === '.pdf' || file.type === 'application/pdf') {
             try {
@@ -929,10 +910,10 @@ onRendered() {
                 validation.warnings.push('Could not verify PDF format');
             }
         }
-        
+
         return validation;
     }
-    
+
     // Helper method to read file bytes for validation
     async readFileBytes(file, start, length) {
         return new Promise((resolve, reject) => {
@@ -946,16 +927,16 @@ onRendered() {
     addFiles(files) {
         const currentFiles = this.getState('files');
         const isMultiple = this.getProp('multiple', false);
-        
+
         let newFiles;
         if (isMultiple) {
             newFiles = [...currentFiles, ...files];
         } else {
             newFiles = files.slice(-1); // Keep only the last file
         }
-        
+
         this.setState({ files: newFiles });
-        
+
         // Emit file selection event
         this.emit('files-selected', {
             files: newFiles,
@@ -967,7 +948,7 @@ onRendered() {
         const files = this.getState('files');
         const newFiles = files.filter((_, i) => i !== index);
         this.setState({ files: newFiles });
-        
+
         this.emit('files-changed', { files: newFiles });
     }
 
@@ -979,7 +960,7 @@ onRendered() {
     // Template helper methods
     getUploadIcon() {
         const state = this.getState();
-        
+
         if (state.isProcessing) {
             return `
                 <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -993,7 +974,7 @@ onRendered() {
                 </svg>
             `;
         }
-        
+
         if (state.isDragOver) {
             return `
                 <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -1005,7 +986,7 @@ onRendered() {
                 </svg>
             `;
         }
-        
+
         return `
             <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="50" cy="50" r="40" fill="currentColor" opacity="0.08" />
@@ -1015,38 +996,38 @@ onRendered() {
             </svg>
         `;
     }
-    
+
     getUploadText() {
         const state = this.getState();
-        
+
         if (state.isProcessing) {
             return 'Processing files...';
         }
-        
+
         if (state.isDragOver) {
             return 'Drop files here';
         }
-        
+
         const multiple = this.getProp('multiple', false);
         return multiple ? 'Drop your files here or click to browse' : 'Drop your PDF here or click to browse';
     }
-    
+
     getAriaLabel() {
         const state = this.getState();
         const multiple = this.getProp('multiple', false);
-        
+
         if (state.isProcessing) {
             return 'Processing files, please wait';
         }
-        
+
         if (state.isDragOver) {
             return 'Drop files to upload';
         }
-        
+
         const fileType = multiple ? 'files' : 'file';
         return `Click to select ${fileType} or drag and drop ${fileType} here`;
     }
-    
+
     escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
@@ -1058,7 +1039,7 @@ onRendered() {
         const maxSize = this.getProp('max-size', '50MB');
         const accept = this.getProp('accept', '.pdf');
         const multiple = this.getProp('multiple', false);
-        
+
         let text = `Maximum file size: ${maxSize}`;
         if (accept) {
             const types = accept.split(',').map(t => t.trim().toUpperCase()).join(', ');
@@ -1067,7 +1048,7 @@ onRendered() {
         if (multiple) {
             text += ' • Multiple files allowed';
         }
-        
+
         return text;
     }
 
@@ -1089,7 +1070,7 @@ onRendered() {
         const units = { B: 1, KB: 1024, MB: 1024 * 1024, GB: 1024 * 1024 * 1024 };
         const match = sizeString.match(/^(\d+(?:\.\d+)?)\s*([A-Z]+)$/i);
         if (!match) return 50 * 1024 * 1024; // Default 50MB
-        
+
         const value = parseFloat(match[1]);
         const unit = match[2].toUpperCase();
         return Math.round(value * (units[unit] || 1));
@@ -1103,28 +1084,28 @@ onRendered() {
     setFiles(files) {
         const validFiles = Array.isArray(files) ? files : [];
         this.setState({ files: validFiles });
-        
+
         // Emit files changed event
         this.emit('files-changed', { files: validFiles });
     }
 
     reset() {
-        this.setState({ 
-            files: [], 
-            error: null, 
-            isDragOver: false, 
-            isProcessing: false 
+        this.setState({
+            files: [],
+            error: null,
+            isDragOver: false,
+            isProcessing: false
         });
-        
+
         // Reset drag counter
         this.dragCounter = 0;
-        
+
         // Clear file input
         const fileInput = this.$('.file-input');
         if (fileInput) {
             fileInput.value = '';
         }
-        
+
         // Emit reset event
         this.emit('reset');
     }
@@ -1136,51 +1117,51 @@ onRendered() {
     clearError() {
         this.setState({ error: null });
     }
-    
+
     // Additional public methods for better control
     isProcessing() {
         return this.getState('isProcessing') || false;
     }
-    
+
     hasFiles() {
         return this.getFiles().length > 0;
     }
-    
+
     hasError() {
         return !!this.getState('error');
     }
-    
+
     getError() {
         return this.getState('error');
     }
-    
+
     getTotalFileSize() {
         return this.getFiles().reduce((total, file) => total + file.size, 0);
     }
-    
+
     getFileCount() {
         return this.getFiles().length;
     }
-    
+
     // Enable/disable the uploader
     setDisabled(disabled) {
         this.updateProp('disabled', disabled);
     }
-    
+
     isDisabled() {
         return this.getProp('disabled', false);
     }
-    
+
     // Programmatically trigger file selection
     openFileDialog() {
         if (this.isDisabled() || this.isProcessing()) return;
-        
+
         const fileInput = this.$('.file-input');
         if (fileInput) {
             fileInput.click();
         }
     }
-    
+
     // Validate files without adding them
     async validateFiles(files) {
         const results = [];

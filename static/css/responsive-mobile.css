@@ -1,0 +1,778 @@
+/* Mobile and Tablet Responsive Optimizations */
+/* PDFSmaller UI Modernization - Mobile Experience Enhancement */
+
+/* === MOBILE-FIRST RESPONSIVE DESIGN === */
+
+/* Base mobile styles (320px+) */
+@media (min-width: 320px) {
+    /* Touch-friendly base sizing */
+    :root {
+        --touch-target-min: 44px;
+        --mobile-padding: var(--space-4);
+        --mobile-gap: var(--space-3);
+        --mobile-border-radius: var(--radius-lg);
+    }
+
+    /* Ensure minimum touch target sizes */
+    .tab-button,
+    .btn,
+    .toggle-option,
+    .form-input,
+    .form-select {
+        min-height: var(--touch-target-min);
+        min-width: var(--touch-target-min);
+    }
+
+    /* Mobile typography adjustments */
+    .interface-title {
+        font-size: var(--text-2xl-fluid);
+        line-height: var(--leading-tight);
+    }
+
+    .interface-subtitle {
+        font-size: var(--text-base-fluid);
+        line-height: var(--leading-relaxed);
+    }
+
+    .panel-title,
+    .section-title {
+        font-size: var(--text-lg-fluid);
+    }
+
+    /* Mobile spacing adjustments */
+    .tab-panel {
+        padding: var(--mobile-padding);
+    }
+
+    .settings-panel-container,
+    .mode-toggle-container,
+    .upload-section,
+    .progress-section,
+    .results-section,
+    .upload-area-container,
+    .controls-container {
+        padding: var(--mobile-padding);
+        border-radius: var(--mobile-border-radius);
+        margin-bottom: var(--mobile-gap);
+    }
+
+    /* Mobile navigation optimizations */
+    .tab-nav-container {
+        padding: 0 var(--mobile-padding);
+        gap: var(--space-1);
+    }
+
+    .tab-button {
+        padding: var(--space-3) var(--space-4);
+        font-size: var(--text-sm);
+        border-radius: var(--radius-md) var(--radius-md) 0 0;
+        transition: all var(--duration-200) var(--ease-in-out);
+    }
+
+    /* Enhanced touch feedback */
+    .tab-button:active,
+    .btn:active,
+    .toggle-option:active {
+        transform: scale(0.98);
+        transition-duration: var(--duration-75);
+    }
+
+    /* Mobile upload area optimizations */
+    .upload-area {
+        padding: var(--space-8) var(--space-4);
+        border-width: 2px;
+        border-radius: var(--radius-xl);
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .upload-icon {
+        width: 60px;
+        height: 60px;
+        margin-bottom: var(--space-4);
+    }
+
+    .upload-text {
+        font-size: var(--text-lg);
+        margin-bottom: var(--space-2);
+    }
+
+    .upload-subtext {
+        font-size: var(--text-sm);
+        color: var(--gray-600);
+    }
+
+    /* Mobile form optimizations */
+    .form-input,
+    .form-select,
+    .form-textarea {
+        font-size: 16px; /* Prevents zoom on iOS */
+        padding: var(--space-4);
+        border-radius: var(--radius-lg);
+    }
+
+    /* Mobile button optimizations */
+    .btn {
+        padding: var(--space-4) var(--space-6);
+        font-size: var(--text-base);
+        font-weight: var(--font-semibold);
+        border-radius: var(--radius-lg);
+        min-height: var(--touch-target-min);
+    }
+
+    .btn-sm {
+        padding: var(--space-3) var(--space-5);
+        font-size: var(--text-sm);
+        min-height: 40px;
+    }
+
+    /* Mobile progress tracking */
+    .progress-container {
+        margin: var(--space-4) 0;
+    }
+
+    .progress-bar-container {
+        height: 12px;
+        border-radius: var(--radius-full);
+    }
+
+    .progress-label {
+        font-size: var(--text-sm);
+        margin-bottom: var(--space-3);
+    }
+
+    /* Mobile card system */
+    .card {
+        border-radius: var(--radius-xl);
+        margin-bottom: var(--space-4);
+    }
+
+    .card-header,
+    .card-body,
+    .card-footer {
+        padding: var(--space-4);
+    }
+
+    /* Mobile modal optimizations */
+    .modal-content {
+        margin: var(--space-4);
+        border-radius: var(--radius-xl);
+        max-height: calc(100vh - var(--space-8));
+        overflow-y: auto;
+    }
+}
+
+/* Small Mobile (320px - 480px) */
+@media (max-width: 480px) {
+    /* Ultra-compact layout for small screens */
+    .compress-interface {
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
+    }
+
+    .settings-sidebar {
+        position: static;
+        max-height: none;
+        order: 2; /* Move settings below upload area */
+    }
+
+    .upload-main {
+        order: 1;
+        gap: var(--space-4);
+    }
+
+    /* Compact tab navigation */
+    .tab-button {
+        padding: var(--space-2) var(--space-3);
+        min-height: var(--touch-target-min);
+        gap: var(--space-1);
+        flex-direction: column;
+        font-size: var(--text-xs);
+    }
+
+    .tab-button .tab-label {
+        display: none; /* Hide labels on very small screens */
+    }
+
+    .tab-icon {
+        font-size: var(--text-lg);
+        margin-bottom: var(--space-1);
+    }
+
+    /* Compact mode toggle */
+    .mode-toggle {
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+
+    .toggle-option {
+        justify-content: center;
+        padding: var(--space-4);
+        border-radius: var(--radius-md);
+    }
+
+    /* Compact upload area */
+    .upload-area {
+        padding: var(--space-6) var(--space-3);
+        min-height: 160px;
+    }
+
+    .upload-icon {
+        width: 48px;
+        height: 48px;
+    }
+
+    .upload-text {
+        font-size: var(--text-base);
+    }
+
+    .upload-subtext {
+        font-size: var(--text-xs);
+    }
+
+    /* Compact settings panel */
+    .settings-panel-container {
+        padding: var(--space-3);
+    }
+
+    .panel-title {
+        font-size: var(--text-base);
+        margin-bottom: var(--space-3);
+    }
+
+    .setting-group {
+        margin-bottom: var(--space-4);
+    }
+
+    .setting-label {
+        font-size: var(--text-sm);
+        margin-bottom: var(--space-2);
+    }
+
+    /* Compact form controls */
+    .form-input,
+    .form-select {
+        padding: var(--space-3);
+        font-size: 16px;
+    }
+
+    /* Stack button groups vertically */
+    .btn-group {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .btn-group .btn {
+        border-radius: 0;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-group .btn:first-child {
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+
+    .btn-group .btn:last-child {
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        border-bottom: none;
+    }
+
+    /* Compact interface headers */
+    .interface-header {
+        padding: var(--space-4);
+        margin-bottom: var(--space-6);
+    }
+
+    .interface-title {
+        font-size: var(--text-xl);
+        margin-bottom: var(--space-2);
+    }
+
+    .interface-subtitle {
+        font-size: var(--text-sm);
+    }
+
+    /* Compact stats grid */
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-3);
+    }
+
+    .stat-card {
+        padding: var(--space-4);
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: var(--text-xl);
+    }
+
+    .stat-label {
+        font-size: var(--text-xs);
+    }
+}
+
+/* Mobile Landscape (481px - 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+    /* Optimized for mobile landscape and small tablets */
+    .compress-interface {
+        grid-template-columns: 1fr;
+        gap: var(--space-6);
+    }
+
+    .settings-sidebar {
+        position: static;
+        max-height: none;
+    }
+
+    /* Improved tab navigation for landscape */
+    .tab-nav-container {
+        padding: 0 var(--space-6);
+        gap: var(--space-2);
+    }
+
+    .tab-button {
+        padding: var(--space-3) var(--space-5);
+        font-size: var(--text-sm);
+        min-height: 50px;
+    }
+
+    .tab-icon {
+        font-size: var(--text-lg);
+    }
+
+    .tab-label {
+        font-size: var(--text-sm);
+    }
+
+    /* Landscape upload area */
+    .upload-area {
+        padding: var(--space-8) var(--space-6);
+        min-height: 180px;
+    }
+
+    .upload-icon {
+        width: 64px;
+        height: 64px;
+    }
+
+    /* Landscape mode toggle */
+    .mode-toggle {
+        flex-direction: row;
+        gap: var(--space-1);
+    }
+
+    .toggle-option {
+        padding: var(--space-3) var(--space-5);
+    }
+
+    /* Two-column stats for landscape */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-4);
+    }
+}
+
+/* Tablet Portrait (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+    /* Tablet-optimized layout */
+    .compress-interface {
+        grid-template-columns: 1fr;
+        gap: var(--space-8);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .settings-sidebar {
+        position: static;
+        max-height: none;
+    }
+
+    /* Tablet navigation */
+    .tab-nav-container {
+        padding: 0 var(--space-8);
+        gap: var(--space-3);
+        justify-content: center;
+    }
+
+    .tab-button {
+        padding: var(--space-4) var(--space-6);
+        font-size: var(--text-base);
+        min-height: 56px;
+    }
+
+    .tab-icon {
+        font-size: var(--text-xl);
+    }
+
+    .tab-label {
+        font-size: var(--text-base);
+    }
+
+    /* Tablet upload area */
+    .upload-area {
+        padding: var(--space-10) var(--space-8);
+        min-height: 220px;
+    }
+
+    .upload-icon {
+        width: 80px;
+        height: 80px;
+    }
+
+    .upload-text {
+        font-size: var(--text-xl);
+    }
+
+    .upload-subtext {
+        font-size: var(--text-base);
+    }
+
+    /* Tablet settings panel */
+    .settings-panel-container {
+        padding: var(--space-6);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    /* Tablet form controls */
+    .form-input,
+    .form-select {
+        padding: var(--space-4) var(--space-5);
+        font-size: var(--text-base);
+    }
+
+    /* Three-column stats for tablet */
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-6);
+    }
+
+    /* Tablet interface headers */
+    .interface-header {
+        padding: var(--space-8);
+        margin-bottom: var(--space-10);
+    }
+
+    .interface-title {
+        font-size: var(--text-3xl);
+    }
+
+    .interface-subtitle {
+        font-size: var(--text-lg);
+    }
+}
+
+/* === TOUCH INTERACTION OPTIMIZATIONS === */
+
+/* Enhanced touch targets */
+@media (pointer: coarse) {
+    .tab-button,
+    .btn,
+    .toggle-option,
+    .form-input,
+    .form-select,
+    .toggle-switch {
+        min-height: var(--touch-target-min);
+        min-width: var(--touch-target-min);
+    }
+
+    /* Larger touch areas for small elements */
+    .badge,
+    .alert-close,
+    .modal-close {
+        padding: var(--space-3);
+        min-height: var(--touch-target-min);
+        min-width: var(--touch-target-min);
+    }
+
+    /* Enhanced hover states for touch */
+    .tab-button:hover,
+    .btn:hover,
+    .toggle-option:hover {
+        transform: none; /* Disable hover transforms on touch devices */
+    }
+
+    /* Touch-specific active states */
+    .tab-button:active,
+    .btn:active,
+    .toggle-option:active {
+        transform: scale(0.95);
+        transition-duration: var(--duration-75);
+    }
+}
+
+/* === MOBILE UPLOAD OPTIMIZATIONS === */
+
+@media (max-width: 768px) {
+    /* Mobile drag and drop enhancements */
+    .upload-area.dragover {
+        transform: scale(1.02);
+        border-color: var(--color-primary);
+        background: var(--primary-50);
+        box-shadow: var(--shadow-lg);
+    }
+
+    /* Mobile file info display */
+    .file-info {
+        padding: var(--space-4);
+        border-radius: var(--radius-lg);
+        flex-direction: column;
+        text-align: center;
+        gap: var(--space-3);
+    }
+
+    .file-icon {
+        width: 48px;
+        height: 48px;
+        align-self: center;
+    }
+
+    .file-details {
+        text-align: center;
+    }
+
+    .file-name {
+        font-size: var(--text-base);
+        word-break: break-word;
+    }
+
+    .file-size {
+        font-size: var(--text-sm);
+    }
+
+    /* Mobile progress display */
+    .progress-container {
+        padding: var(--space-4);
+        background: var(--gray-50);
+        border-radius: var(--radius-lg);
+        margin: var(--space-4) 0;
+    }
+
+    .progress-label {
+        flex-direction: column;
+        gap: var(--space-2);
+        text-align: center;
+    }
+
+    .progress-percentage {
+        font-size: var(--text-lg);
+        font-weight: var(--font-bold);
+    }
+
+    /* Mobile results display */
+    .results-section {
+        padding: var(--space-4);
+    }
+
+    .comparison {
+        flex-direction: column;
+        gap: var(--space-4);
+    }
+
+    .file-comparison {
+        padding: var(--space-4);
+        border-radius: var(--radius-lg);
+    }
+
+    .comparison-bar {
+        height: 24px;
+        border-radius: var(--radius-md);
+        margin: var(--space-3) 0;
+    }
+}
+
+/* === MOBILE NAVIGATION ENHANCEMENTS === */
+
+@media (max-width: 768px) {
+    /* Sticky navigation for mobile */
+    .tab-navigation {
+        position: sticky;
+        top: var(--navbar-height);
+        z-index: var(--z-sticky);
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    /* Horizontal scroll indicators */
+    .tab-nav-container {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        scroll-behavior: smooth;
+    }
+
+    .tab-nav-container::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Add scroll shadows */
+    .tab-nav-container::before,
+    .tab-nav-container::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 20px;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .tab-nav-container::before {
+        left: 0;
+        background: linear-gradient(to right, rgba(255, 255, 255, 0.8), transparent);
+    }
+
+    .tab-nav-container::after {
+        right: 0;
+        background: linear-gradient(to left, rgba(255, 255, 255, 0.8), transparent);
+    }
+}
+
+/* === MOBILE ACCESSIBILITY ENHANCEMENTS === */
+
+@media (max-width: 768px) {
+    /* Larger focus indicators for mobile */
+    .tab-button:focus-visible,
+    .btn:focus-visible,
+    .toggle-option:focus-visible,
+    .form-input:focus,
+    .form-select:focus {
+        outline: 3px solid var(--color-primary);
+        outline-offset: 3px;
+    }
+
+    /* Enhanced contrast for mobile */
+    .tab-button.active {
+        background: white;
+        color: var(--color-primary);
+        font-weight: var(--font-bold);
+        border-bottom: 4px solid var(--color-primary);
+    }
+
+    /* Mobile-friendly error states */
+    .form-input-error,
+    .form-select-error {
+        border-width: 3px;
+        border-color: var(--color-error);
+    }
+
+    .alert {
+        padding: var(--space-5);
+        border-radius: var(--radius-xl);
+        border-width: 2px;
+    }
+
+    .alert-icon {
+        width: 24px;
+        height: 24px;
+    }
+}
+
+/* === MOBILE PERFORMANCE OPTIMIZATIONS === */
+
+@media (max-width: 768px) {
+    /* Reduce animations on mobile for better performance */
+    .tab-button,
+    .btn,
+    .toggle-option {
+        transition: background-color var(--duration-200) var(--ease-in-out),
+                   color var(--duration-200) var(--ease-in-out),
+                   border-color var(--duration-200) var(--ease-in-out);
+    }
+
+    /* Optimize shadows for mobile */
+    .settings-panel-container,
+    .mode-toggle-container,
+    .upload-section,
+    .progress-section,
+    .results-section {
+        box-shadow: var(--shadow-md);
+    }
+
+    .settings-panel-container:hover,
+    .mode-toggle-container:hover,
+    .upload-section:hover,
+    .progress-section:hover,
+    .results-section:hover {
+        box-shadow: var(--shadow-lg);
+        transform: none; /* Disable transform on mobile */
+    }
+}
+
+/* === MOBILE LANDSCAPE SPECIFIC OPTIMIZATIONS === */
+
+@media (max-height: 500px) and (orientation: landscape) {
+    /* Compact layout for mobile landscape */
+    .interface-header {
+        padding: var(--space-3);
+        margin-bottom: var(--space-4);
+    }
+
+    .interface-title {
+        font-size: var(--text-lg);
+        margin-bottom: var(--space-1);
+    }
+
+    .interface-subtitle {
+        font-size: var(--text-sm);
+    }
+
+    .tab-button {
+        min-height: 40px;
+        padding: var(--space-2) var(--space-4);
+    }
+
+    .upload-area {
+        min-height: 120px;
+        padding: var(--space-4);
+    }
+
+    .upload-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .settings-panel-container,
+    .mode-toggle-container,
+    .upload-section,
+    .progress-section,
+    .results-section {
+        padding: var(--space-3);
+    }
+}
+
+/* === PRINT OPTIMIZATIONS FOR MOBILE === */
+
+@media print {
+    .tab-navigation,
+    .navbar,
+    .nav-menu {
+        display: none !important;
+    }
+
+    .tab-panel {
+        display: block !important;
+        padding: 0;
+        page-break-inside: avoid;
+    }
+
+    .compress-interface {
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
+    }
+
+    .settings-panel-container,
+    .upload-section,
+    .progress-section,
+    .results-section {
+        box-shadow: none;
+        border: 1px solid var(--gray-300);
+        page-break-inside: avoid;
+        margin-bottom: var(--space-4);
+    }
+}

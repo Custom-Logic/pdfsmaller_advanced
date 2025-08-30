@@ -13,6 +13,8 @@ import { getTabNavigation } from './modules/tab-navigation.js';
 import { fileProcessingService } from './services/file-processing-service.js';
 import { uiIntegrationService } from './services/ui-integration-service.js';
 import { errorHandlingIntegration } from './modules/error-handling-integration.js';
+import { MobileTouchHandler } from './utils/mobile-touch-handler.js';
+import { settingsSyncService } from './services/settings-sync-service.js';
 
 export class MainIntegration {
     constructor() {
@@ -48,6 +50,9 @@ export class MainIntegration {
             // Update UI based on auth state
             this.updateUI();
             
+            // Initialize mobile touch handler
+            this.initializeMobileOptimizations();
+            
             console.log('Main integration initialized successfully');
         } catch (error) {
             console.error('Failed to initialize main integration:', error);
@@ -68,6 +73,9 @@ export class MainIntegration {
         // Initialize file processing services
         await fileProcessingService.init();
         await uiIntegrationService.init();
+        
+        // Initialize settings sync service
+        settingsSyncService.init();
     }
 
     async checkAuthState() {
@@ -519,6 +527,76 @@ export class MainIntegration {
     showNotification(message, type = 'info') {
         // Emit notification event for the notification system to handle
         this.emit('show-notification', { message, type });
+    }
+
+    initializeMobileOptimizations() {
+        // Initialize mobile touch handler
+        if (MobileTouchHandler.isTouchDevice()) {
+            this.mobileTouchHandler = new MobileTouchHandler();
+            
+            // Add mobile-specific optimizations
+            document.body.classList.add('mobile-optimized');
+            
+            // Optimize existing elements for touch
+            const touchElements = document.querySelectorAll('.btn, .tab-button, .toggle-option, .upload-area');
+            touchElements.forEach(element => {
+                MobileTouchHandler.optimizeForTouch(element);
+            });
+            
+            // Setup mobile-specific event handlers
+            this.setupMobileEventHandlers();
+            
+            console.log('Mobile optimizations initialized');
+        }
+    }
+
+    setupMobileEventHandlers() {
+        // Handle orientation changes
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                this.handleOrientationChange();
+            }, 100);
+        });
+
+        // Handle viewport changes
+        window.addEventListener('resize', () => {
+            this.handleViewportChange();
+        });
+
+        // Handle touch-specific upload interactions
+        const uploadAreas = document.querySelectorAll('.upload-area');
+        uploadAreas.forEach(area => {
+            this.mobileTouchHandler.detectSwipe(area, (direction, details) => {
+                if (direction === 'left' || direction === 'right') {
+                    // Could implement swipe to switch between upload modes
+                    console.log(`Swipe ${direction} detected on upload area`);
+                }
+            });
+        });
+    }
+
+    handleOrientationChange() {
+        // Adjust layout for orientation changes
+        const isLandscape = window.orientation === 90 || window.orientation === -90;
+        document.body.classList.toggle('landscape', isLandscape);
+        document.body.classList.toggle('portrait', !isLandscape);
+        
+        // Trigger layout recalculation
+        if (this.tabNavigation) {
+            this.tabNavigation.updateLayout();
+        }
+    }
+
+    handleViewportChange() {
+        // Update viewport-dependent elements
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+        
+        // Update mobile breakpoint classes
+        const width = window.innerWidth;
+        document.body.classList.toggle('mobile-xs', width <= 480);
+        document.body.classList.toggle('mobile-sm', width > 480 && width <= 768);
+        document.body.classList.toggle('tablet', width > 768 && width <= 1024);
     }
 
     handleError(error) {

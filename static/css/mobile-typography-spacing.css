@@ -1,0 +1,630 @@
+/* Mobile Typography and Spacing Optimizations */
+/* PDFSmaller UI Modernization - Mobile Typography & Spacing */
+
+/* === MOBILE TYPOGRAPHY SYSTEM === */
+
+/* Base mobile typography (320px+) */
+@media (min-width: 320px) {
+    /* Fluid typography for better mobile readability */
+    :root {
+        --mobile-text-xs: clamp(0.7rem, 0.65rem + 0.25vw, 0.75rem);
+        --mobile-text-sm: clamp(0.8rem, 0.75rem + 0.25vw, 0.875rem);
+        --mobile-text-base: clamp(0.9rem, 0.85rem + 0.25vw, 1rem);
+        --mobile-text-lg: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+        --mobile-text-xl: clamp(1.1rem, 1rem + 0.5vw, 1.25rem);
+        --mobile-text-2xl: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem);
+        --mobile-text-3xl: clamp(1.5rem, 1.25rem + 1.25vw, 1.875rem);
+        
+        /* Mobile line heights for better readability */
+        --mobile-leading-tight: 1.2;
+        --mobile-leading-normal: 1.4;
+        --mobile-leading-relaxed: 1.6;
+        --mobile-leading-loose: 1.8;
+        
+        /* Mobile letter spacing */
+        --mobile-tracking-tight: -0.02em;
+        --mobile-tracking-normal: 0em;
+        --mobile-tracking-wide: 0.02em;
+    }
+
+    /* Apply mobile typography to key elements */
+    .interface-title {
+        font-size: var(--mobile-text-3xl);
+        line-height: var(--mobile-leading-tight);
+        letter-spacing: var(--mobile-tracking-tight);
+        font-weight: var(--font-bold);
+        margin-bottom: var(--space-4);
+    }
+
+    .interface-subtitle {
+        font-size: var(--mobile-text-lg);
+        line-height: var(--mobile-leading-relaxed);
+        letter-spacing: var(--mobile-tracking-normal);
+        font-weight: var(--font-normal);
+        margin-bottom: var(--space-6);
+    }
+
+    .panel-title,
+    .section-title {
+        font-size: var(--mobile-text-xl);
+        line-height: var(--mobile-leading-tight);
+        letter-spacing: var(--mobile-tracking-normal);
+        font-weight: var(--font-semibold);
+        margin-bottom: var(--space-4);
+    }
+
+    .upload-text {
+        font-size: var(--mobile-text-lg);
+        line-height: var(--mobile-leading-normal);
+        font-weight: var(--font-semibold);
+        margin-bottom: var(--space-2);
+    }
+
+    .upload-subtext {
+        font-size: var(--mobile-text-sm);
+        line-height: var(--mobile-leading-relaxed);
+        color: var(--gray-600);
+        margin-bottom: 0;
+    }
+
+    /* Form labels and inputs */
+    .form-label,
+    .setting-label {
+        font-size: var(--mobile-text-sm);
+        line-height: var(--mobile-leading-normal);
+        font-weight: var(--font-semibold);
+        margin-bottom: var(--space-2);
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+        font-size: var(--mobile-text-base);
+        line-height: var(--mobile-leading-normal);
+        padding: var(--space-4);
+    }
+
+    /* Button typography */
+    .btn {
+        font-size: var(--mobile-text-base);
+        line-height: var(--mobile-leading-tight);
+        font-weight: var(--font-semibold);
+        letter-spacing: var(--mobile-tracking-normal);
+    }
+
+    .btn-sm {
+        font-size: var(--mobile-text-sm);
+    }
+
+    .btn-lg {
+        font-size: var(--mobile-text-lg);
+    }
+
+    /* Tab button typography */
+    .tab-button {
+        font-size: var(--mobile-text-sm);
+        line-height: var(--mobile-leading-tight);
+        font-weight: var(--font-medium);
+    }
+
+    .tab-label {
+        font-size: var(--mobile-text-sm);
+        line-height: var(--mobile-leading-tight);
+    }
+
+    /* Progress and status text */
+    .progress-label {
+        font-size: var(--mobile-text-sm);
+        line-height: var(--mobile-leading-normal);
+        font-weight: var(--font-semibold);
+    }
+
+    .progress-percentage {
+        font-size: var(--mobile-text-sm);
+        font-weight: var(--font-bold);
+    }
+
+    /* File information typography */
+    .file-name {
+        font-size: var(--mobile-text-base);
+        line-height: var(--mobile-leading-tight);
+        font-weight: var(--font-semibold);
+        word-break: break-word;
+        hyphens: auto;
+    }
+
+    .file-size {
+        font-size: var(--mobile-text-sm);
+        line-height: var(--mobile-leading-normal);
+        color: var(--gray-600);
+    }
+
+    /* Alert typography */
+    .alert-title {
+        font-size: var(--mobile-text-base);
+        line-height: var(--mobile-leading-tight);
+        font-weight: var(--font-semibold);
+        margin-bottom: var(--space-2);
+    }
+
+    .alert-message {
+        font-size: var(--mobile-text-sm);
+        line-height: var(--mobile-leading-relaxed);
+    }
+
+    /* Stats typography */
+    .stat-value {
+        font-size: var(--mobile-text-2xl);
+        line-height: var(--mobile-leading-tight);
+        font-weight: var(--font-bold);
+    }
+
+    .stat-label {
+        font-size: var(--mobile-text-xs);
+        line-height: var(--mobile-leading-normal);
+        text-transform: uppercase;
+        letter-spacing: var(--mobile-tracking-wide);
+    }
+}
+
+/* === MOBILE SPACING SYSTEM === */
+
+@media (max-width: 768px) {
+    /* Mobile-optimized spacing scale */
+    :root {
+        --mobile-space-xs: var(--space-2);   /* 8px */
+        --mobile-space-sm: var(--space-3);   /* 12px */
+        --mobile-space-md: var(--space-4);   /* 16px */
+        --mobile-space-lg: var(--space-6);   /* 24px */
+        --mobile-space-xl: var(--space-8);   /* 32px */
+        --mobile-space-2xl: var(--space-10); /* 40px */
+        --mobile-space-3xl: var(--space-12); /* 48px */
+    }
+
+    /* Apply mobile spacing to layout containers */
+    .tab-panel {
+        padding: var(--mobile-space-md);
+    }
+
+    .compress-interface {
+        gap: var(--mobile-space-lg);
+    }
+
+    .upload-main {
+        gap: var(--mobile-space-md);
+    }
+
+    /* Mobile card spacing */
+    .settings-panel-container,
+    .mode-toggle-container,
+    .upload-section,
+    .progress-section,
+    .results-section,
+    .upload-area-container,
+    .controls-container {
+        padding: var(--mobile-space-md);
+        margin-bottom: var(--mobile-space-md);
+        border-radius: var(--radius-xl);
+    }
+
+    /* Mobile form spacing */
+    .form-group {
+        margin-bottom: var(--mobile-space-md);
+    }
+
+    .setting-group {
+        margin-bottom: var(--mobile-space-md);
+    }
+
+    .form-label,
+    .setting-label {
+        margin-bottom: var(--mobile-space-xs);
+    }
+
+    /* Mobile button spacing */
+    .btn {
+        padding: var(--mobile-space-sm) var(--mobile-space-md);
+        margin: var(--mobile-space-xs) 0;
+    }
+
+    .btn-sm {
+        padding: var(--mobile-space-xs) var(--mobile-space-sm);
+    }
+
+    .btn-lg {
+        padding: var(--mobile-space-md) var(--mobile-space-lg);
+    }
+
+    /* Mobile tab spacing */
+    .tab-nav-container {
+        padding: 0 var(--mobile-space-md);
+        gap: var(--mobile-space-xs);
+    }
+
+    .tab-button {
+        padding: var(--mobile-space-sm) var(--mobile-space-md);
+        gap: var(--mobile-space-xs);
+    }
+
+    /* Mobile upload area spacing */
+    .upload-area {
+        padding: var(--mobile-space-xl) var(--mobile-space-md);
+        margin-bottom: var(--mobile-space-md);
+    }
+
+    .upload-icon {
+        margin-bottom: var(--mobile-space-md);
+    }
+
+    .upload-text {
+        margin-bottom: var(--mobile-space-xs);
+    }
+
+    /* Mobile file list spacing */
+    .file-list {
+        gap: var(--mobile-space-sm);
+        margin-top: var(--mobile-space-md);
+    }
+
+    .file-item {
+        padding: var(--mobile-space-sm);
+    }
+
+    .file-item-header {
+        gap: var(--mobile-space-sm);
+        margin-bottom: var(--mobile-space-sm);
+    }
+
+    .file-actions {
+        gap: var(--mobile-space-xs);
+    }
+
+    /* Mobile progress spacing */
+    .progress-container {
+        margin: var(--mobile-space-md) 0;
+    }
+
+    .progress-label {
+        margin-bottom: var(--mobile-space-sm);
+    }
+
+    .file-progress {
+        margin-top: var(--mobile-space-sm);
+        padding-top: var(--mobile-space-sm);
+    }
+
+    .file-progress-label {
+        margin-bottom: var(--mobile-space-xs);
+    }
+
+    /* Mobile alert spacing */
+    .alert {
+        padding: var(--mobile-space-md);
+        margin-bottom: var(--mobile-space-md);
+        gap: var(--mobile-space-sm);
+    }
+
+    .alert-title {
+        margin-bottom: var(--mobile-space-xs);
+    }
+
+    .alert-message {
+        margin-bottom: var(--mobile-space-sm);
+    }
+
+    /* Mobile stats spacing */
+    .stats-grid {
+        gap: var(--mobile-space-sm);
+        margin: var(--mobile-space-md) 0;
+    }
+
+    .stat-card {
+        padding: var(--mobile-space-md);
+    }
+
+    .stat-value {
+        margin-bottom: var(--mobile-space-xs);
+    }
+
+    /* Mobile interface header spacing */
+    .interface-header {
+        padding: var(--mobile-space-lg);
+        margin-bottom: var(--mobile-space-xl);
+    }
+
+    .interface-title {
+        margin-bottom: var(--mobile-space-sm);
+    }
+
+    .interface-subtitle {
+        margin-bottom: 0;
+    }
+}
+
+/* === SMALL MOBILE SPACING (≤480px) === */
+
+@media (max-width: 480px) {
+    /* Compact spacing for very small screens */
+    :root {
+        --compact-space-xs: var(--space-1);   /* 4px */
+        --compact-space-sm: var(--space-2);   /* 8px */
+        --compact-space-md: var(--space-3);   /* 12px */
+        --compact-space-lg: var(--space-4);   /* 16px */
+        --compact-space-xl: var(--space-6);   /* 24px */
+        --compact-space-2xl: var(--space-8);  /* 32px */
+    }
+
+    /* Apply compact spacing */
+    .tab-panel {
+        padding: var(--compact-space-md);
+    }
+
+    .settings-panel-container,
+    .mode-toggle-container,
+    .upload-section,
+    .progress-section,
+    .results-section,
+    .upload-area-container,
+    .controls-container {
+        padding: var(--compact-space-md);
+        margin-bottom: var(--compact-space-md);
+    }
+
+    .upload-area {
+        padding: var(--compact-space-xl) var(--compact-space-md);
+    }
+
+    .file-item {
+        padding: var(--compact-space-md);
+    }
+
+    .file-item-header {
+        gap: var(--compact-space-sm);
+        margin-bottom: var(--compact-space-sm);
+    }
+
+    .btn {
+        padding: var(--compact-space-sm) var(--compact-space-lg);
+    }
+
+    .tab-button {
+        padding: var(--compact-space-sm) var(--compact-space-md);
+    }
+
+    .alert {
+        padding: var(--compact-space-lg);
+    }
+
+    .interface-header {
+        padding: var(--compact-space-lg);
+        margin-bottom: var(--compact-space-xl);
+    }
+
+    /* Reduce gaps in grids */
+    .stats-grid {
+        gap: var(--compact-space-sm);
+    }
+
+    .file-list {
+        gap: var(--compact-space-sm);
+    }
+
+    .compress-interface {
+        gap: var(--compact-space-lg);
+    }
+
+    .upload-main {
+        gap: var(--compact-space-md);
+    }
+}
+
+/* === MOBILE LANDSCAPE TYPOGRAPHY === */
+
+@media (max-height: 500px) and (orientation: landscape) {
+    /* Compact typography for landscape mode */
+    .interface-title {
+        font-size: var(--mobile-text-xl);
+        margin-bottom: var(--space-2);
+    }
+
+    .interface-subtitle {
+        font-size: var(--mobile-text-base);
+        margin-bottom: var(--space-3);
+    }
+
+    .panel-title,
+    .section-title {
+        font-size: var(--mobile-text-lg);
+        margin-bottom: var(--space-3);
+    }
+
+    .upload-text {
+        font-size: var(--mobile-text-base);
+        margin-bottom: var(--space-1);
+    }
+
+    .upload-subtext {
+        font-size: var(--mobile-text-xs);
+    }
+
+    /* Compact spacing for landscape */
+    .interface-header {
+        padding: var(--space-3);
+        margin-bottom: var(--space-4);
+    }
+
+    .upload-area {
+        padding: var(--space-4) var(--space-3);
+        min-height: 120px;
+    }
+
+    .settings-panel-container,
+    .mode-toggle-container,
+    .upload-section,
+    .progress-section,
+    .results-section {
+        padding: var(--space-3);
+    }
+}
+
+/* === ACCESSIBILITY ENHANCEMENTS === */
+
+@media (max-width: 768px) {
+    /* Ensure sufficient contrast for mobile */
+    .tab-button.active {
+        color: var(--color-primary);
+        background: white;
+        font-weight: var(--font-bold);
+        border-bottom: 3px solid var(--color-primary);
+    }
+
+    /* Larger focus indicators for mobile */
+    .tab-button:focus-visible,
+    .btn:focus-visible,
+    .toggle-option:focus-visible,
+    .form-input:focus,
+    .form-select:focus {
+        outline: 3px solid var(--color-primary);
+        outline-offset: 2px;
+    }
+
+    /* Enhanced error states for mobile */
+    .form-input-error,
+    .form-select-error {
+        border-width: 2px;
+        border-color: var(--color-error);
+    }
+
+    .alert-error {
+        border-left-width: 4px;
+    }
+
+    /* Better text selection on mobile */
+    .file-name,
+    .alert-message,
+    .interface-subtitle {
+        -webkit-user-select: text;
+        user-select: text;
+    }
+
+    /* Prevent text selection on interactive elements */
+    .btn,
+    .tab-button,
+    .toggle-option,
+    .upload-area {
+        -webkit-user-select: none;
+        user-select: none;
+    }
+}
+
+/* === HIGH DPI DISPLAY OPTIMIZATIONS === */
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    /* Sharper text rendering on high DPI displays */
+    body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+    }
+
+    /* Crisper borders on high DPI */
+    .settings-panel-container,
+    .mode-toggle-container,
+    .upload-section,
+    .progress-section,
+    .results-section,
+    .upload-area,
+    .file-item,
+    .alert {
+        border-width: 0.5px;
+    }
+
+    /* Sharper shadows on high DPI */
+    .settings-panel-container,
+    .mode-toggle-container,
+    .upload-section,
+    .progress-section,
+    .results-section {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+}
+
+/* === REDUCED MOTION SUPPORT === */
+
+@media (prefers-reduced-motion: reduce) {
+    /* Remove animations for users who prefer reduced motion */
+    .tab-button,
+    .btn,
+    .toggle-option,
+    .upload-area,
+    .file-item,
+    .progress-bar,
+    .file-progress-fill {
+        transition: none;
+    }
+
+    .upload-area:hover,
+    .file-item:hover,
+    .settings-panel-container:hover {
+        transform: none;
+    }
+
+    /* Keep essential feedback animations */
+    .tab-button:active,
+    .btn:active,
+    .toggle-option:active {
+        transition: transform 0.1s ease-out;
+    }
+}
+
+/* === PRINT OPTIMIZATIONS === */
+
+@media print {
+    /* Optimize typography for print */
+    .interface-title,
+    .panel-title,
+    .section-title {
+        color: black;
+        text-shadow: none;
+    }
+
+    .interface-subtitle,
+    .upload-text,
+    .upload-subtext,
+    .file-name,
+    .alert-message {
+        color: black;
+    }
+
+    /* Ensure readable font sizes in print */
+    .interface-title {
+        font-size: 24px;
+    }
+
+    .interface-subtitle {
+        font-size: 16px;
+    }
+
+    .panel-title,
+    .section-title {
+        font-size: 18px;
+    }
+
+    body {
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    /* Remove unnecessary spacing in print */
+    .tab-panel {
+        padding: 0;
+    }
+
+    .settings-panel-container,
+    .upload-section,
+    .progress-section,
+    .results-section {
+        margin-bottom: 16px;
+        padding: 12px;
+    }
+}

@@ -32,7 +32,7 @@ export class ProgressTracker extends BaseComponent {
             filesProcessed: 0,
             totalFiles: 0
         });
-        
+
         // Initialize from attributes
         this.updateProp('progress', this.getAttribute('progress') || '0');
         this.updateProp('status', this.getAttribute('status') || 'idle');
@@ -45,7 +45,7 @@ export class ProgressTracker extends BaseComponent {
         const state = this.getState();
         const showPercentage = this.getProp('show-percentage', true);
         const showTime = this.getProp('show-time', true);
-        
+
         return `
             <div class="progress-tracker ${state.status} ${state.isComplete ? 'complete' : ''}">
                 ${this.renderHeader()}
@@ -59,7 +59,7 @@ export class ProgressTracker extends BaseComponent {
     renderHeader() {
         const state = this.getState();
         const showPercentage = this.getProp('show-percentage', true);
-        
+
         return `
             <div class="progress-header">
                 <div class="progress-label">
@@ -73,7 +73,7 @@ export class ProgressTracker extends BaseComponent {
     renderProgressBar() {
         const state = this.getState();
         const animated = this.getProp('animated', true);
-        
+
         return `
             <div class="progress-bar-container">
                 <div class="progress-bar-track">
@@ -94,9 +94,9 @@ export class ProgressTracker extends BaseComponent {
     renderDetails() {
         const state = this.getState();
         const showTime = this.getProp('show-time', true);
-        
+
         if (!showTime || state.status === 'idle') return '';
-        
+
         return `
             <div class="progress-details">
                 <div class="time-info">
@@ -123,9 +123,9 @@ export class ProgressTracker extends BaseComponent {
 
     renderFileProgress() {
         const state = this.getState();
-        
+
         if (state.totalFiles <= 1) return '';
-        
+
         return `
             <div class="file-progress">
                 <span class="file-count">
@@ -143,9 +143,9 @@ export class ProgressTracker extends BaseComponent {
     renderStatusMessage() {
         const state = this.getState();
         const message = this.getStatusMessage();
-        
+
         if (!message) return '';
-        
+
         return `
             <div class="status-message">
                 <span class="message-text">${message}</span>
@@ -165,7 +165,7 @@ export class ProgressTracker extends BaseComponent {
                 background: white;
                 border-radius: 8px;
                 padding: 16px;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
                 transition: all 0.3s ease;
             }
             
@@ -396,35 +396,35 @@ export class ProgressTracker extends BaseComponent {
 
     updateProgress(data) {
         const currentTime = Date.now();
-        
+
         // Initialize start time on first update
         if (!this.startTime && data.progress > 0) {
             this.startTime = currentTime;
         }
-        
+
         // Calculate elapsed time
         const elapsedTime = this.startTime ? currentTime - this.startTime : 0;
-        
+
         // Calculate speed and estimated time
         let estimatedTime = null;
         let speed = 0;
-        
+
         if (this.lastUpdate && data.progress > 0 && data.progress < 100) {
             const timeDiff = currentTime - this.lastUpdate.time;
             const progressDiff = data.progress - this.lastUpdate.progress;
-            
+
             if (timeDiff > 0 && progressDiff > 0) {
                 speed = progressDiff / (timeDiff / 1000); // Progress per second
                 const remainingProgress = 100 - data.progress;
                 estimatedTime = (remainingProgress / speed) * 1000; // Milliseconds
             }
         }
-        
+
         this.lastUpdate = {
             time: currentTime,
             progress: data.progress
         };
-        
+
         // Update state
         this.setState({
             progress: Math.max(0, Math.min(100, data.progress)),
@@ -437,7 +437,7 @@ export class ProgressTracker extends BaseComponent {
             filesProcessed: data.filesProcessed || this.getState('filesProcessed'),
             totalFiles: data.totalFiles || this.getState('totalFiles')
         });
-        
+
         // Emit progress change event
         this.emit('progress-changed', {
             progress: data.progress,
@@ -448,7 +448,7 @@ export class ProgressTracker extends BaseComponent {
             filesProcessed: data.filesProcessed,
             totalFiles: data.totalFiles
         });
-        
+
         // Auto-complete animation
         if (data.progress >= 100 && data.status !== 'error') {
             setTimeout(() => {
@@ -480,7 +480,7 @@ export class ProgressTracker extends BaseComponent {
             cancelled: 'Cancelled',
             paused: 'Paused'
         };
-        
+
         return statusTexts[status] || status;
     }
 
@@ -497,17 +497,17 @@ export class ProgressTracker extends BaseComponent {
             cancelled: 'Processing was cancelled.',
             paused: 'Processing is paused.'
         };
-        
+
         return messages[state.status] || null;
     }
 
     formatTime(milliseconds) {
         if (!milliseconds || milliseconds < 0) return '0s';
-        
+
         const seconds = Math.floor(milliseconds / 1000);
         const minutes = Math.floor(seconds / 60);
         const hours = Math.floor(minutes / 60);
-        
+
         if (hours > 0) {
             return `${hours}h ${minutes % 60}m`;
         } else if (minutes > 0) {

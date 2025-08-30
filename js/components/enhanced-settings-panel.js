@@ -1,20 +1,24 @@
 /**
  * Enhanced Settings Panel Component
  * Integrates user preferences, compression settings, and account settings
+ * Requirements: 1.1, 1.2, 1.3, 1.4, 10.1, 10.2, 10.3, 10.4, 10.5
  */
 
 import { BaseComponent } from './base-component.js';
+import { appState } from '../services/app-state.js';
 
 export class EnhancedSettingsPanel extends BaseComponent {
     constructor() {
         super();
         this.currentTab = 'compression';
-        this.settings = {
+        
+        // Default settings structure matching requirements
+        this.defaultSettings = {
             compression: {
-                compressionLevel: 'medium',
-                imageQuality: 80,
-                targetSize: 'auto',
-                optimizationStrategy: 'balanced'
+                processingMode: 'single', // 'single' | 'bulk'
+                compressionLevel: 'medium', // 'low' | 'medium' | 'high' | 'maximum'
+                imageQuality: 70, // 10-100
+                useServerProcessing: false
             },
             preferences: {
                 theme: 'light',
@@ -23,7 +27,11 @@ export class EnhancedSettingsPanel extends BaseComponent {
                 autoSave: true
             }
         };
+        
+        this.settings = JSON.parse(JSON.stringify(this.defaultSettings));
         this.user = null;
+        this.validationErrors = {};
+        this.saveTimeout = null;
     }
 
     static get observedAttributes() {
@@ -31,11 +39,17 @@ export class EnhancedSettingsPanel extends BaseComponent {
     }
 
     init() {
+        // Load settings from localStorage and app state
+        this.loadSettings();
+        
         this.setState({
             currentTab: this.getProp('active-tab', 'compression'),
-            settings: this.getProp('settings', this.settings),
+            settings: this.settings,
             user: this.getProp('user', null)
         });
+        
+        // Subscribe to app state changes
+        this.subscribeToAppState();
     }
 
     getTemplate() {
@@ -90,6 +104,7 @@ export class EnhancedSettingsPanel extends BaseComponent {
 
     getCompressionSettings() {
         const settings = this.getState('settings').compression;
+        const errors = this.validationErrors;
         
         return `
             <div class="settings-tab compression-settings">
@@ -97,25 +112,106 @@ export class EnhancedSettingsPanel extends BaseComponent {
                 <p class="settings-description">Configure how your PDFs are compressed</p>
                 
                 <div class="settings-grid">
+                    <!-- Processing Mode -->
+                    <div class="setting-group full-width">
+                        <label class="setting-label">Processing Mode</label>
+                        <div class="mode-toggle-container">
+                            <button class="mode-option ${settings.processingMode === 'single' ? 'active' : ''}" 
+                                    data-setting="compression.processingMode" data-value="single">
+                                <span class="mode-label">Single File</span>
+                                <span class="mode-description">Process one file at a time</span>
+                            </button>
+                            <button class="mode-option ${settings.processingMode === 'bulk' ? 'active' : ''}" 
+                                    data-setting="compression.processingMode" data-value="bulk">
+                                <span class="mode-label">Bulk Processing</span>
+                                <span class="mode-description">Process multiple files</span>
+                                <span class="pro-badge">PRO</span>
+                            </button>
+                        </div>
+                        ${errors.processingMode ? `<div class="error-message">${errors.processingMode}</div>` : ''}
+                        <div class="setting-help">Choose between single file or bulk processing mode</div>
+                    </div>
+                    
+                    <!-- Compression Level -->
                     <div class="setting-group">
                         <label for="compressionLevel" class="setting-label">Compression Level</label>
-                        <select id="compressionLevel" class="setting-control" data-setting="compression.compressionLevel">
-                            <option value="low" ${settings.compressionLevel === 'low' ? 'selected' : ''}>Low (Better Quality)</option>
+                        <select id="compressionLevel" class="setting-control ${errors.compressionLevel ? 'error' : ''}" 
+                                data-setting="compression.compressionLevel">
+                            <option value="low" ${settings.compressionLevel === 'low' ? 'selected' : ''}>Low (Best Quality)</option>
                             <option value="medium" ${settings.compressionLevel === 'medium' ? 'selected' : ''}>Medium (Balanced)</option>
                             <option value="high" ${settings.compressionLevel === 'high' ? 'selected' : ''}>High (Smaller Size)</option>
                             <option value="maximum" ${settings.compressionLevel === 'maximum' ? 'selected' : ''}>Maximum (Smallest Size)</option>
                         </select>
+                        ${errors.compressionLevel ? `<div class="error-message">${errors.compressionLevel}</div>` : ''}
+                        <div class="setting-help">Higher compression reduces file size but may affect quality</div>
                     </div>
                     
+                    <!-- Image Quality -->
                     <div class="setting-group">
                         <label for="imageQuality" class="setting-label">Image Quality</label>
                         <div class="range-container">
                             <input type="range" id="imageQuality" min="10" max="100" value="${settings.imageQuality}" 
-                                   class="setting-range" data-setting="compression.imageQuality">
-                            <div class="range-value" id="imageQualityValue">${settings.imageQuality}%</div>
+                                   step="5" class="setting-range ${errors.imageQuality ? 'error' : ''}" 
+                                   data-setting="compression.imageQuality">
+                            <div class="range-labels">
+                                <span class="range-min">10%</span>
+                                <span class="range-value" id="imageQualityValue">${settings.imageQuality}%</span>
+                                <span class="range-max">100%</span>
+                            </div>
+                        </div>
+                        ${errors.imageQuality ? `<div class="error-message">${errors.imageQuality}</div>` : ''}
+                        <div class="setting-help">Adjust image compression quality (higher = better quality, larger size)</div>
+                    </div>
+                    
+                    <!-- Server Processing -->
+                    <div class="setting-group full-width">
+                        <label class="checkbox-container">
+                            <input type="checkbox" class="checkbox-input" id="useServerProcessing" 
+                                   ${settings.useServerProcessing ? 'checked' : ''} 
+                                   data-setting="compression.useServerProcessing">
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-label">Use Server Processing</span>
+                            <span class="pro-badge">PRO</span>
+                        </label>
+                        ${errors.useServerProcessing ? `<div class="error-message">${errors.useServerProcessing}</div>` : ''}
+                        <div class="setting-help">Enable server-side processing for better compression results</div>
+                    </div>
+                </div>
+                
+                <!-- Current Settings Summary -->
+                <div class="current-settings-summary">
+                    <h4>Current Settings Summary</h4>
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <span class="summary-label">Mode:</span>
+                            <span class="summary-value">${settings.processingMode === 'single' ? 'Single File' : 'Bulk Processing'}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Level:</span>
+                            <span class="summary-value">${this.getCompressionLevelLabel(settings.compressionLevel)}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Quality:</span>
+                            <span class="summary-value">${settings.imageQuality}%</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Server:</span>
+                            <span class="summary-value">${settings.useServerProcessing ? 'Enabled' : 'Disabled'}</span>
                         </div>
                     </div>
                 </div>
+                
+                <!-- Settings Actions -->
+                <div class="settings-actions">
+                    <button class="btn btn-secondary" data-action="reset-settings">Reset to Defaults</button>
+                    <button class="btn btn-primary" data-action="save-settings">
+                        <span class="btn-text">Save Settings</span>
+                        <span class="btn-spinner hidden">Saving...</span>
+                    </button>
+                </div>
+                
+                <!-- Save Status -->
+                <div class="save-status" id="saveStatus"></div>
             </div>
         `;
     }
@@ -149,17 +245,17 @@ export class EnhancedSettingsPanel extends BaseComponent {
                 </div>
                 
                 <div class="checkbox-group">
-                    <label class="checkbox-item">
-                        <input type="checkbox" ${settings.notifications ? 'checked' : ''} 
+                    <label class="checkbox-container">
+                        <input type="checkbox" class="checkbox-input" ${settings.notifications ? 'checked' : ''} 
                                data-setting="preferences.notifications">
-                        <span class="checkmark"></span>
-                        Show notifications for completed tasks
+                        <span class="checkbox-custom"></span>
+                        <span class="checkbox-label">Show notifications for completed tasks</span>
                     </label>
-                    <label class="checkbox-item">
-                        <input type="checkbox" ${settings.autoSave ? 'checked' : ''} 
+                    <label class="checkbox-container">
+                        <input type="checkbox" class="checkbox-input" ${settings.autoSave ? 'checked' : ''} 
                                data-setting="preferences.autoSave">
-                        <span class="checkmark"></span>
-                        Auto-save settings and preferences
+                        <span class="checkbox-custom"></span>
+                        <span class="checkbox-label">Auto-save settings and preferences</span>
                     </label>
                 </div>
             </div>
@@ -207,10 +303,16 @@ export class EnhancedSettingsPanel extends BaseComponent {
             .enhanced-settings-panel {
                 background: #ffffff;
                 border-radius: 12px;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                border: 1px solid #e5e7eb;
                 padding: 32px;
                 max-width: 1000px;
                 margin: 0 auto;
+                /* Ensure no dark backgrounds - light theme only */
+                color: #1f2937;
+                /* Ensure proper contrast ratios */
+                min-height: auto;
+                position: relative;
             }
             
             .settings-header {
@@ -270,6 +372,8 @@ export class EnhancedSettingsPanel extends BaseComponent {
                 background: #eff6ff;
                 color: #1d4ed8;
                 border-left: 3px solid #3b82f6;
+                /* Ensure no dark overlays */
+                box-shadow: none;
             }
             
             .settings-content {
@@ -292,9 +396,13 @@ export class EnhancedSettingsPanel extends BaseComponent {
             
             .settings-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
                 gap: 24px;
                 margin-bottom: 32px;
+            }
+            
+            .setting-group.full-width {
+                grid-column: 1 / -1;
             }
             
             .setting-group {
@@ -455,12 +563,312 @@ export class EnhancedSettingsPanel extends BaseComponent {
                 gap: 12px;
             }
             
+            /* Mode Toggle Styles - Light theme only */
+            .mode-toggle-container {
+                display: flex;
+                background: #f8fafc;
+                border-radius: 8px;
+                padding: 4px;
+                gap: 4px;
+                border: 1px solid #e2e8f0;
+            }
+            
+            .mode-option {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 4px;
+                padding: 16px 12px;
+                border: none;
+                background: transparent;
+                color: #6b7280;
+                font-size: 14px;
+                cursor: pointer;
+                border-radius: 6px;
+                transition: all 0.2s ease;
+                position: relative;
+            }
+            
+            .mode-option.active {
+                background: #ffffff;
+                color: #3b82f6;
+                font-weight: 600;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            }
+            
+            .mode-option:hover:not(.active) {
+                color: #374151;
+                background: rgba(255, 255, 255, 0.5);
+            }
+            
+            .mode-label {
+                font-weight: 500;
+            }
+            
+            .mode-description {
+                font-size: 12px;
+                color: #9ca3af;
+                text-align: center;
+            }
+            
+            .mode-option.active .mode-description {
+                color: #6b7280;
+            }
+            
+            .pro-badge {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                font-size: 10px;
+                font-weight: 700;
+                padding: 2px 6px;
+                border-radius: 12px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-top: 4px;
+            }
+            
+            /* Range Input Styles */
+            .range-container {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .range-labels {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 12px;
+                color: #6b7280;
+            }
+            
+            .range-value {
+                font-weight: 600;
+                color: #3b82f6;
+                font-size: 14px;
+            }
+            
+            .setting-range {
+                width: 100%;
+                height: 6px;
+                border-radius: 3px;
+                background: #e5e7eb;
+                outline: none;
+                appearance: none;
+                cursor: pointer;
+            }
+            
+            .setting-range::-webkit-slider-thumb {
+                appearance: none;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                background: #3b82f6;
+                cursor: pointer;
+                border: 2px solid #ffffff;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            
+            .setting-range::-moz-range-thumb {
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                background: #3b82f6;
+                cursor: pointer;
+                border: 2px solid #ffffff;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            
+            /* Checkbox Styles */
+            .checkbox-container {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                cursor: pointer;
+                padding: 12px;
+                border-radius: 8px;
+                transition: background-color 0.2s ease;
+            }
+            
+            .checkbox-container:hover {
+                background: #f9fafb;
+            }
+            
+            .checkbox-input {
+                display: none;
+            }
+            
+            .checkbox-custom {
+                width: 20px;
+                height: 20px;
+                border: 2px solid #d1d5db;
+                border-radius: 4px;
+                position: relative;
+                transition: all 0.2s ease;
+                flex-shrink: 0;
+            }
+            
+            .checkbox-input:checked + .checkbox-custom {
+                background: #3b82f6;
+                border-color: #3b82f6;
+            }
+            
+            .checkbox-input:checked + .checkbox-custom::after {
+                content: '';
+                position: absolute;
+                left: 6px;
+                top: 2px;
+                width: 6px;
+                height: 10px;
+                border: solid white;
+                border-width: 0 2px 2px 0;
+                transform: rotate(45deg);
+            }
+            
+            .checkbox-label {
+                font-size: 14px;
+                color: #374151;
+                font-weight: 500;
+                flex: 1;
+            }
+            
+            /* Checkbox Group */
+            .checkbox-group {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+                margin-top: 24px;
+            }
+            
+            /* Help Text */
+            .setting-help {
+                font-size: 12px;
+                color: #6b7280;
+                margin-top: 4px;
+                line-height: 1.4;
+            }
+            
+            /* Error Handling */
+            .error-message {
+                color: #dc2626;
+                font-size: 12px;
+                margin-top: 4px;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+            }
+            
+            .error-message::before {
+                content: '⚠';
+                font-size: 14px;
+            }
+            
+            .setting-control.error,
+            .setting-range.error {
+                border-color: #dc2626;
+                box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+            }
+            
+            /* Save Status */
+            .save-status {
+                margin-top: 16px;
+                padding: 12px;
+                border-radius: 6px;
+                font-size: 14px;
+                text-align: center;
+                transition: all 0.3s ease;
+            }
+            
+            .save-status.success {
+                background: #d1fae5;
+                color: #065f46;
+                border: 1px solid #a7f3d0;
+            }
+            
+            .save-status.error {
+                background: #fee2e2;
+                color: #991b1b;
+                border: 1px solid #fca5a5;
+            }
+            
+            .save-status.hidden {
+                display: none;
+            }
+            
+            /* Current Settings Summary - Light theme only */
+            .current-settings-summary {
+                background: #f8fafc;
+                border: 1px solid #e2e8f0;
+                border-radius: 8px;
+                padding: 20px;
+                margin: 24px 0;
+                /* Ensure no dark overlays or backgrounds */
+                position: relative;
+                z-index: 1;
+            }
+            
+            .current-settings-summary h4 {
+                font-size: 16px;
+                font-weight: 600;
+                color: #1f2937;
+                margin: 0 0 16px 0;
+            }
+            
+            .summary-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 12px;
+            }
+            
+            .summary-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 8px 12px;
+                background: #ffffff;
+                border: 1px solid #e5e7eb;
+                border-radius: 6px;
+            }
+            
+            .summary-label {
+                font-size: 14px;
+                color: #6b7280;
+                font-weight: 500;
+            }
+            
+            .summary-value {
+                font-size: 14px;
+                color: #1f2937;
+                font-weight: 600;
+            }
+
+            /* Button Styles */
             .settings-actions {
                 display: flex;
                 justify-content: flex-end;
                 gap: 16px;
                 padding-top: 24px;
                 border-top: 1px solid #e5e7eb;
+            }
+            
+            .btn-spinner {
+                display: inline-block;
+                width: 16px;
+                height: 16px;
+                border: 2px solid transparent;
+                border-top: 2px solid currentColor;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            }
+            
+            .btn-spinner.hidden {
+                display: none;
+            }
+            
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
             }
             
             .btn {
@@ -510,10 +918,49 @@ export class EnhancedSettingsPanel extends BaseComponent {
                 border-color: #9ca3af;
             }
             
+            /* Ensure no dark backgrounds in any state */
+            .enhanced-settings-panel *,
+            .enhanced-settings-panel *::before,
+            .enhanced-settings-panel *::after {
+                /* Override any potential dark backgrounds */
+                background-color: inherit;
+            }
+            
+            /* Specific overrides for common dark background patterns */
+            .enhanced-settings-panel .modal-overlay,
+            .enhanced-settings-panel .backdrop,
+            .enhanced-settings-panel .overlay {
+                background: rgba(255, 255, 255, 0.95) !important;
+                backdrop-filter: blur(4px);
+            }
+            
+            /* Ensure all interactive elements have light backgrounds */
+            .enhanced-settings-panel button:not(.btn),
+            .enhanced-settings-panel input,
+            .enhanced-settings-panel select,
+            .enhanced-settings-panel textarea {
+                background: #ffffff;
+                border: 1px solid #d1d5db;
+                color: #374151;
+            }
+            
+            /* Focus states with light backgrounds */
+            .enhanced-settings-panel button:focus,
+            .enhanced-settings-panel input:focus,
+            .enhanced-settings-panel select:focus,
+            .enhanced-settings-panel textarea:focus {
+                background: #ffffff;
+                border-color: #3b82f6;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+                outline: none;
+            }
+            
             @media (max-width: 768px) {
                 .enhanced-settings-panel {
                     padding: 24px;
                     margin: 16px;
+                    /* Ensure light background on mobile */
+                    background: #ffffff;
                 }
                 
                 .settings-container {
@@ -528,6 +975,10 @@ export class EnhancedSettingsPanel extends BaseComponent {
                 .settings-nav {
                     flex-direction: row;
                     overflow-x: auto;
+                    /* Light background for mobile nav */
+                    background: #f9fafb;
+                    padding: 8px;
+                    border-radius: 8px;
                 }
                 
                 .settings-grid {
@@ -538,6 +989,8 @@ export class EnhancedSettingsPanel extends BaseComponent {
                     flex-direction: column;
                     text-align: center;
                     gap: 20px;
+                    /* Ensure light background */
+                    background: #ffffff;
                 }
                 
                 .account-actions {
@@ -561,6 +1014,16 @@ export class EnhancedSettingsPanel extends BaseComponent {
             }
         });
 
+        // Mode toggle buttons
+        this.addEventListener(this.shadowRoot, 'click', (event) => {
+            if (event.target.matches('.mode-option') || event.target.closest('.mode-option')) {
+                const button = event.target.closest('.mode-option');
+                const setting = button.getAttribute('data-setting');
+                const value = button.getAttribute('data-value');
+                this.handleModeToggle(setting, value);
+            }
+        });
+
         // Setting changes
         this.addEventListener(this.shadowRoot, 'change', (event) => {
             if (event.target.matches('[data-setting]')) {
@@ -580,6 +1043,23 @@ export class EnhancedSettingsPanel extends BaseComponent {
             if (event.target.matches('[data-action]')) {
                 this.handleAction(event.target.getAttribute('data-action'));
             }
+        });
+        
+        // Auto-save on setting changes (debounced)
+        this.addEventListener(this.shadowRoot, 'change', () => {
+            this.debouncedSave();
+        });
+        
+        this.addEventListener(this.shadowRoot, 'input', () => {
+            this.debouncedSave();
+        });
+
+        // Listen for quick settings changes
+        document.addEventListener('quick-settings:changed', (event) => {
+            const { settings } = event.detail;
+            this.settings = settings;
+            this.setState({ settings });
+            this.render();
         });
     }
 
@@ -619,14 +1099,24 @@ export class EnhancedSettingsPanel extends BaseComponent {
         this.emit('settings:change', settings);
     }
 
+    handleModeToggle(settingPath, value) {
+        // Check for Pro features
+        if (value === 'bulk' && !this.hasProAccess()) {
+            this.showProUpgradePrompt();
+            return;
+        }
+        
+        this.updateSetting(settingPath, value);
+        this.scheduleRender();
+    }
+
     handleAction(action) {
         switch (action) {
             case 'save-settings':
-                this.emit('settings:save', this.getState('settings'));
+                this.saveSettings();
                 break;
             case 'reset-settings':
-                this.setState({ settings: this.settings });
-                this.scheduleRender();
+                this.resetToDefaults();
                 break;
             case 'edit-profile':
                 this.emit('settings:edit-profile');
@@ -636,10 +1126,227 @@ export class EnhancedSettingsPanel extends BaseComponent {
                 break;
         }
     }
+    
+    async saveSettings() {
+        try {
+            // Validate settings
+            const isValid = this.validateSettings();
+            if (!isValid) {
+                this.showSaveStatus('Please fix validation errors before saving.', 'error');
+                return;
+            }
+            
+            // Show saving state
+            this.showSavingState(true);
+            
+            // Save to localStorage
+            this.persistSettings();
+            
+            // Update app state
+            this.updateAppState();
+            
+            // Emit save event
+            this.emit('settings:save', this.getState('settings'));
+            
+            // Dispatch settings changed event for synchronization
+            const settingsChangedEvent = new CustomEvent('settings:changed', {
+                detail: { settings: this.getState('settings') }
+            });
+            document.dispatchEvent(settingsChangedEvent);
+            
+            // Show success
+            this.showSaveStatus('Settings saved successfully!', 'success');
+            
+        } catch (error) {
+            console.error('Failed to save settings:', error);
+            this.showSaveStatus('Failed to save settings. Please try again.', 'error');
+        } finally {
+            this.showSavingState(false);
+        }
+    }
+    
+    resetToDefaults() {
+        this.validationErrors = {};
+        this.setState({ settings: JSON.parse(JSON.stringify(this.defaultSettings)) });
+        this.persistSettings();
+        this.updateAppState();
+        this.scheduleRender();
+        this.showSaveStatus('Settings reset to defaults.', 'success');
+    }
+    
+    validateSettings() {
+        this.validationErrors = {};
+        const settings = this.getState('settings');
+        let isValid = true;
+        
+        // Validate compression settings
+        const compression = settings.compression;
+        
+        // Validate compression level
+        const validLevels = ['low', 'medium', 'high', 'maximum'];
+        if (!validLevels.includes(compression.compressionLevel)) {
+            this.validationErrors.compressionLevel = 'Invalid compression level selected.';
+            isValid = false;
+        }
+        
+        // Validate image quality
+        const quality = parseInt(compression.imageQuality);
+        if (isNaN(quality) || quality < 10 || quality > 100) {
+            this.validationErrors.imageQuality = 'Image quality must be between 10 and 100.';
+            isValid = false;
+        }
+        
+        // Validate processing mode
+        const validModes = ['single', 'bulk'];
+        if (!validModes.includes(compression.processingMode)) {
+            this.validationErrors.processingMode = 'Invalid processing mode selected.';
+            isValid = false;
+        }
+        
+        // Check Pro features
+        if (compression.processingMode === 'bulk' && !this.hasProAccess()) {
+            this.validationErrors.processingMode = 'Bulk processing requires Pro subscription.';
+            isValid = false;
+        }
+        
+        if (compression.useServerProcessing && !this.hasProAccess()) {
+            this.validationErrors.useServerProcessing = 'Server processing requires Pro subscription.';
+            isValid = false;
+        }
+        
+        return isValid;
+    }
+    
+    loadSettings() {
+        try {
+            // Load from localStorage
+            const saved = localStorage.getItem('pdfsmaller_enhanced_settings');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                this.settings = this.mergeSettings(this.defaultSettings, parsed);
+            }
+            
+            // Sync with app state
+            const appSettings = appState.getSettings();
+            if (appSettings) {
+                this.settings.compression = {
+                    ...this.settings.compression,
+                    ...appSettings
+                };
+            }
+        } catch (error) {
+            console.warn('Failed to load settings:', error);
+            this.settings = JSON.parse(JSON.stringify(this.defaultSettings));
+        }
+    }
+    
+    persistSettings() {
+        try {
+            localStorage.setItem('pdfsmaller_enhanced_settings', JSON.stringify(this.settings));
+        } catch (error) {
+            console.error('Failed to persist settings:', error);
+        }
+    }
+    
+    updateAppState() {
+        // Update app state with compression settings
+        appState.updateCompressionSettings(this.settings.compression);
+    }
+    
+    subscribeToAppState() {
+        // Subscribe to app state changes to keep in sync
+        appState.subscribe('compressionLevel', (value) => {
+            this.settings.compression.compressionLevel = value;
+            this.scheduleRender();
+        });
+        
+        appState.subscribe('imageQuality', (value) => {
+            this.settings.compression.imageQuality = value;
+            this.scheduleRender();
+        });
+        
+        appState.subscribe('useServerProcessing', (value) => {
+            this.settings.compression.useServerProcessing = value;
+            this.scheduleRender();
+        });
+        
+        appState.subscribe('processingMode', (value) => {
+            this.settings.compression.processingMode = value;
+            this.scheduleRender();
+        });
+    }
+    
+    debouncedSave() {
+        // Clear existing timeout
+        if (this.saveTimeout) {
+            clearTimeout(this.saveTimeout);
+        }
+        
+        // Set new timeout for auto-save
+        this.saveTimeout = setTimeout(() => {
+            if (this.validateSettings()) {
+                this.persistSettings();
+                this.updateAppState();
+            }
+        }, 1000); // Save after 1 second of inactivity
+    }
+    
+    showSavingState(saving) {
+        const saveButton = this.shadowRoot.querySelector('[data-action="save-settings"]');
+        const btnText = saveButton?.querySelector('.btn-text');
+        const btnSpinner = saveButton?.querySelector('.btn-spinner');
+        
+        if (saveButton) {
+            saveButton.disabled = saving;
+            if (btnText) btnText.classList.toggle('hidden', saving);
+            if (btnSpinner) btnSpinner.classList.toggle('hidden', !saving);
+        }
+    }
+    
+    showSaveStatus(message, type) {
+        const statusElement = this.shadowRoot.getElementById('saveStatus');
+        if (statusElement) {
+            statusElement.textContent = message;
+            statusElement.className = `save-status ${type}`;
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                statusElement.classList.add('hidden');
+            }, 3000);
+        }
+    }
+    
+    hasProAccess() {
+        // Check if user has Pro access
+        return appState.hasProAccess();
+    }
+    
+    showProUpgradePrompt() {
+        // Emit event for Pro upgrade modal
+        this.emit('pro-upgrade-required', { feature: 'bulk-processing' });
+    }
+    
+    mergeSettings(defaults, saved) {
+        const merged = JSON.parse(JSON.stringify(defaults));
+        
+        // Deep merge saved settings
+        for (const [key, value] of Object.entries(saved)) {
+            if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+                merged[key] = { ...merged[key], ...value };
+            } else {
+                merged[key] = value;
+            }
+        }
+        
+        return merged;
+    }
 
     // Public methods
     setSettings(settings) {
-        this.setState({ settings });
+        this.settings = this.mergeSettings(this.settings, settings);
+        this.setState({ settings: this.settings });
+        this.persistSettings();
+        this.updateAppState();
         this.scheduleRender();
     }
 
@@ -651,6 +1358,29 @@ export class EnhancedSettingsPanel extends BaseComponent {
     setActiveTab(tab) {
         this.setState({ currentTab: tab });
         this.scheduleRender();
+    }
+    
+    getSettings() {
+        return JSON.parse(JSON.stringify(this.settings));
+    }
+    
+    refreshSettings() {
+        this.loadSettings();
+        this.setState({ settings: this.settings });
+        this.scheduleRender();
+    }
+    
+    // Method to handle external settings updates
+    updateFromAppState() {
+        const appSettings = appState.getSettings();
+        if (appSettings) {
+            this.settings.compression = {
+                ...this.settings.compression,
+                ...appSettings
+            };
+            this.setState({ settings: this.settings });
+            this.scheduleRender();
+        }
     }
 
     // Utility methods
@@ -673,6 +1403,16 @@ export class EnhancedSettingsPanel extends BaseComponent {
             'pro': 'Pro Plan'
         };
         return planMap[user.plan] || 'Free Plan';
+    }
+
+    getCompressionLevelLabel(level) {
+        const labels = {
+            'low': 'Low (Best Quality)',
+            'medium': 'Medium (Balanced)',
+            'high': 'High (Smaller Size)',
+            'maximum': 'Maximum (Smallest Size)'
+        };
+        return labels[level] || 'Medium (Balanced)';
     }
 }
 

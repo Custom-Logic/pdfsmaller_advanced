@@ -88,6 +88,10 @@
     <link rel="stylesheet" href="static/css/utilities.css">
     <link rel="stylesheet" href="static/css/components-modern.css">
     <link rel="stylesheet" href="static/css/layout-modern.css">
+    <link rel="stylesheet" href="static/css/responsive-mobile.css">
+    <link rel="stylesheet" href="static/css/mobile-upload-optimizations.css">
+    <link rel="stylesheet" href="static/css/mobile-typography-spacing.css">
+    <link rel="stylesheet" href="static/css/tablet-optimizations.css">
     
     <!-- Application Styles -->
     <link rel="stylesheet" href="static/css/app.css">
@@ -95,6 +99,9 @@
     <link rel="stylesheet" href="static/css/extended-features.css">
     <link rel="stylesheet" href="static/css/components.css">
     <link rel="stylesheet" href="static/css/error-handling.css">
+    
+    <!-- Settings Light Theme - Remove Dark Backgrounds -->
+    <link rel="stylesheet" href="static/css/settings-light-theme.css">
 </head>
 <body>
     <!-- Loading Indicator -->
@@ -153,18 +160,32 @@
             <div class="tab-content" slot="content">
                 <!-- Compress Tab -->
                 <div id="compressTab" class="tab-panel active" role="tabpanel" aria-labelledby="tab-compress">
-                    <div class="compress-layout">
-                        <!-- Settings Sidebar -->
-                        <aside class="settings-sidebar">
-                            <div class="sidebar-card">
-                                <modern-settings-panel 
-                                    id="compressionSettings">
-                                </modern-settings-panel>
+                    <div class="compress-layout-clean">
+                        <!-- Quick Settings -->
+                        <div class="quick-settings-container">
+                            <div class="quick-settings-header">
+                                <h4>Quick Settings</h4>
+                                <button class="full-settings-link" onclick="switchTab('settings')">
+                                    All Settings →
+                                </button>
                             </div>
-                        </aside>
+                            <div class="quick-setting-item">
+                                <label for="quickCompressionLevel" class="quick-setting-label">Compression Level:</label>
+                                <select id="quickCompressionLevel" class="quick-setting-control">
+                                    <option value="low">Low (Best Quality)</option>
+                                    <option value="medium" selected>Medium (Balanced)</option>
+                                    <option value="high">High (Smaller Size)</option>
+                                    <option value="maximum">Maximum (Smallest Size)</option>
+                                </select>
+                            </div>
+                            <p class="settings-note">
+                                For more options like image quality, processing mode, and server processing, 
+                                <button class="inline-settings-link" onclick="switchTab('settings')">go to Settings</button>.
+                            </p>
+                        </div>
                         
                         <!-- Main Content Area -->
-                        <main class="main-area">
+                        <main class="main-area-full">
                             <!-- Upload Section -->
                             <div class="content-card">
                                 <div class="upload-header">
