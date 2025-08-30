@@ -1,0 +1,102 @@
+/* Auth Modal Styles */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0.3s ease, opacity 0.3s ease;
+}
+
+.auth-modal:not(.hidden) {
+    visibility: visible;
+    opacity: 1;
+}
+
+.auth-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+}
+
+.auth-modal-content {
+    position: relative;
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    max-width: 400px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    z-index: 1002;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.auth-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    color: #6b7280;
+    z-index: 1003;
+}
+
+.auth-modal-close:hover {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+/* Navigation Auth Links */
+.auth-links {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.user-info-nav {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f3f4f6;
+    margin-bottom: 8px;
+}
+
+.user-name-nav {
+    display: block;
+    font-weight: 600;
+    color: #111827;
+    font-size: 14px;
+}
+
+.user-plan-nav {
+    display: block;
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 2px;
+}
+
+/* Ensure auth-panel fits in modal */
+#modalAuthPanel {
+    display: block;
+    width: 100%;
+    box-shadow: none;
+    padding: 0;
+}
+
+#modalAuthPanel .auth-panel {
+    box-shadow: none;
+    padding: 0;
+}

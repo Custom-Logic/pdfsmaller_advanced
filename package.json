@@ -8,17 +8,34 @@
     "dev": "node scripts/dev-server.js",
     "build": "echo 'No build required - static files only'",
     "serve": "node scripts/serve.js",
-    "lint": "eslint js/**/*.js",
-    "lint:fix": "eslint js/**/*.js --fix",
-    "test": "node scripts/test-runner.js",
-    "test:watch": "node scripts/test-runner.js --watch"
+    "lint:js": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:css": "stylelint \"**/*.css\"",
+    "lint:html": "htmlhint \"**/*.html\"",
+    "lint": "npm run lint:js && npm run lint:css && npm run lint:html",
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix && stylelint \"**/*.css\" --fix",
+    "test": "node --experimental-vm-modules --no-warnings node_modules/jest/bin/jest.js",
+    "test:watch": "node --experimental-vm-modules --no-warnings node_modules/jest/bin/jest.js --watch"
   },
   "devDependencies": {
-    "eslint": "^8.57.0",
-    "terser": "^5.24.0",
+    "@babel/core": "^7.28.3",
+    "@babel/preset-env": "^7.28.3",
+    "babel-jest": "^30.1.1",
     "chokidar": "^3.5.3",
-    "ws": "^8.14.2",
-    "mime-types": "^2.1.35"
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-vue": "^10.4.0",
+    "htmlhint": "^1.6.3",
+    "jest": "^30.1.1",
+    "jest-environment-jsdom": "^30.1.1",
+    "mime-types": "^2.1.35",
+    "prettier": "^3.6.2",
+    "stylelint": "^16.23.1",
+    "stylelint-config-standard": "^39.0.0",
+    "terser": "^5.24.0",
+    "ws": "^8.14.2"
   },
   "dependencies": {
     "pdf-lib": "^1.17.1"

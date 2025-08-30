@@ -1,0 +1,756 @@
+
+> pdfsmaller-frontend@1.0.0 lint:fix
+> eslint . --ext .js,.jsx,.ts,.tsx --fix && stylelint "**/*.css" --fix
+
+
+E:\projects\pdfsmaller_frontend\js\components\ai-panel.js
+   45:17  warning  Unexpected console statement    no-console
+   49:13  warning  Unexpected console statement    no-console
+  537:13  warning  Unexpected console statement    no-console
+  587:13  warning  Unexpected console statement    no-console
+  662:13  warning  Unexpected console statement    no-console
+  719:27  warning  'id' is defined but never used  no-unused-vars
+  723:33  error    'item' is not defined           no-undef
+  723:44  error    'item' is not defined           no-undef
+  725:13  warning  Unexpected console statement    no-console
+
+E:\projects\pdfsmaller_frontend\js\components\base-component.js
+  153:18  warning  'oldState' is defined but never used                                       no-unused-vars
+  153:28  warning  'newState' is defined but never used                                       no-unused-vars
+  166:24  error    Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  189:17  warning  'name' is defined but never used                                           no-unused-vars
+  189:23  warning  'oldValue' is defined but never used                                       no-unused-vars
+  189:33  warning  'newValue' is defined but never used                                       no-unused-vars
+  204:9   warning  Unexpected console statement                                               no-console
+  213:7   warning  Unexpected console statement                                               no-console
+  227:7   warning  Unexpected console statement                                               no-console
+  242:9   warning  Unexpected console statement                                               no-console
+  251:7   warning  Unexpected console statement                                               no-console
+  270:7   warning  Unexpected console statement                                               no-console
+  516:5   warning  Unexpected console statement                                               no-console
+  525:5   warning  Unexpected console statement                                               no-console
+
+E:\projects\pdfsmaller_frontend\js\components\cloud-integration-panel.js
+   25:17  warning  Unexpected console statement  no-console
+   31:13  warning  Unexpected console statement  no-console
+   45:13  warning  Unexpected console statement  no-console
+   57:13  warning  Unexpected console statement  no-console
+  238:13  warning  Unexpected console statement  no-console
+  250:13  warning  Unexpected console statement  no-console
+  262:13  warning  Unexpected console statement  no-console
+  279:13  warning  Unexpected console statement  no-console
+  289:13  warning  Unexpected console statement  no-console
+  299:13  warning  Unexpected console statement  no-console
+  309:13  warning  Unexpected console statement  no-console
+  328:13  warning  Unexpected console statement  no-console
+  335:9   warning  Unexpected console statement  no-console
+  345:13  warning  Unexpected console statement  no-console
+  358:17  warning  Unexpected console statement  no-console
+  366:9   warning  Unexpected console statement  no-console
+  371:9   warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\js\components\cloud-panel.js
+   30:17  warning  Unexpected console statement           no-console
+   36:13  warning  Unexpected console statement           no-console
+  584:13  warning  Unexpected console statement           no-console
+  602:13  warning  Unexpected console statement           no-console
+  627:13  warning  Unexpected console statement           no-console
+  686:13  warning  Unexpected console statement           no-console
+  713:13  warning  Unexpected console statement           no-console
+  728:13  warning  Unexpected console statement           no-console
+  778:5   error    Duplicate name 'updateDownloadButton'  no-dupe-class-members
+  823:17  warning  Unexpected console statement           no-console
+
+E:\projects\pdfsmaller_frontend\js\components\conversion-panel.js
+   29:17  warning  Unexpected console statement  no-console
+   32:13  warning  Unexpected console statement  no-console
+  679:13  warning  Unexpected console statement  no-console
+  705:13  warning  Unexpected console statement  no-console
+  792:9   warning  Unexpected console statement  no-console
+  798:9   warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\js\components\enhanced-integration.js
+   42:13  warning  Unexpected console statement  no-console
+   44:13  warning  Unexpected console statement  no-console
+  251:9   warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\js\components\enhanced-settings-panel.js
+  1161:13  warning  Unexpected console statement  no-console
+  1238:13  warning  Unexpected console statement  no-console
+  1247:13  warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\js\components\error-message.js
+  518:17  warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\js\components\extended-features-panel.js
+   55:17  warning  Unexpected console statement  no-console
+   58:13  warning  Unexpected console statement  no-console
+  267:13  warning  Unexpected console statement  no-console
+  320:13  warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\js\components\file-manager.js
+  89:1  error  Parsing error: Unexpected token Content
+
+E:\projects\pdfsmaller_frontend\js\components\file-uploader-refactored.js
+   62:7  warning  Unexpected console statement  no-console
+  260:7  warning  Unexpected console statement  no-console
+  334:9  warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\js\components\file-uploader.js
+   62:7  warning  Unexpected console statement  no-console
+  260:7  warning  Unexpected console statement  no-console
+  334:9  warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\js\components\modern-settings-panel.js
+  538:13  warning  Unexpected console statement  no-console
+  550:13  warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\js\components\notification-system.js
+  439:21  warning  Unexpected console statement                no-console
+  617:34  warning  'field' is assigned a value but never used  no-unused-vars
+
+E:\projects\pdfsmaller_frontend\js\components\ocr-panel.js
+    29:17  warning  Unexpected console statement               no-console
+    32:13  warning  Unexpected console statement               no-console
+   838:17  error    'logEvent' is not defined                  no-undef
+   842:34  error    'results' is not defined                   no-undef
+   847:30  error    'results' is not defined                   no-undef
+   854:13  warning  Unexpected console statement               no-console
+   869:19  warning  'file' is assigned a value but never used  no-unused-vars
+   872:30  error    'preview' is not defined                   no-undef
+   875:13  warning  Unexpected console statement               no-console
+   989:9   warning  Unexpected console statement               no-console
+  1028:9   warning  Unexpected console statement               no-console
+  1042:9   warning  Unexpected console statement               no-console
+
+E:\projects\pdfsmaller_frontend\js\components\settings-panel.js
+  510:13  warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\js\controllers\main-controller-validation.js
+    9:5   warning  Unexpected console statement  no-console
+   14:9   warning  Unexpected console statement  no-console
+   18:9   warning  Unexpected console statement  no-console
+   25:13  warning  Unexpected console statement  no-console
+   40:13  warning  Unexpected console statement  no-console
+   56:13  warning  Unexpected console statement  no-console
+   64:13  warning  Unexpected console statement  no-console
+   71:9   warning  Unexpected console statement  no-console
+   75:9   warning  Unexpected console statement  no-console
+   92:13  warning  Unexpected console statement  no-console
+  112:13  warning  Unexpected console statement  no-console
+  117:9   warning  Unexpected console statement  no-console
+  118:9   warning  Unexpected console statement  no-console
+  119:9   warning  Unexpected console statement  no-console
+  120:9   warning  Unexpected console statement  no-console
+  121:9   warning  Unexpected console statement  no-console
+  122:9   warning  Unexpected console statement  no-console
+  127:9   warning  Unexpected console statement  no-console
+  134:5   warning  Unexpected console statement  no-console
+  169:13  warning  Unexpected console statement  no-console
+  177:9   warning  Unexpected console statement  no-console
+  192:9   warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\js\controllers\main-controller.js
+   27:7   warning  Unexpected console statement                    no-console
+   43:7   warning  Unexpected console statement                    no-console
+   51:7   warning  Unexpected console statement                    no-console
+   58:5   warning  Unexpected console statement                    no-console
+   98:5   warning  Unexpected console statement                    no-console
+  123:5   warning  Unexpected console statement                    no-console
+  155:5   warning  Unexpected console statement                    no-console
+  175:5   warning  Unexpected console statement                    no-console
+  191:5   warning  Unexpected console statement                    no-console
+  197:5   warning  Unexpected console statement                    no-console
+  216:7   warning  Unexpected console statement                    no-console
+  218:9   warning  Unexpected console statement                    no-console
+  225:7   warning  Unexpected console statement                    no-console
+  231:5   warning  Unexpected console statement                    no-console
+  247:5   warning  Unexpected console statement                    no-console
+  249:30  warning  'requestId' is assigned a value but never used  no-unused-vars
+  260:7   warning  Unexpected console statement                    no-console
+  266:5   warning  Unexpected console statement                    no-console
+  268:36  warning  'requestId' is assigned a value but never used  no-unused-vars
+  279:7   warning  Unexpected console statement                    no-console
+  286:29  warning  'event' is defined but never used               no-unused-vars
+  287:5   warning  Unexpected console statement                    no-console
+  313:28  warning  'event' is defined but never used               no-unused-vars
+  314:5   warning  Unexpected console statement                    no-console
+  341:5   warning  Unexpected console statement                    no-console
+  359:5   warning  Unexpected console statement                    no-console
+  390:5   warning  Unexpected console statement                    no-console
+  410:5   warning  Unexpected console statement                    no-console
+  418:31  warning  'event' is defined but never used               no-unused-vars
+  419:5   warning  Unexpected console statement                    no-console
+  433:7   warning  Unexpected console statement                    no-console
+  436:7   warning  Unexpected console statement                    no-console
+  449:5   warning  Unexpected console statement                    no-console
+  466:9   warning  Unexpected console statement                    no-console
+  480:7   warning  Unexpected console statement                    no-console
+  486:5   warning  Unexpected console statement                    no-console
+  514:7   warning  Unexpected console statement                    no-console
+  517:7   warning  Unexpected console statement                    no-console
+  555:5   warning  Unexpected console statement                    no-console
+  598:5   warning  Unexpected console statement                    no-console
+  614:7   warning  Unexpected console statement                    no-console
+  620:7   warning  Unexpected console statement                    no-console
+  626:5   warning  Unexpected console statement                    no-console
+  639:7   warning  Unexpected console statement                    no-console
+  645:7   warning  Unexpected console statement                    no-console
+  651:5   warning  Unexpected console statement                    no-console
+  664:7   warning  Unexpected console statement                    no-console
+  670:7   warning  Unexpected console statement                    no-console
+  676:5   warning  Unexpected console statement                    no-console
+  689:7   warning  Unexpected console statement                    no-console
+  707:7   warning  Unexpected console statement                    no-console
+  713:5   warning  Unexpected console statement                    no-console
+  737:7   warning  Unexpected console statement                    no-console
+
+E:\projects\pdfsmaller_frontend\js\integration\settings-integration.js
+   35:5   warning  Unexpected console statement  no-console
+  503:34  warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\js\main-integration.js
+   61:7   warning  Unexpected console statement                 no-console
+   63:7   warning  Unexpected console statement                 no-console
+  100:7   warning  Unexpected console statement                 no-console
+  176:7   warning  Unexpected console statement                 no-console
+  481:7   warning  Unexpected console statement                 no-console
+  612:7   warning  Unexpected console statement                 no-console
+  655:15  warning  'planId' is assigned a value but never used  no-unused-vars
+  683:3   error    Duplicate name 'handleAuthStateChange'       no-dupe-class-members
+  687:5   warning  Unexpected console statement                 no-console
+  704:5   warning  Unexpected console statement                 no-console
+  722:11  warning  Unexpected console statement                 no-console
+  750:7   warning  Unexpected console statement                 no-console
+  771:61  warning  'details' is defined but never used          no-unused-vars
+  774:11  warning  Unexpected console statement                 no-console
+  807:5   warning  Unexpected console statement                 no-console
+  891:9   warning  Unexpected console statement                 no-console
+
+E:\projects\pdfsmaller_frontend\js\main.js
+   45:11  error    '__DEV__' is not defined      no-undef
+   46:9   warning  Unexpected console statement  no-console
+   47:9   warning  Unexpected console statement  no-console
+  100:11  error    '__DEV__' is not defined      no-undef
+  101:9   warning  Unexpected console statement  no-console
+  165:9   warning  Unexpected console statement  no-console
+  166:9   warning  Unexpected console statement  no-console
+  181:9   warning  Unexpected console statement  no-console
+  182:9   warning  Unexpected console statement  no-console
+  267:7   warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\js\modules\app.js
+  43:13  warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\js\modules\auth-manager.js
+  285:7  warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\js\modules\compression-flow.js
+   73:32  error    'getTabNavigation' is not defined               no-undef
+   77:17  warning  Unexpected console statement                    no-console
+  126:48  error    'jobId' is not defined                          no-undef
+  376:15  warning  'level' is assigned a value but never used      no-unused-vars
+  382:15  warning  'useServer' is assigned a value but never used  no-unused-vars
+  392:20  warning  'event' is defined but never used               no-unused-vars
+  394:21  warning  'jobId' is assigned a value but never used      no-unused-vars
+
+E:\projects\pdfsmaller_frontend\js\modules\error-handling-integration.js
+   41:13  warning  Unexpected console statement                     no-console
+   44:13  warning  Unexpected console statement                     no-console
+   53:21  warning  'validFiles' is assigned a value but never used  no-unused-vars
+  427:9   warning  Unexpected console statement                     no-console
+  433:13  warning  Unexpected console statement                     no-console
+  438:13  warning  Unexpected console statement                     no-console
+
+E:\projects\pdfsmaller_frontend\js\modules\progress-results-integration.js
+    8:10  warning  'uiIntegrationService' is defined but never used  no-unused-vars
+  149:9   warning  Unexpected console statement                      no-console
+  191:9   warning  Unexpected console statement                      no-console
+  209:9   warning  Unexpected console statement                      no-console
+  216:19  warning  'statusText' is assigned a value but never used   no-unused-vars
+  230:27  warning  'result' is assigned a value but never used       no-unused-vars
+  233:19  warning  'statusText' is assigned a value but never used   no-unused-vars
+  244:9   warning  Unexpected console statement                      no-console
+  251:19  warning  'statusText' is assigned a value but never used   no-unused-vars
+  262:9   warning  Unexpected console statement                      no-console
+  274:9   warning  Unexpected console statement                      no-console
+  278:9   warning  Unexpected console statement                      no-console
+  282:17  warning  'url' is assigned a value but never used          no-unused-vars
+  283:9   warning  Unexpected console statement                      no-console
+  296:9   warning  Unexpected console statement                      no-console
+  309:9   warning  Unexpected console statement                      no-console
+  313:9   warning  Unexpected console statement                      no-console
+  498:27  warning  'results' is defined but never used               no-unused-vars
+  508:13  warning  Unexpected console statement                      no-console
+
+E:\projects\pdfsmaller_frontend\js\modules\tab-navigation.js
+   30:13  warning  Unexpected console statement                     no-console
+   33:13  warning  Unexpected console statement                     no-console
+   65:9   warning  Unexpected console statement                     no-console
+   66:9   warning  Unexpected console statement                     no-console
+  127:17  error    Unexpected lexical declaration in case block     no-case-declarations
+  156:13  warning  Unexpected console statement                     no-console
+  184:13  warning  Unexpected console statement                     no-console
+  192:15  warning  'fromButton' is assigned a value but never used  no-unused-vars
+  193:15  warning  'toButton' is assigned a value but never used    no-unused-vars
+
+E:\projects\pdfsmaller_frontend\js\services\ai-service-backup.js
+   27:25  error    Empty block statement                no-empty
+   69:13  warning  Unexpected console statement         no-console
+  115:13  warning  Unexpected console statement         no-console
+  170:13  warning  Unexpected console statement         no-console
+  265:13  warning  Unexpected console statement         no-console
+  310:13  warning  Unexpected console statement         no-console
+  362:13  warning  Unexpected console statement         no-console
+  390:13  warning  Unexpected console statement         no-console
+  467:47  warning  'options' is defined but never used  no-unused-vars
+
+E:\projects\pdfsmaller_frontend\js\services\ai-service-refactored.js
+  165:7  warning  Unexpected console statement  no-console
+  207:7  warning  Unexpected console statement  no-console
+  260:7  warning  Unexpected console statement  no-console
+  354:7  warning  Unexpected console statement  no-console
+  399:7  warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\js\services\ai-service.js
+  165:7  warning  Unexpected console statement  no-console
+  207:7  warning  Unexpected console statement  no-console
+  260:7  warning  Unexpected console statement  no-console
+  354:7  warning  Unexpected console statement  no-console
+  399:7  warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\js\services\analytics-service.js
+   37:13  warning  Unexpected console statement  no-console
+   78:13  warning  Unexpected console statement  no-console
+  116:13  error    'gtag' is not defined         no-undef
+  142:13  error    'gtag' is not defined         no-undef
+  207:13  error    'gtag' is not defined         no-undef
+  216:13  error    'dataLayer' is not defined    no-undef
+  256:13  warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\js\services\api-client.js
+    6:10  warning  'ErrorHandler' is defined but never used   no-unused-vars
+  102:40  warning  'decryptionKey' is defined but never used  no-unused-vars
+
+E:\projects\pdfsmaller_frontend\js\services\app-state.js
+  129:21  warning  Unexpected console statement  no-console
+  141:21  warning  Unexpected console statement  no-console
+  163:13  warning  Unexpected console statement  no-console
+  178:13  warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\js\services\cloud-integration-service.js
+  197:17  warning  Unexpected console statement  no-console
+  257:13  warning  Unexpected console statement  no-console
+  320:17  warning  Unexpected console statement  no-console
+  323:13  warning  Unexpected console statement  no-console
+  351:13  warning  Unexpected console statement  no-console
+  369:13  warning  Unexpected console statement  no-console
+  424:13  warning  Unexpected console statement  no-console
+  499:13  warning  Unexpected console statement  no-console
+  591:21  warning  Unexpected console statement  no-console
+  610:13  warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\js\services\cloud-storage-service-refactored.js
+  197:17  warning  Unexpected console statement  no-console
+  257:13  warning  Unexpected console statement  no-console
+  320:17  warning  Unexpected console statement  no-console
+  323:13  warning  Unexpected console statement  no-console
+  351:13  warning  Unexpected console statement  no-console
+  369:13  warning  Unexpected console statement  no-console
+  424:13  warning  Unexpected console statement  no-console
+  499:13  warning  Unexpected console statement  no-console
+  591:21  warning  Unexpected console statement  no-console
+  610:13  warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\js\services\compression-service.js
+   40:13  warning  Unexpected console statement    no-console
+  104:13  warning  Unexpected console statement    no-console
+  198:13  warning  Unexpected console statement    no-console
+  203:5   error    Duplicate name 'mergeSettings'  no-dupe-class-members
+  231:13  warning  Unexpected console statement    no-console
+  320:13  warning  Unexpected console statement    no-console
+
+E:\projects\pdfsmaller_frontend\js\services\conversion-service.js
+  105:57  warning  'analysis' is defined but never used  no-unused-vars
+  164:13  warning  Unexpected console statement          no-console
+  196:13  warning  Unexpected console statement          no-console
+  252:13  warning  Unexpected console statement          no-console
+  281:13  warning  Unexpected console statement          no-console
+
+E:\projects\pdfsmaller_frontend\js\services\enhanced-features-manager.js
+   74:13  warning  Unexpected console statement                                               no-console
+   82:13  warning  Unexpected console statement                                               no-console
+   84:13  warning  Unexpected console statement                                               no-console
+  300:13  warning  Unexpected console statement                                               no-console
+  353:13  warning  Unexpected console statement                                               no-console
+  469:30  error    Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+
+E:\projects\pdfsmaller_frontend\js\services\error-handling-service.js
+   50:13  warning  Unexpected console statement                  no-console
+   64:13  warning  Unexpected console statement                  no-console
+   78:17  warning  Unexpected console statement                  no-console
+  206:38  warning  'context' is assigned a value but never used  no-unused-vars
+  223:29  warning  'context' is assigned a value but never used  no-unused-vars
+  274:9   warning  Unexpected console statement                  no-console
+
+E:\projects\pdfsmaller_frontend\js\services\extended-features-index.js
+   92:13  warning  Unexpected console statement  no-console
+   94:13  warning  Unexpected console statement  no-console
+  149:9   warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\js\services\file-processing-service.js
+  533:21  warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\js\services\ocr-service-refactored.js
+  148:13  warning  Unexpected console statement          no-console
+  196:13  warning  Unexpected console statement          no-console
+  259:20  warning  'analysis' is defined but never used  no-unused-vars
+  292:13  warning  Unexpected console statement          no-console
+
+E:\projects\pdfsmaller_frontend\js\services\ocr-service.js
+  148:13  warning  Unexpected console statement          no-console
+  196:13  warning  Unexpected console statement          no-console
+  259:20  warning  'analysis' is defined but never used  no-unused-vars
+  292:13  warning  Unexpected console statement          no-console
+
+E:\projects\pdfsmaller_frontend\js\services\pdf-analyzer.js
+   18:31  error    'PDFLib' is not defined       no-undef
+   25:35  error    'PDFLib' is not defined       no-undef
+   31:13  warning  Unexpected console statement  no-console
+   39:13  warning  Unexpected console statement  no-console
+   60:13  warning  Unexpected console statement  no-console
+  107:13  warning  Unexpected console statement  no-console
+  150:13  warning  Unexpected console statement  no-console
+  184:13  warning  Unexpected console statement  no-console
+  209:13  warning  Unexpected console statement  no-console
+  228:13  warning  Unexpected console statement  no-console
+  250:13  warning  Unexpected console statement  no-console
+  272:13  warning  Unexpected console statement  no-console
+  329:13  warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\js\services\security-service.js
+    6:10  warning  'ErrorHandler' is defined but never used  no-unused-vars
+  269:13  warning  Unexpected console statement              no-console
+
+E:\projects\pdfsmaller_frontend\js\services\settings-sync-service.js
+   79:17  warning  Unexpected console statement  no-console
+   91:13  warning  Unexpected console statement  no-console
+  115:13  warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\js\services\storage-service.js
+   44:13  warning  Unexpected console statement  no-console
+   72:13  warning  Unexpected console statement  no-console
+  128:13  warning  Unexpected console statement  no-console
+  154:13  warning  Unexpected console statement  no-console
+  730:13  warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\js\services\storage-service.test.js
+  7:10  warning  'ErrorHandler' is defined but never used  no-unused-vars
+
+E:\projects\pdfsmaller_frontend\js\services\ui-integration-service.js
+    8:10  warning  'ErrorHandler' is defined but never used        no-unused-vars
+  201:21  warning  Unexpected console statement                    no-console
+  249:21  warning  Unexpected console statement                    no-console
+  315:17  warning  'jobId' is assigned a value but never used      no-unused-vars
+  338:17  warning  'jobId' is assigned a value but never used      no-unused-vars
+  358:17  warning  'jobId' is assigned a value but never used      no-unused-vars
+  394:9   warning  Unexpected console statement                    no-console
+  405:9   warning  Unexpected console statement                    no-console
+  410:9   warning  Unexpected console statement                    no-console
+  603:13  warning  Unexpected console statement                    no-console
+  606:13  warning  Unexpected console statement                    no-console
+  608:13  warning  Unexpected console statement                    no-console
+  678:27  warning  'results' is defined but never used             no-unused-vars
+  693:5   error    Duplicate name 'handleFileCompressionStart'     no-dupe-class-members
+  707:5   error    Duplicate name 'handleFileCompressionComplete'  no-dupe-class-members
+  716:9   warning  Unexpected console statement                    no-console
+  734:5   error    Duplicate name 'handleFileCompressionError'     no-dupe-class-members
+  738:9   warning  Unexpected console statement                    no-console
+  754:5   error    Duplicate name 'getProgressStatusText'          no-dupe-class-members
+
+E:\projects\pdfsmaller_frontend\js\test\error-handling-test.js
+   17:13  warning  Unexpected console statement                    no-console
+   24:9   warning  Unexpected console statement                    no-console
+   55:13  warning  Unexpected console statement                    no-console
+   63:9   warning  Unexpected console statement                    no-console
+   85:9   warning  Unexpected console statement                    no-console
+   89:19  warning  'successId' is assigned a value but never used  no-unused-vars
+   92:19  warning  'errorId' is assigned a value but never used    no-unused-vars
+   95:19  warning  'warningId' is assigned a value but never used  no-unused-vars
+   98:19  warning  'infoId' is assigned a value but never used     no-unused-vars
+  122:9   warning  Unexpected console statement                    no-console
+  135:38  warning  Unexpected console statement                    no-console
+  163:9   warning  Unexpected console statement                    no-console
+  201:9   warning  Unexpected console statement                    no-console
+  244:9   warning  Unexpected console statement                    no-console
+  256:21  warning  Unexpected console statement                    no-console
+  297:9   warning  Unexpected console statement                    no-console
+  330:9   warning  Unexpected console statement                    no-console
+  373:9   warning  Unexpected console statement                    no-console
+  381:9   warning  Unexpected console statement                    no-console
+  382:9   warning  Unexpected console statement                    no-console
+  383:9   warning  Unexpected console statement                    no-console
+  384:9   warning  Unexpected console statement                    no-console
+  385:9   warning  Unexpected console statement                    no-console
+  388:13  warning  Unexpected console statement                    no-console
+  391:31  warning  Unexpected console statement                    no-console
+
+E:\projects\pdfsmaller_frontend\js\utils\error-handler.js
+  7:23  error  Parsing error: Unexpected token =
+
+E:\projects\pdfsmaller_frontend\js\utils\file-validator.js
+   73:47  warning  'options' is defined but never used                                no-unused-vars
+  272:13  error    Unexpected control character(s) in regular expression: \x00        no-control-regex
+  273:13  error    Unexpected control character(s) in regular expression: \x01, \x1f  no-control-regex
+
+E:\projects\pdfsmaller_frontend\js\utils\format-helper.js
+  338:25  error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+
+E:\projects\pdfsmaller_frontend\js\utils\mobile-touch-handler.js
+  71:50  warning  'e' is defined but never used  no-unused-vars
+  86:51  warning  'e' is defined but never used  no-unused-vars
+
+E:\projects\pdfsmaller_frontend\js\utils\module-loader.js
+   54:17  error    '__DEV__' is not defined      no-undef
+   55:17  warning  Unexpected console statement  no-console
+   93:25  error    '__DEV__' is not defined      no-undef
+   94:25  warning  Unexpected console statement  no-console
+   98:25  error    '__DEV__' is not defined      no-undef
+   99:25  warning  Unexpected console statement  no-console
+  129:21  warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\js\utils\session-preference-manager.js
+  20:35  error  Parsing error: Unexpected token =
+
+E:\projects\pdfsmaller_frontend\scripts\build.js
+    9:43  warning  'basename' is defined but never used  no-unused-vars
+   25:5   warning  Unexpected console statement          no-console
+   44:7   warning  Unexpected console statement          no-console
+   45:7   warning  Unexpected console statement          no-console
+   48:7   warning  Unexpected console statement          no-console
+   57:7   warning  Unexpected console statement          no-console
+   64:5   warning  Unexpected console statement          no-console
+   78:7   warning  Unexpected console statement          no-console
+  101:5   warning  Unexpected console statement          no-console
+  140:7   warning  Unexpected console statement          no-console
+  143:7   warning  Unexpected console statement          no-console
+  153:5   warning  Unexpected console statement          no-console
+  159:7   warning  Unexpected console statement          no-console
+  161:7   warning  Unexpected console statement          no-console
+  183:5   warning  Unexpected console statement          no-console
+  200:5   warning  Unexpected console statement          no-console
+
+E:\projects\pdfsmaller_frontend\scripts\dev-server.js
+   35:7  warning  Unexpected console statement  no-console
+   39:9  warning  Unexpected console statement  no-console
+   55:7  warning  Unexpected console statement  no-console
+   60:7  warning  Unexpected console statement  no-console
+  132:7  warning  Unexpected console statement  no-console
+  206:7  warning  Unexpected console statement  no-console
+  207:7  warning  Unexpected console statement  no-console
+  208:7  warning  Unexpected console statement  no-console
+  209:7  warning  Unexpected console statement  no-console
+  210:7  warning  Unexpected console statement  no-console
+  211:7  warning  Unexpected console statement  no-console
+  212:7  warning  Unexpected console statement  no-console
+  213:7  warning  Unexpected console statement  no-console
+  214:7  warning  Unexpected console statement  no-console
+  215:7  warning  Unexpected console statement  no-console
+  216:7  warning  Unexpected console statement  no-console
+  217:7  warning  Unexpected console statement  no-console
+  218:7  warning  Unexpected console statement  no-console
+  219:7  warning  Unexpected console statement  no-console
+  220:7  warning  Unexpected console statement  no-console
+  221:7  warning  Unexpected console statement  no-console
+  222:7  warning  Unexpected console statement  no-console
+  223:7  warning  Unexpected console statement  no-console
+  232:5  warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\scripts\serve.js
+  136:3  error  Parsing error: Cannot use keyword 'await' outside an async function
+
+E:\projects\pdfsmaller_frontend\scripts\test-runner.js
+    8:19  warning  'readFile' is defined but never used  no-unused-vars
+   30:5   warning  Unexpected console statement          no-console
+   44:7   warning  Unexpected console statement          no-console
+   74:9   warning  Unexpected console statement          no-console
+   78:5   warning  Unexpected console statement          no-console
+   87:9   warning  Unexpected console statement          no-console
+  106:7   warning  Unexpected console statement          no-console
+  110:7   warning  Unexpected console statement          no-console
+  214:5   warning  Unexpected console statement          no-console
+  215:5   warning  Unexpected console statement          no-console
+  216:5   warning  Unexpected console statement          no-console
+  217:5   warning  Unexpected console statement          no-console
+  220:7   warning  Unexpected console statement          no-console
+  222:7   warning  Unexpected console statement          no-console
+  227:5   warning  Unexpected console statement          no-console
+  240:7   warning  Unexpected console statement          no-console
+  251:7   warning  Unexpected console statement          no-console
+
+E:\projects\pdfsmaller_frontend\static\js\app.js
+  143:13  warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\static\js\interface.js
+   70:9   warning  Unexpected console statement                     no-console
+  135:10  warning  'toggleAuthMode' is defined but never used       no-unused-vars
+  141:10  warning  'logout' is defined but never used               no-unused-vars
+  143:5   warning  Unexpected console statement                     no-console
+  146:10  warning  'handlePlanSelection' is defined but never used  no-unused-vars
+  147:5   warning  Unexpected console statement                     no-console
+
+E:\projects\pdfsmaller_frontend\static\js\intergration.js
+    6:5   warning  Unexpected console statement          no-console
+    7:5   error    'showNotification' is not defined     no-undef
+   11:5   warning  Unexpected console statement          no-console
+   12:5   error    'showNotification' is not defined     no-undef
+   16:35  error    'AuthManager' is not defined          no-undef
+   30:13  warning  Unexpected console statement          no-console
+   44:13  warning  Unexpected console statement          no-console
+   50:42  error    'CompressionManager' is not defined   no-undef
+   65:17  error    'showNotification' is not defined     no-undef
+   86:14  error    'authManager' is not defined          no-undef
+  108:13  warning  Unexpected console statement          no-console
+  115:13  error    'showNotification' is not defined     no-undef
+  123:19  error    'authManager' is not defined          no-undef
+  125:13  error    'showNotification' is not defined     no-undef
+  128:13  error    'showNotification' is not defined     no-undef
+  135:13  error    'showNotification' is not defined     no-undef
+  140:19  error    'authManager' is not defined          no-undef
+  142:13  error    'showNotification' is not defined     no-undef
+  145:13  error    'showNotification' is not defined     no-undef
+  153:18  error    'appState' is not defined             no-undef
+  197:41  error    'showAuthModal' is not defined        no-undef
+  200:40  error    'showAuthModal' is not defined        no-undef
+  206:10  error    'appState' is not defined             no-undef
+  207:9   error    'showAuthModal' is not defined        no-undef
+  212:15  error    'subscriptionManager' is not defined  no-undef
+  225:15  error    'subscriptionManager' is not defined  no-undef
+  237:22  error    'authManager' is not defined          no-undef
+  255:23  error    'formatFileSize' is not defined       no-undef
+  266:9   error    'appState' is not defined             no-undef
+  267:9   error    'updateFileInfo' is not defined       no-undef
+  274:9   error    'showNotification' is not defined     no-undef
+  280:10  error    'authManager' is not defined          no-undef
+  281:9   error    'showNotification' is not defined     no-undef
+  282:9   error    'switchTab' is not defined            no-undef
+  294:33  error    'appState' is not defined             no-undef
+  307:33  error    'showNotification' is not defined     no-undef
+  311:9   error    'appState' is not defined             no-undef
+  313:9   error    'showNotification' is not defined     no-undef
+  323:9   error    'appState' is not defined             no-undef
+  332:26  error    'appState' is not defined             no-undef
+  341:26  error    'formatFileSize' is not defined       no-undef
+  350:5   error    'appState' is not defined             no-undef
+  358:31  error    'AppState' is not defined             no-undef
+  359:32  error    'APIClient' is not defined            no-undef
+  360:54  error    'appState' is not defined             no-undef
+  360:64  error    'apiClient' is not defined            no-undef
+  361:68  error    'appState' is not defined             no-undef
+  361:78  error    'apiClient' is not defined            no-undef
+  362:62  error    'appState' is not defined             no-undef
+  362:72  error    'apiClient' is not defined            no-undef
+  363:37  error    'NavigationMenu' is not defined       no-undef
+  366:13  error    'apiClient' is not defined            no-undef
+  367:19  error    'authManager' is not defined          no-undef
+  374:9   error    'switchTab' is not defined            no-undef
+  377:9   warning  Unexpected console statement          no-console
+  380:9   warning  Unexpected console statement          no-console
+  381:9   error    'showNotification' is not defined     no-undef
+  434:18  error    'authManager' is not defined          no-undef
+  435:17  error    'showNotification' is not defined     no-undef
+  436:17  error    'switchTab' is not defined            no-undef
+  444:17  error    'authManager' is not defined          no-undef
+  509:38  error    'authManager' is not defined          no-undef
+  511:17  error    'showNotification' is not defined     no-undef
+  512:17  error    'switchTab' is not defined            no-undef
+  521:18  error    'appState' is not defined             no-undef
+  533:38  error    'compressionManager' is not defined   no-undef
+  533:72  error    'appState' is not defined             no-undef
+  536:77  error    'formatFileSize' is not defined       no-undef
+  537:79  error    'formatFileSize' is not defined       no-undef
+  542:17  error    'showNotification' is not defined     no-undef
+  545:17  error    'showNotification' is not defined     no-undef
+  557:17  error    'appState' is not defined             no-undef
+  568:38  error    'compressionManager' is not defined   no-undef
+  568:70  error    'appState' is not defined             no-undef
+  575:17  error    'showNotification' is not defined     no-undef
+  578:17  error    'showNotification' is not defined     no-undef
+  590:28  error    'appState' is not defined             no-undef
+  592:57  error    'appState' is not defined             no-undef
+  600:28  error    'appState' is not defined             no-undef
+  639:27  error    'authManager' is not defined          no-undef
+  640:21  error    'showNotification' is not defined     no-undef
+  642:27  error    'authManager' is not defined          no-undef
+  643:21  error    'showNotification' is not defined     no-undef
+  646:17  error    'hideAuthModal' is not defined        no-undef
+  650:17  error    'showNotification' is not defined     no-undef
+  666:38  error    'authManager' is not defined          no-undef
+  668:17  error    'showNotification' is not defined     no-undef
+  669:17  error    'switchTab' is not defined            no-undef
+  677:13  error    'hideAuthModal' is not defined        no-undef
+  683:13  error    'hideAuthModal' is not defined        no-undef
+  710:5   error    'appState' is not defined             no-undef
+  711:5   error    'appState' is not defined             no-undef
+  727:5   error    'appState' is not defined             no-undef
+  728:5   error    'appState' is not defined             no-undef
+  747:20  error    'switchTab' is not defined            no-undef
+  748:24  error    'showAuthModal' is not defined        no-undef
+  749:24  error    'hideAuthModal' is not defined        no-undef
+  750:25  error    'toggleAuthMode' is not defined       no-undef
+  751:23  error    'authManager' is not defined          no-undef
+  770:9   error    'authManager' is not defined          no-undef
+  770:24  error    'authManager' is not defined          no-undef
+  770:53  error    'apiClient' is not defined            no-undef
+  772:19  error    'authManager' is not defined          no-undef
+  774:13  warning  Unexpected console statement          no-console
+
+E:\projects\pdfsmaller_frontend\static\js\navigation.js
+   4:7   warning  'NavigationMenu' is defined but never used  no-unused-vars
+  18:13  warning  Unexpected console statement                no-console
+
+E:\projects\pdfsmaller_frontend\test\setup.js
+   75:12  error    'vi' is not defined           no-undef
+   76:12  error    'vi' is not defined           no-undef
+   77:15  error    'vi' is not defined           no-undef
+   78:10  error    'vi' is not defined           no-undef
+   80:8   error    'vi' is not defined           no-undef
+   88:16  error    'vi' is not defined           no-undef
+   91:30  error    'vi' is not defined           no-undef
+   92:30  error    'vi' is not defined           no-undef
+  125:11  error    'vi' is not defined           no-undef
+  126:13  error    'vi' is not defined           no-undef
+  128:12  error    'vi' is not defined           no-undef
+  129:8   error    'vi' is not defined           no-undef
+  133:30  warning  Unexpected console statement  no-console
+  134:1   warning  Unexpected console statement  no-console
+
+E:\projects\pdfsmaller_frontend\validate-architecture.js
+   17:9   warning  Unexpected console statement  no-console
+   33:9   warning  Unexpected console statement  no-console
+   84:9   warning  Unexpected console statement  no-console
+  158:9   warning  Unexpected console statement  no-console
+  196:9   warning  Unexpected console statement  no-console
+  197:9   warning  Unexpected console statement  no-console
+  198:9   warning  Unexpected console statement  no-console
+  201:13  warning  Unexpected console statement  no-console
+  202:47  warning  Unexpected console statement  no-console
+  206:13  warning  Unexpected console statement  no-console
+  207:46  warning  Unexpected console statement  no-console
+  211:13  warning  Unexpected console statement  no-console
+  212:50  warning  Unexpected console statement  no-console
+  215:9   warning  Unexpected console statement  no-console
+  216:9   warning  Unexpected console statement  no-console
+  217:9   warning  Unexpected console statement  no-console
+  218:9   warning  Unexpected console statement  no-console
+  219:9   warning  Unexpected console statement  no-console
+  223:9   warning  Unexpected console statement  no-console
+  226:13  warning  Unexpected console statement  no-console
+  227:13  warning  Unexpected console statement  no-console
+  229:13  warning  Unexpected console statement  no-console
+  230:13  warning  Unexpected console statement  no-console
+  233:9   warning  Unexpected console statement  no-console
+  239:28  warning  Unexpected console statement  no-console
+
+Γ£û 617 problems (145 errors, 472 warnings)
+

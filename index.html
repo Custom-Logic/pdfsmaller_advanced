@@ -100,6 +100,9 @@
     <link rel="stylesheet" href="static/css/components.css">
     <link rel="stylesheet" href="static/css/error-handling.css">
     <link rel="stylesheet" href="static/css/file-manager.css">
+    <link rel="stylesheet" href="static/css/file-uploader.css">
+    <link rel="stylesheet" href="static/css/authmodal.css">
+
     
     <!-- Settings Light Theme - Remove Dark Backgrounds -->
     <!-- <link rel="stylesheet" href="static/css/settings-light-theme.css"> -->
@@ -133,25 +136,47 @@
     </header>
 
     <!-- Navigation Menu -->
-    <nav class="nav-menu">
-        <div class="nav-menu-overlay"></div>
-        <div class="nav-menu-content">
-            <nav class="nav-menu-list">
-                <a href="#" class="nav-menu-link" data-section="compress">Compress</a>
-                <a href="#" class="nav-menu-link" data-section="convert">Convert</a>
-                <a href="#" class="nav-menu-link" data-section="ocr">OCR</a>
-                <a href="#" class="nav-menu-link" data-section="ai_tools">AI Tools</a>
-                <a href="#" class="nav-menu-link" data-section="files">Files</a>
-                <a href="#" class="nav-menu-link" data-section="settings">Settings</a>
-                <a href="#" class="nav-menu-link" data-section="pricing">Pricing</a>
-            </nav>
-            <div class="nav-menu-divider"></div>
-            <!-- Auth Panel Component -->
-            <div class="nav-auth-section">
-                <auth-panel id="navAuthPanel" mode="login"></auth-panel>
+<!-- Navigation Menu -->
+<nav class="nav-menu">
+    <div class="nav-menu-overlay"></div>
+    <div class="nav-menu-content">
+        <nav class="nav-menu-list">
+            <a href="#" class="nav-menu-link" data-section="compress">Compress</a>
+            <a href="#" class="nav-menu-link" data-section="convert">Convert</a>
+            <a href="#" class="nav-menu-link" data-section="ocr">OCR</a>
+            <a href="#" class="nav-menu-link" data-section="ai_tools">AI Tools</a>
+            <a href="#" class="nav-menu-link" data-section="files">Files</a>
+            <a href="#" class="nav-menu-link" data-section="settings">Settings</a>
+            <a href="#" class="nav-menu-link" data-section="pricing">Pricing</a>
+        </nav>
+        <div class="nav-menu-divider"></div>
+        
+        <!-- Updated Auth Section - Simple Links -->
+        <div class="nav-auth-section">
+            <div class="auth-links" id="guestAuthSection">
+                <a href="#" class="nav-menu-link auth-link" data-action="show-login">Sign In</a>
+                <a href="#" class="nav-menu-link auth-link" data-action="show-register">Create Account</a>
+            </div>
+            <div class="auth-links hidden" id="userAuthSection">
+                <div class="user-info-nav">
+                    <span class="user-name-nav" id="userNameNav"></span>
+                    <span class="user-plan-nav" id="userPlanNav"></span>
+                </div>
+                <a href="#" class="nav-menu-link auth-link" data-action="show-profile">Profile</a>
+                <a href="#" class="nav-menu-link auth-link logout-link" data-action="logout">Sign Out</a>
             </div>
         </div>
-    </nav>
+    </div>
+</nav>
+
+<!-- Auth Modal (will be shown when login/register links are clicked) -->
+<div id="authModal" class="auth-modal hidden">
+    <div class="auth-modal-overlay" data-action="close-auth-modal"></div>
+    <div class="auth-modal-content">
+        <button class="auth-modal-close" data-action="close-auth-modal">&times;</button>
+        <auth-panel id="modalAuthPanel"></auth-panel>
+    </div>
+</div>
 
     <!-- Main Application Container -->
     <main class="main-content">
@@ -330,7 +355,7 @@
     <!-- Notification System -->
     <notification-system id="notificationSystem"></notification-system>
 
-    <!-- Component Styles
+    
     <style>
         /* Loading Overlay */
         .loading-overlay {
@@ -825,7 +850,7 @@
                 border: 1px solid var(--gray-300);
             }
         }
-    </style> -->
+    </style> 
 
     <!-- Component Scripts -->
     <script type="module">

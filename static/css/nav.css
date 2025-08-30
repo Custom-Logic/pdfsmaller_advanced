@@ -1,4 +1,4 @@
-/* Navigation Menu Styles */
+/* Navigation Menu Styles - Modified for new structure */
 .nav-menu {
     position: fixed;
     top: 0;
@@ -11,6 +11,7 @@
     transition: visibility 0.3s ease, opacity 0.3s ease;
 }
 
+.nav-menu.active,
 .nav-menu[aria-hidden="false"],
 .nav-menu.nav-menu-open {
     visibility: visible;
@@ -39,8 +40,12 @@
     transition: transform 0.3s ease;
     overflow-y: auto;
     padding: 20px 0;
+    display: flex;
+    flex-direction: column;
 }
 
+.nav-menu.active .nav-menu-content,
+.nav-menu[aria-hidden="false"] .nav-menu-content,
 .nav-menu.nav-menu-open .nav-menu-content {
     transform: translateX(0);
 }
@@ -49,10 +54,8 @@
     list-style: none;
     margin: 0;
     padding: 0;
-}
-
-.nav-menu-item {
-    border-bottom: 1px solid #f3f4f6;
+    display: flex;
+    flex-direction: column;
 }
 
 .nav-menu-link {
@@ -63,6 +66,7 @@
     text-decoration: none;
     transition: background-color 0.2s ease, color 0.2s ease;
     font-weight: 500;
+    border-bottom: 1px solid #f3f4f6;
 }
 
 .nav-menu-link:hover,
@@ -80,13 +84,20 @@
 }
 
 .nav-menu-divider {
-    height: 8px;
-    background-color: #f9fafb;
-    margin: 8px 0;
+    height: 1px;
+    background-color: #f3f4f6;
+    margin: 16px 0;
 }
 
-/* Hamburger Menu Styles */
-.hamburger-menu {
+/* Navigation Auth Section */
+.nav-auth-section {
+    padding: 16px 24px;
+    margin-top: auto;
+    border-top: 1px solid #f3f4f6;
+}
+
+/* Hamburger Menu Toggle Button */
+.sidenav-toggle {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -101,16 +112,16 @@
     transition: background-color 0.2s ease;
 }
 
-.hamburger-menu:hover {
+.sidenav-toggle:hover {
     background-color: rgba(0, 0, 0, 0.05);
 }
 
-.hamburger-menu:focus {
+.sidenav-toggle:focus {
     outline: 2px solid #667eea;
     outline-offset: 2px;
 }
 
-.hamburger-line {
+.sidenav-toggle .hamburger-line {
     width: 24px;
     height: 2px;
     background-color: #374151;
@@ -119,42 +130,48 @@
     transform-origin: center;
 }
 
-.hamburger-line:not(:last-child) {
+.sidenav-toggle .hamburger-line:not(:last-child) {
     margin-bottom: 4px;
 }
 
-/* Hamburger animation */
-.hamburger-active .hamburger-line:nth-child(1) {
+/* Hamburger animation when menu is active */
+.sidenav-toggle.active .hamburger-line:nth-child(1) {
     transform: translateY(6px) rotate(45deg);
 }
 
-.hamburger-active .hamburger-line:nth-child(2) {
+.sidenav-toggle.active .hamburger-line:nth-child(2) {
     opacity: 0;
     transform: translateX(-10px);
 }
 
-.hamburger-active .hamburger-line:nth-child(3) {
+.sidenav-toggle.active .hamburger-line:nth-child(3) {
     transform: translateY(-6px) rotate(-45deg);
 }
 
-/* Authentication Section Styles */
-.auth-section {
-    margin-top: auto;
-    border-top: 1px solid #f3f4f6;
-    padding-top: 16px;
+/* Update JavaScript to toggle active class on button too */
+.nav-menu.active ~ .sidenav-toggle,
+.sidenav-toggle[aria-expanded="true"] {
+    /* This will target the toggle button when menu is open */
 }
 
-.user-section {
-    padding: 16px 24px;
+/* Authentication Section Styles - Updated for nav */
+.nav-auth-section .auth-section {
+    margin-top: 0;
+    border-top: none;
+    padding-top: 0;
 }
 
-.user-info {
+.nav-auth-section .user-section {
+    padding: 0;
+}
+
+.nav-auth-section .user-info {
     display: flex;
     align-items: center;
     margin-bottom: 16px;
 }
 
-.user-avatar-nav {
+.nav-auth-section .user-avatar-nav {
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -168,11 +185,11 @@
     margin-right: 12px;
 }
 
-.user-details {
+.nav-auth-section .user-details {
     flex: 1;
 }
 
-.user-name {
+.nav-auth-section .user-name {
     display: block;
     font-weight: 600;
     color: #111827;
@@ -180,14 +197,14 @@
     line-height: 1.2;
 }
 
-.user-plan {
+.nav-auth-section .user-plan {
     display: block;
     font-size: 12px;
     color: #6b7280;
     margin-top: 2px;
 }
 
-.pro-badge {
+.nav-auth-section .pro-badge {
     display: inline-block;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
@@ -198,42 +215,37 @@
     margin-left: 4px;
 }
 
-.auth-link,
-.premium-link {
+.nav-auth-section .auth-link,
+.nav-auth-section .premium-link {
     color: #667eea;
     font-weight: 600;
 }
 
-.premium-link {
+.nav-auth-section .premium-link {
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
 }
 
-.logout-link {
+.nav-auth-section .logout-link {
     color: #ef4444;
 }
 
-.logout-link:hover {
+.nav-auth-section .logout-link:hover {
     background-color: rgba(239, 68, 68, 0.05);
     color: #dc2626;
-}
-
-/* Screen reader only content */
-.sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
 }
 
 /* Responsive adjustments */
 @media (max-width: 480px) {
     .nav-menu-content {
         width: 100%;
+    }
+    
+    .nav-menu-link {
+        padding: 14px 20px;
+    }
+    
+    .nav-auth-section {
+        padding: 16px 20px;
     }
 }
 
@@ -243,161 +255,68 @@
     outline-offset: -2px;
 }
 
-/* Hidden utility class */
-.hidden {
-    display: none !important;
-}
-
-/* Notification styles */
-.notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 12px 16px;
-    border-radius: 6px;
-    color: white;
-    font-weight: 500;
-    z-index: 10000;
-    transform: translateX(100%);
-    transition: transform 0.3s ease;
-    max-width: 300px;
-    font-size: 14px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.notification.success {
-    background-color: #10b981;
-}
-
-.notification.error {
-    background-color: #ef4444;
-}
-
-.notification.warning {
-    background-color: #f59e0b;
-}
-
-.notification.info {
-    background-color: #3b82f6;
-}
-
-/* Modal improvements */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1001;
-}
-
-.modal {
-    background: white;
-    border-radius: 8px;
-    padding: 24px;
-    width: 90%;
-    max-width: 400px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-/* Progress bar improvements */
-.progress-container {
-    margin: 20px 0;
-    display: none;
-}
-
-.progress-label {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #374151;
-}
-
-.progress-bar-container {
-    width: 100%;
-    height: 8px;
-    background-color: #f3f4f6;
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.progress-bar {
-    height: 100%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 4px;
-    transition: width 0.3s ease;
-    width: 0;
-}
-
-/* File info improvements */
-.file-info {
-    display: none;
-    align-items: center;
-    padding: 16px;
-    background-color: #f9fafb;
-    border-radius: 8px;
-    border: 1px solid #f3f4f6;
-    margin: 16px 0;
-}
-
-.file-icon {
-    width: 40px;
-    height: 40px;
-    margin-right: 12px;
-}
-
-.file-details h4 {
-    margin: 0 0 4px 0;
-    color: #111827;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.file-details p {
-    margin: 0;
-    color: #6b7280;
-    font-size: 12px;
-}
-
-/* Upload area improvements */
-.upload-area {
-    border: 2px dashed #d1d5db;
-    border-radius: 8px;
-    padding: 40px 20px;
-    text-align: center;
+/* Update the JavaScript to handle the new structure */
+.nav-menu-link[data-section] {
     cursor: pointer;
-    transition: all 0.2s ease;
-    background-color: #fafafa;
 }
 
-.upload-area:hover,
-.upload-area.dragover {
-    border-color: #667eea;
-    background-color: rgba(102, 126, 234, 0.05);
+/* Ensure auth-panel component styles work in nav */
+.nav-auth-section auth-panel {
+    display: block;
+    width: 100%;
 }
 
-.upload-icon {
-    width: 48px;
-    height: 48px;
-    margin: 0 auto 16px;
-    opacity: 0.6;
+.nav-auth-section .auth-form {
+    margin: 0;
+    padding: 0;
 }
 
-.upload-text {
-    font-size: 16px;
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 4px;
+.nav-auth-section .form-group {
+    margin-bottom: 12px;
 }
 
-.upload-subtext {
-    font-size: 14px;
-    color: #6b7280;
+.nav-auth-section .btn {
+    width: 100%;
+    margin-top: 8px;
+}
+
+/* Mobile optimization */
+@media (max-width: 768px) {
+    .nav-menu-content {
+        width: 280px;
+    }
+    
+    .sidenav-toggle {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .sidenav-toggle .hamburger-line {
+        width: 20px;
+        height: 2px;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .nav-menu-link {
+        border-bottom-color: #000;
+    }
+    
+    .nav-menu-divider {
+        background-color: #000;
+    }
+    
+    .nav-auth-section {
+        border-top-color: #000;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .nav-menu,
+    .nav-menu-content,
+    .sidenav-toggle .hamburger-line {
+        transition: none;
+    }
 }

@@ -6,36 +6,37 @@
 import { BaseComponent } from './base-component.js';
 
 export class AuthPanel extends BaseComponent {
-    constructor() {
-        super();
-        this.currentMode = 'login'; // 'login' or 'register'
-        this.isAuthenticated = false;
-        this.currentUser = null;
-        this.onAuthStateChange = null;
-    }
+  constructor() {
+    super();
+    this.currentMode = 'login';
+    this.isAuthenticated = false;
+    this.currentUser = null;
+    this.showSocialAuth = true; // Add this
+    this.onAuthStateChange = null;
+  }
 
-    static get observedAttributes() {
-        return ['mode', 'authenticated', 'user'];
-    }
+  static get observedAttributes() {
+    return ['mode', 'authenticated', 'user'];
+  }
 
-    init() {
-        this.setState({
-            currentMode: this.getProp('mode', 'login'),
-            isAuthenticated: this.getProp('authenticated', false),
-            currentUser: this.getProp('user', null)
-        });
-    }
+  init() {
+    this.setState({
+      currentMode: this.getProp('mode', 'login'),
+      isAuthenticated: this.getProp('authenticated', false),
+      currentUser: this.getProp('user', null)
+    });
+  }
 
-    getTemplate() {
-        if (this.getState('isAuthenticated')) {
-            return this.getUserProfileTemplate();
-        }
-        return this.getAuthFormTemplate();
+  getTemplate() {
+    if (this.getState('isAuthenticated')) {
+      return this.getUserProfileTemplate();
     }
+    return this.getAuthFormTemplate();
+  }
 
-    getUserProfileTemplate() {
-        const user = this.getState('currentUser');
-        return `
+  getUserProfileTemplate() {
+    const user = this.getState('currentUser');
+    return `
             <div class="auth-panel user-profile">
                 <div class="profile-header">
                     <div class="user-avatar">
@@ -74,11 +75,11 @@ export class AuthPanel extends BaseComponent {
                 </div>
             </div>
         `;
-    }
+  }
 
-    getAuthFormTemplate() {
-        const isLogin = this.getState('currentMode') === 'login';
-        return `
+  getAuthFormTemplate() {
+    const isLogin = this.getState('currentMode') === 'login';
+    return `
             <div class="auth-panel auth-form">
                 <div class="auth-header">
                     <h2 class="auth-title">${isLogin ? 'Sign In' : 'Create Account'}</h2>
@@ -137,7 +138,7 @@ export class AuthPanel extends BaseComponent {
                     
                     <div class="form-footer">
                         <p class="switch-mode-text">
-                            ${isLogin ? "Don't have an account?" : "Already have an account?"}
+                            ${isLogin ? "Don't have an account?" : 'Already have an account?'}
                             <button type="button" class="switch-mode-btn" data-action="switch-mode">
                                 ${isLogin ? 'Sign Up' : 'Sign In'}
                             </button>
@@ -161,10 +162,14 @@ export class AuthPanel extends BaseComponent {
                 </div>
             </div>
         `;
-    }
+  }
+  setShowSocialAuth(show) {
+    this.showSocialAuth = show;
+    this.scheduleRender();
+  }
 
-    getStyles() {
-        return `
+  getStyles() {
+    return `
             :host {
                 display: block;
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -419,124 +424,124 @@ export class AuthPanel extends BaseComponent {
                 }
             }
         `;
-    }
+  }
 
-    setupEventListeners() {
-        // Form submission
-        this.addEventListener(this.$('#authForm'), 'submit', this.handleFormSubmit.bind(this));
+  setupEventListeners() {
+    // Form submission
+    this.addEventListener(this.$('#authForm'), 'submit', this.handleFormSubmit.bind(this));
         
-        // Mode switching
-        this.addEventListener(this.shadowRoot, 'click', (event) => {
-            if (event.target.matches('[data-action="switch-mode"]')) {
-                this.switchMode();
-            } else if (event.target.matches('[data-action="logout"]')) {
-                this.handleLogout();
-            } else if (event.target.matches('[data-action="edit-profile"]')) {
-                this.handleEditProfile();
-            } else if (event.target.matches('[data-action="manage-subscription"]')) {
-                this.handleManageSubscription();
-            } else if (event.target.matches('[data-action="google-auth"]')) {
-                this.handleGoogleAuth();
-            }
-        });
-    }
+    // Mode switching
+    this.addEventListener(this.shadowRoot, 'click', (event) => {
+      if (event.target.matches('[data-action="switch-mode"]')) {
+        this.switchMode();
+      } else if (event.target.matches('[data-action="logout"]')) {
+        this.handleLogout();
+      } else if (event.target.matches('[data-action="edit-profile"]')) {
+        this.handleEditProfile();
+      } else if (event.target.matches('[data-action="manage-subscription"]')) {
+        this.handleManageSubscription();
+      } else if (event.target.matches('[data-action="google-auth"]')) {
+        this.handleGoogleAuth();
+      }
+    });
+  }
 
-    async handleFormSubmit(event) {
-        event.preventDefault();
+  async handleFormSubmit(event) {
+    event.preventDefault();
         
-        const formData = new FormData(event.target);
-        const email = formData.get('email');
-        const password = formData.get('password');
-        const name = formData.get('name');
+    const formData = new FormData(event.target);
+    const email = formData.get('email');
+    const password = formData.get('password');
+    const name = formData.get('name');
         
-        try {
-            if (this.getState('currentMode') === 'login') {
-                await this.handleLogin(email, password);
-            } else {
-                await this.handleRegister(email, password, name);
-            }
-        } catch (error) {
-            this.showError(error.message);
-        }
+    try {
+      if (this.getState('currentMode') === 'login') {
+        await this.handleLogin(email, password);
+      } else {
+        await this.handleRegister(email, password, name);
+      }
+    } catch (error) {
+      this.showError(error.message);
     }
+  }
 
-    async handleLogin(email, password) {
-        // Emit login event for parent components to handle
-        this.emit('auth:login', { email, password });
-    }
+  async handleLogin(email, password) {
+    // Emit login event for parent components to handle
+    this.emit('auth:login', { email, password });
+  }
 
-    async handleRegister(email, password, name) {
-        // Emit register event for parent components to handle
-        this.emit('auth:register', { email, password, name });
-    }
+  async handleRegister(email, password, name) {
+    // Emit register event for parent components to handle
+    this.emit('auth:register', { email, password, name });
+  }
 
-    async handleLogout() {
-        this.emit('auth:logout');
-    }
+  async handleLogout() {
+    this.emit('auth:logout');
+  }
 
-    handleEditProfile() {
-        this.emit('auth:edit-profile');
-    }
+  handleEditProfile() {
+    this.emit('auth:edit-profile');
+  }
 
-    handleManageSubscription() {
-        this.emit('auth:manage-subscription');
-    }
+  handleManageSubscription() {
+    this.emit('auth:manage-subscription');
+  }
 
-    handleGoogleAuth() {
-        this.emit('auth:google-auth');
-    }
+  handleGoogleAuth() {
+    this.emit('auth:google-auth');
+  }
 
-    switchMode() {
-        const newMode = this.getState('currentMode') === 'login' ? 'register' : 'login';
-        this.setState({ currentMode: newMode });
-        this.scheduleRender();
-    }
+  switchMode() {
+    const newMode = this.getState('currentMode') === 'login' ? 'register' : 'login';
+    this.setState({ currentMode: newMode });
+    this.scheduleRender();
+  }
 
-    // Public methods for external state management
-    setAuthState(isAuthenticated, user = null) {
-        this.setState({
-            isAuthenticated,
-            currentUser: user
-        });
-        this.scheduleRender();
-    }
+  // Public methods for external state management
+  setAuthState(isAuthenticated, user = null) {
+    this.setState({
+      isAuthenticated,
+      currentUser: user
+    });
+    this.scheduleRender();
+  }
 
-    setMode(mode) {
-        if (['login', 'register'].includes(mode)) {
-            this.setState({ currentMode: mode });
-            this.scheduleRender();
-        }
+  setMode(mode) {
+    if (['login', 'register'].includes(mode)) {
+      this.setState({ currentMode: mode });
+      this.scheduleRender();
     }
+  }
 
-    // Utility methods
-    getUserInitials(user) {
-        if (!user || !user.name) return 'U';
-        return user.name
-            .split(' ')
-            .map(n => n.charAt(0))
-            .join('')
-            .toUpperCase()
-            .substring(0, 2);
-    }
+  // Utility methods
+  getUserInitials(user) {
+    if (!user || !user.name) return 'U';
+    return user.name
+      .split(' ')
+      .map(n => n.charAt(0))
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  }
 
-    getPlanDisplayName(user) {
-        if (!user || !user.plan) return 'Free Plan';
-        const planMap = {
-            'free': 'Free Plan',
-            'basic': 'Basic Plan',
-            'premium': 'Premium Plan',
-            'pro': 'Pro Plan'
-        };
-        return planMap[user.plan] || 'Free Plan';
-    }
+  getPlanDisplayName(user) {
+    if (!user || !user.plan) return 'Free Plan';
+    const planMap = {
+      'free': 'Free Plan',
+      'basic': 'Basic Plan',
+      'premium': 'Premium Plan',
+      'pro': 'Pro Plan'
+    };
+    return planMap[user.plan] || 'Free Plan';
+  }
 
-    showError(message) {
-        this.emit('auth:error', { message });
-    }
+  showError(message) {
+    this.emit('auth:error', { message });
+  }
 
-    showSuccess(message) {
-        this.emit('auth:success', { message });
-    }
+  showSuccess(message) {
+    this.emit('auth:success', { message });
+  }
 }
 
 // Register the component

@@ -4,6 +4,17 @@
  */
 
 import { StorageService } from './storage-service.js';
+import { ErrorHandler } from '../utils/error-handler.js';
+import { describe, test, expect, beforeEach, afterEach, jest } from '@jest/globals';
+
+// Mock the entire error-handler module
+jest.mock('../utils/error-handler.js', () => ({
+    ErrorHandler: {
+        handleError: jest.fn(),
+        showEnhancedNotification: jest.fn(),
+        // Add any other methods that might be called
+    }
+}));
 
 describe('StorageService', () => {
     let storageService;

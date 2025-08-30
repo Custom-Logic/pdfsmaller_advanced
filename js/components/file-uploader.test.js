@@ -4,6 +4,17 @@
  */
 
 import { FileUploader } from './file-uploader.js';
+import { describe, test, expect, beforeEach, afterEach, jest } from '@jest/globals';
+
+// Mock StorageService to prevent real I/O and speed up tests
+jest.mock('../services/storage-service.js', () => ({
+    StorageService: jest.fn().mockImplementation(() => ({
+        init: jest.fn().mockResolvedValue(undefined),
+        saveFile: jest.fn().mockResolvedValue(true),
+        generateFileId: jest.fn().mockReturnValue('mock-file-id'),
+        // Add other methods used by FileUploader if necessary
+    })),
+}));
 
 describe('FileUploader (Refactored)', () => {
     let uploader;
@@ -17,6 +28,8 @@ describe('FileUploader (Refactored)', () => {
         // Wait for initialization
         await new Promise(resolve => {
             uploader.addEventListener('initialized', resolve);
+        uploader.connectedCallback();
+        uploader.connectedCallback();
             uploader.connectedCallback();
         });
 

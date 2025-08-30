@@ -6,34 +6,34 @@
 import { BaseComponent } from './base-component.js';
 
 export class SubscriptionPanel extends BaseComponent {
-    constructor() {
-        super();
-        this.plans = [];
-        this.currentSubscription = null;
-        this.usageStats = null;
-        this.isLoading = false;
-        this.onPlanChange = null;
+  constructor() {
+    super();
+    this.plans = [];
+    this.currentSubscription = null;
+    this.usageStats = null;
+    this.isLoading = false;
+    this.onPlanChange = null;
+  }
+
+  static get observedAttributes() {
+    return ['plans', 'subscription', 'usage'];
+  }
+
+  init() {
+    this.setState({
+      plans: this.getProp('plans', []),
+      currentSubscription: this.getProp('subscription', null),
+      usageStats: this.getProp('usage', null),
+      isLoading: false
+    });
+  }
+
+  getTemplate() {
+    if (this.getState('isLoading')) {
+      return this.getLoadingTemplate();
     }
 
-    static get observedAttributes() {
-        return ['plans', 'subscription', 'usage'];
-    }
-
-    init() {
-        this.setState({
-            plans: this.getProp('plans', []),
-            currentSubscription: this.getProp('subscription', null),
-            usageStats: this.getProp('usage', null),
-            isLoading: false
-        });
-    }
-
-    getTemplate() {
-        if (this.getState('isLoading')) {
-            return this.getLoadingTemplate();
-        }
-
-        return `
+    return `
             <div class="subscription-panel">
                 <div class="subscription-header">
                     <h2>Subscription Management</h2>
@@ -57,10 +57,10 @@ export class SubscriptionPanel extends BaseComponent {
                 </div>
             </div>
         `;
-    }
+  }
 
-    getLoadingTemplate() {
-        return `
+  getLoadingTemplate() {
+    return `
             <div class="subscription-panel loading">
                 <div class="loading-content">
                     <div class="loading-spinner"></div>
@@ -68,12 +68,12 @@ export class SubscriptionPanel extends BaseComponent {
                 </div>
             </div>
         `;
-    }
+  }
 
-    getCurrentPlanSection() {
-        const subscription = this.getState('currentSubscription');
-        if (!subscription) {
-            return `
+  getCurrentPlanSection() {
+    const subscription = this.getState('currentSubscription');
+    if (!subscription) {
+      return `
                 <div class="current-plan-section no-subscription">
                     <h3>Current Plan</h3>
                     <div class="no-plan-info">
@@ -84,9 +84,9 @@ export class SubscriptionPanel extends BaseComponent {
                     </div>
                 </div>
             `;
-        }
+    }
 
-        return `
+    return `
             <div class="current-plan-section">
                 <h3>Current Plan</h3>
                 <div class="current-plan-card">
@@ -109,17 +109,17 @@ export class SubscriptionPanel extends BaseComponent {
                 </div>
             </div>
         `;
-    }
+  }
 
-    getPlansTemplate() {
-        const plans = this.getState('plans');
-        const currentPlan = this.getState('currentSubscription')?.plan;
+  getPlansTemplate() {
+    const plans = this.getState('plans');
+    const currentPlan = this.getState('currentSubscription')?.plan;
         
-        return plans.map(plan => {
-            const isCurrentPlan = currentPlan === plan.name;
-            const isPopular = plan.name === 'premium';
+    return plans.map(plan => {
+      const isCurrentPlan = currentPlan === plan.name;
+      const isPopular = plan.name === 'premium';
             
-            return `
+      return `
                 <div class="plan-card ${isCurrentPlan ? 'current' : ''} ${isPopular ? 'popular' : ''}">
                     ${isPopular ? '<div class="popular-badge">Most Popular</div>' : ''}
                     <div class="plan-header">
@@ -189,14 +189,14 @@ export class SubscriptionPanel extends BaseComponent {
                     </div>
                 </div>
             `;
-        }).join('');
-    }
+    }).join('');
+  }
 
-    getUsageSection() {
-        const usage = this.getState('usageStats');
-        if (!usage) return '';
+  getUsageSection() {
+    const usage = this.getState('usageStats');
+    if (!usage) return '';
 
-        return `
+    return `
             <div class="usage-section">
                 <h3>Usage This Month</h3>
                 <div class="usage-grid">
@@ -217,16 +217,16 @@ export class SubscriptionPanel extends BaseComponent {
                 ${this.getUsageProgressBar(usage)}
             </div>
         `;
-    }
+  }
 
-    getUsageProgressBar(usage) {
-        const currentPlan = this.getState('currentSubscription')?.plan;
-        const plan = this.getState('plans').find(p => p.name === currentPlan);
-        const limit = plan?.daily_compression_limit || 5;
-        const used = usage.daily_usage_count || 0;
-        const percentage = Math.min((used / limit) * 100, 100);
+  getUsageProgressBar(usage) {
+    const currentPlan = this.getState('currentSubscription')?.plan;
+    const plan = this.getState('plans').find(p => p.name === currentPlan);
+    const limit = plan?.daily_compression_limit || 5;
+    const used = usage.daily_usage_count || 0;
+    const percentage = Math.min((used / limit) * 100, 100);
 
-        return `
+    return `
             <div class="usage-progress">
                 <div class="progress-header">
                     <span>Daily Limit: ${used}/${limit}</span>
@@ -240,19 +240,19 @@ export class SubscriptionPanel extends BaseComponent {
                 ` : ''}
             </div>
         `;
-    }
+  }
 
-    getBillingTemplate() {
-        const subscription = this.getState('currentSubscription');
-        if (!subscription) {
-            return `
+  getBillingTemplate() {
+    const subscription = this.getState('currentSubscription');
+    if (!subscription) {
+      return `
                 <div class="no-billing-info">
                     <p>No active subscription found.</p>
                 </div>
             `;
-        }
+    }
 
-        return `
+    return `
             <div class="billing-info">
                 <div class="billing-details">
                     <div class="billing-item">
@@ -279,10 +279,10 @@ export class SubscriptionPanel extends BaseComponent {
                 </div>
             </div>
         `;
-    }
+  }
 
-    getStyles() {
-        return `
+  getStyles() {
+    return `
             :host {
                 display: block;
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -784,122 +784,122 @@ export class SubscriptionPanel extends BaseComponent {
                 }
             }
         `;
-    }
+  }
 
-    setupEventListeners() {
-        this.addEventListener(this.shadowRoot, 'click', (event) => {
-            if (event.target.matches('[data-action="upgrade-plan"]')) {
-                this.handleUpgradePlan();
-            } else if (event.target.matches('[data-action="change-plan"]')) {
-                this.handleChangePlan();
-            } else if (event.target.matches('[data-action="cancel-subscription"]')) {
-                this.handleCancelSubscription();
-            } else if (event.target.matches('[data-action="select-plan"]')) {
-                const planId = event.target.getAttribute('data-plan-id');
-                this.handleSelectPlan(planId);
-            } else if (event.target.matches('[data-action="update-payment"]')) {
-                this.handleUpdatePayment();
-            } else if (event.target.matches('[data-action="download-invoice"]')) {
-                this.handleDownloadInvoice();
-            }
-        });
-    }
+  setupEventListeners() {
+    this.addEventListener(this.shadowRoot, 'click', (event) => {
+      if (event.target.matches('[data-action="upgrade-plan"]')) {
+        this.handleUpgradePlan();
+      } else if (event.target.matches('[data-action="change-plan"]')) {
+        this.handleChangePlan();
+      } else if (event.target.matches('[data-action="cancel-subscription"]')) {
+        this.handleCancelSubscription();
+      } else if (event.target.matches('[data-action="select-plan"]')) {
+        const planId = event.target.getAttribute('data-plan-id');
+        this.handleSelectPlan(planId);
+      } else if (event.target.matches('[data-action="update-payment"]')) {
+        this.handleUpdatePayment();
+      } else if (event.target.matches('[data-action="download-invoice"]')) {
+        this.handleDownloadInvoice();
+      }
+    });
+  }
 
-    // Event handlers
-    handleUpgradePlan() {
-        this.emit('subscription:upgrade');
-    }
+  // Event handlers
+  handleUpgradePlan() {
+    this.emit('subscription:upgrade');
+  }
 
-    handleChangePlan() {
-        this.emit('subscription:change-plan');
-    }
+  handleChangePlan() {
+    this.emit('subscription:change-plan');
+  }
 
-    handleCancelSubscription() {
-        this.emit('subscription:cancel');
-    }
+  handleCancelSubscription() {
+    this.emit('subscription:cancel');
+  }
 
-    handleSelectPlan(planId) {
-        this.emit('subscription:select-plan', { planId });
-    }
+  handleSelectPlan(planId) {
+    this.emit('subscription:select-plan', { planId });
+  }
 
-    handleUpdatePayment() {
-        this.emit('subscription:update-payment');
-    }
+  handleUpdatePayment() {
+    this.emit('subscription:update-payment');
+  }
 
-    handleDownloadInvoice() {
-        this.emit('subscription:download-invoice');
-    }
+  handleDownloadInvoice() {
+    this.emit('subscription:download-invoice');
+  }
 
-    // Public methods
-    setPlans(plans) {
-        this.setState({ plans });
-        this.scheduleRender();
-    }
+  // Public methods
+  setPlans(plans) {
+    this.setState({ plans });
+    this.scheduleRender();
+  }
 
-    setSubscription(subscription) {
-        this.setState({ currentSubscription: subscription });
-        this.scheduleRender();
-    }
+  setSubscription(subscription) {
+    this.setState({ currentSubscription: subscription });
+    this.scheduleRender();
+  }
 
-    setUsageStats(usage) {
-        this.setState({ usageStats: usage });
-        this.scheduleRender();
-    }
+  setUsageStats(usage) {
+    this.setState({ usageStats: usage });
+    this.scheduleRender();
+  }
 
-    setLoading(isLoading) {
-        this.setState({ isLoading });
-        this.scheduleRender();
-    }
+  setLoading(isLoading) {
+    this.setState({ isLoading });
+    this.scheduleRender();
+  }
 
-    // Utility methods
-    getPlanDisplayName(planName) {
-        const planMap = {
-            'free': 'Free Plan',
-            'basic': 'Basic Plan',
-            'premium': 'Premium Plan',
-            'pro': 'Pro Plan'
-        };
-        return planMap[planName] || 'Free Plan';
-    }
+  // Utility methods
+  getPlanDisplayName(planName) {
+    const planMap = {
+      'free': 'Free Plan',
+      'basic': 'Basic Plan',
+      'premium': 'Premium Plan',
+      'pro': 'Pro Plan'
+    };
+    return planMap[planName] || 'Free Plan';
+  }
 
-    getPlanDescription(planName) {
-        const planDescriptions = {
-            'free': 'Basic PDF compression features',
-            'basic': 'Enhanced compression with priority processing',
-            'premium': 'Advanced features including bulk processing and OCR',
-            'pro': 'Full access to all features with API access'
-        };
-        return planDescriptions[planName] || 'Basic PDF compression features';
-    }
+  getPlanDescription(planName) {
+    const planDescriptions = {
+      'free': 'Basic PDF compression features',
+      'basic': 'Enhanced compression with priority processing',
+      'premium': 'Advanced features including bulk processing and OCR',
+      'pro': 'Full access to all features with API access'
+    };
+    return planDescriptions[planName] || 'Basic PDF compression features';
+  }
 
-    calculateYearlySavings(plan) {
-        if (!plan.price_yearly || !plan.price_monthly) return 0;
-        const monthlyTotal = plan.price_monthly * 12;
-        const yearlyPrice = plan.price_yearly;
-        return Math.round(((monthlyTotal - yearlyPrice) / monthlyTotal) * 100);
-    }
+  calculateYearlySavings(plan) {
+    if (!plan.price_yearly || !plan.price_monthly) return 0;
+    const monthlyTotal = plan.price_monthly * 12;
+    const yearlyPrice = plan.price_yearly;
+    return Math.round(((monthlyTotal - yearlyPrice) / monthlyTotal) * 100);
+  }
 
-    formatDate(dateString) {
-        if (!dateString) return 'N/A';
-        try {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-        } catch (error) {
-            return 'N/A';
-        }
+  formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch (error) {
+      return 'N/A';
     }
+  }
 
-    showError(message) {
-        this.emit('subscription:error', { message });
-    }
+  showError(message) {
+    this.emit('subscription:error', { message });
+  }
 
-    showSuccess(message) {
-        this.emit('subscription:success', { message });
-    }
+  showSuccess(message) {
+    this.emit('subscription:success', { message });
+  }
 }
 
 // Register the component

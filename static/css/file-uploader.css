@@ -1,15 +1,16 @@
 /**
- * Simple File Uploader Styles
- * Clean, modern styling for the simplified file uploader component
+ * File Uploader Styles - Updated for Component Compatibility
+ * Matches the class names and structure used in file-uploader.js
  */
 
-.file-uploader {
+ .file-uploader {
     width: 100%;
     max-width: 600px;
     margin: 0 auto;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+/* Upload Area - matches component structure */
 .upload-area {
     border: 2px dashed #d1d5db;
     border-radius: 12px;
@@ -19,6 +20,11 @@
     transition: all 0.3s ease;
     background: #f9fafb;
     position: relative;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .upload-area:hover {
@@ -26,18 +32,21 @@
     background: #eff6ff;
 }
 
+/* Drag over state - matches component's data-drag-over attribute */
 .file-uploader[data-drag-over="true"] .upload-area {
     border-color: #3b82f6;
     background: #dbeafe;
     transform: scale(1.02);
 }
 
+/* Disabled state */
 .file-uploader.disabled .upload-area {
     opacity: 0.5;
     cursor: not-allowed;
     background: #f3f4f6;
 }
 
+/* Upload icon */
 .upload-icon {
     margin-bottom: 1rem;
     color: #6b7280;
@@ -47,6 +56,7 @@
     color: #3b82f6;
 }
 
+/* Upload text */
 .upload-text {
     margin-bottom: 1rem;
 }
@@ -64,6 +74,7 @@
     margin: 0;
 }
 
+/* File input - hidden but functional */
 .file-input {
     position: absolute;
     top: 0;
@@ -78,9 +89,9 @@
     cursor: not-allowed;
 }
 
-/* File List */
+/* File List - matches component's renderFileList() output */
 .file-list {
-    margin-top: 1rem;
+    margin-top: 1.5rem;
     padding: 1rem;
     background: white;
     border-radius: 8px;
@@ -88,8 +99,8 @@
 }
 
 .file-list h4 {
-    margin: 0 0 0.75rem 0;
-    font-size: 0.875rem;
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
     font-weight: 600;
     color: #374151;
     text-transform: uppercase;
@@ -100,7 +111,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.5rem 0;
+    padding: 0.75rem 0;
     border-bottom: 1px solid #f3f4f6;
 }
 
@@ -113,12 +124,14 @@
     color: #374151;
     flex: 1;
     text-align: left;
+    font-size: 0.95rem;
 }
 
 .file-size {
     font-size: 0.875rem;
     color: #6b7280;
-    margin-left: 1rem;
+    margin: 0 1rem;
+    flex-shrink: 0;
 }
 
 .remove-file {
@@ -126,45 +139,48 @@
     color: white;
     border: none;
     border-radius: 50%;
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 18px;
     line-height: 1;
-    margin-left: 0.5rem;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
 }
 
 .remove-file:hover {
     background: #dc2626;
+    transform: scale(1.1);
 }
 
-/* Error Message */
+/* Error Message - matches component's renderError() */
 .error-message {
     margin-top: 1rem;
-    padding: 0.75rem 1rem;
+    padding: 1rem;
     background: #fef2f2;
     border: 1px solid #fecaca;
     border-radius: 8px;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
 }
 
 .error-icon {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
+    flex-shrink: 0;
 }
 
 .error-text {
     color: #dc2626;
-    font-size: 0.875rem;
+    font-size: 0.95rem;
     font-weight: 500;
+    flex: 1;
 }
 
-/* Processing State */
+/* Processing State - matches component's isProcessing state */
 .file-uploader.processing .upload-area {
     opacity: 0.7;
     pointer-events: none;
@@ -175,13 +191,24 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 24px;
-    height: 24px;
-    margin: -12px 0 0 -12px;
-    border: 2px solid #3b82f6;
+    width: 32px;
+    height: 32px;
+    margin: -16px 0 0 -16px;
+    border: 3px solid #3b82f6;
     border-top-color: transparent;
     border-radius: 50%;
     animation: spin 1s linear infinite;
+    z-index: 10;
+}
+
+/* Processing state for file list */
+.file-uploader.processing .file-item {
+    opacity: 0.7;
+}
+
+.file-uploader.processing .remove-file {
+    opacity: 0.5;
+    pointer-events: none;
 }
 
 @keyframes spin {
@@ -191,9 +218,10 @@
 }
 
 /* Responsive Design */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
     .upload-area {
-        padding: 1.5rem 1rem;
+        padding: 1.5rem;
+        min-height: 180px;
     }
     
     .upload-title {
@@ -204,24 +232,79 @@
         font-size: 0.8rem;
     }
     
+    .file-list {
+        margin-top: 1rem;
+        padding: 0.75rem;
+    }
+    
     .file-item {
         flex-direction: column;
         align-items: flex-start;
-        gap: 0.25rem;
+        gap: 0.5rem;
+        padding: 1rem 0;
     }
     
     .file-size {
-        margin-left: 0;
+        margin: 0;
+        order: 2;
     }
     
     .remove-file {
         align-self: flex-end;
-        margin-left: 0;
-        margin-top: 0.25rem;
+        margin-top: -2rem;
+        position: relative;
+        order: 3;
+    }
+    
+    .file-name {
+        order: 1;
+        width: 100%;
     }
 }
 
-/* Accessibility */
+@media (max-width: 480px) {
+    .upload-area {
+        padding: 1rem;
+        min-height: 160px;
+    }
+    
+    .upload-icon {
+        width: 36px;
+        height: 36px;
+        margin-bottom: 0.75rem;
+    }
+    
+    .upload-title {
+        font-size: 0.95rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .upload-subtitle {
+        font-size: 0.75rem;
+    }
+    
+    .file-list h4 {
+        font-size: 0.9rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .error-message {
+        padding: 0.75rem;
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+    
+    .error-icon {
+        font-size: 1.25rem;
+    }
+    
+    .error-text {
+        font-size: 0.85rem;
+    }
+}
+
+/* Accessibility Improvements */
 .upload-area:focus-within {
     outline: 2px solid #3b82f6;
     outline-offset: 2px;
@@ -231,14 +314,27 @@
     outline: none;
 }
 
+.remove-file:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
 /* High contrast mode support */
 @media (prefers-contrast: high) {
     .upload-area {
         border-width: 3px;
     }
     
+    .file-item {
+        border-bottom-width: 2px;
+    }
+    
     .error-message {
         border-width: 2px;
+    }
+    
+    .remove-file {
+        border: 2px solid currentColor;
     }
 }
 
@@ -253,9 +349,74 @@
         transform: none;
     }
     
+    .remove-file:hover {
+        transform: none;
+    }
+    
     @keyframes spin {
         to {
             transform: none;
         }
+    }
+    
+    .file-uploader.processing .upload-area::after {
+        animation: none;
+        border: 3px solid #3b82f6;
+    }
+}
+
+/* Dark mode support (optional) */
+@media (prefers-color-scheme: dark) {
+    .file-uploader {
+        color-scheme: dark;
+    }
+    
+    .upload-area {
+        background: #1f2937;
+        border-color: #374151;
+    }
+    
+    .upload-area:hover {
+        background: #374151;
+        border-color: #3b82f6;
+    }
+    
+    .file-uploader[data-drag-over="true"] .upload-area {
+        background: #1e40af;
+        border-color: #3b82f6;
+    }
+    
+    .upload-title {
+        color: #f9fafb;
+    }
+    
+    .upload-subtitle {
+        color: #d1d5db;
+    }
+    
+    .file-list {
+        background: #111827;
+        border-color: #374151;
+    }
+    
+    .file-list h4 {
+        color: #f9fafb;
+    }
+    
+    .file-name {
+        color: #f9fafb;
+    }
+    
+    .file-item {
+        border-bottom-color: #374151;
+    }
+    
+    .error-message {
+        background: #7f1d1d;
+        border-color: #dc2626;
+    }
+    
+    .error-text {
+        color: #fecaca;
     }
 }

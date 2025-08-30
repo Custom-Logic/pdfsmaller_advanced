@@ -105,7 +105,7 @@ export class FileUploader extends BaseComponent {
   }
 
   render() {
-    this.shadowRoot.innerHTML = `
+    this.innerHTML = `
             <div class="file-uploader ${this.isDisabled ? 'disabled' : ''}" 
                  data-drag-over="${this.getState('isDragOver') || false}">
                 <div class="upload-area">

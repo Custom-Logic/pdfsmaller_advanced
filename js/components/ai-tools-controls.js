@@ -4,37 +4,37 @@
  */
 
 class AIToolsControls extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
-        this.selectedTool = 'summarize';
-        this.aiOptions = {
-            summarize: {
-                style: 'concise',
-                length: 'medium',
-                includeKeyPoints: true,
-                includeMetadata: false
-            },
-            translate: {
-                targetLanguage: 'es',
-                quality: 'high',
-                preserveFormatting: true
-            },
-            analyze: {
-                analysisType: 'content',
-                includeStatistics: true,
-                generateInsights: true
-            }
-        };
-    }
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+    this.selectedTool = 'summarize';
+    this.aiOptions = {
+      summarize: {
+        style: 'concise',
+        length: 'medium',
+        includeKeyPoints: true,
+        includeMetadata: false
+      },
+      translate: {
+        targetLanguage: 'es',
+        quality: 'high',
+        preserveFormatting: true
+      },
+      analyze: {
+        analysisType: 'content',
+        includeStatistics: true,
+        generateInsights: true
+      }
+    };
+  }
 
-    connectedCallback() {
-        this.render();
-        this.setupEventListeners();
-    }
+  connectedCallback() {
+    this.render();
+    this.setupEventListeners();
+  }
 
-    render() {
-        this.shadowRoot.innerHTML = `
+  render() {
+    this.shadowRoot.innerHTML = `
             <style>
                 :host {
                     display: block;
@@ -401,156 +401,156 @@ class AIToolsControls extends HTMLElement {
                 </button>
             </div>
         `;
-    }
+  }
 
-    setupEventListeners() {
-        // Tool selection
-        const toolOptions = this.shadowRoot.querySelectorAll('.tool-option');
-        toolOptions.forEach(option => {
-            option.addEventListener('click', () => {
-                toolOptions.forEach(opt => opt.classList.remove('selected'));
-                option.classList.add('selected');
-                this.selectedTool = option.dataset.tool;
-                this.showToolOptions(this.selectedTool);
-                this.updateActionButton();
-                this.dispatchEvent(new CustomEvent('tool-changed', {
-                    detail: { tool: this.selectedTool }
-                }));
-            });
-        });
-
-        // Summarize options
-        this.shadowRoot.getElementById('summaryStyle').addEventListener('change', (e) => {
-            this.aiOptions.summarize.style = e.target.value;
-            this.dispatchOptionsChanged();
-        });
-
-        this.shadowRoot.getElementById('summaryLength').addEventListener('change', (e) => {
-            this.aiOptions.summarize.length = e.target.value;
-            this.dispatchOptionsChanged();
-        });
-
-        // Translate options
-        this.shadowRoot.getElementById('targetLanguage').addEventListener('change', (e) => {
-            this.aiOptions.translate.targetLanguage = e.target.value;
-            this.dispatchOptionsChanged();
-        });
-
-        this.shadowRoot.getElementById('translationQuality').addEventListener('change', (e) => {
-            this.aiOptions.translate.quality = e.target.value;
-            this.dispatchOptionsChanged();
-        });
-
-        // Analyze options
-        this.shadowRoot.getElementById('analysisType').addEventListener('change', (e) => {
-            this.aiOptions.analyze.analysisType = e.target.value;
-            this.dispatchOptionsChanged();
-        });
-
-        // Checkboxes
-        const checkboxes = this.shadowRoot.querySelectorAll('.checkbox');
-        checkboxes.forEach(checkbox => {
-            checkbox.addEventListener('click', () => {
-                checkbox.classList.toggle('checked');
-                const option = checkbox.dataset.option;
-                const isChecked = checkbox.classList.contains('checked');
-                
-                // Update the appropriate tool options
-                if (this.selectedTool === 'summarize') {
-                    this.aiOptions.summarize[option] = isChecked;
-                } else if (this.selectedTool === 'translate') {
-                    this.aiOptions.translate[option] = isChecked;
-                } else if (this.selectedTool === 'analyze') {
-                    this.aiOptions.analyze[option] = isChecked;
-                }
-                
-                this.dispatchOptionsChanged();
-            });
-        });
-
-        // Action button
-        const actionButton = this.shadowRoot.getElementById('actionButton');
-        actionButton.addEventListener('click', () => {
-            this.dispatchEvent(new CustomEvent('ai-process-requested', {
-                detail: {
-                    tool: this.selectedTool,
-                    options: this.aiOptions[this.selectedTool]
-                }
-            }));
-        });
-    }
-
-    showToolOptions(tool) {
-        // Hide all option panels
-        const optionPanels = this.shadowRoot.querySelectorAll('.options-content');
-        optionPanels.forEach(panel => panel.classList.add('hidden'));
-
-        // Show the selected tool's options
-        const selectedPanel = this.shadowRoot.getElementById(`${tool}Options`);
-        if (selectedPanel) {
-            selectedPanel.classList.remove('hidden');
-        }
-    }
-
-    updateActionButton() {
-        const button = this.shadowRoot.getElementById('actionButton');
-        const buttonText = button.querySelector('span:last-child');
-        const buttonIcon = button.querySelector('.button-icon');
-
-        const buttonConfig = {
-            summarize: { text: 'Generate Summary', icon: '📝' },
-            translate: { text: 'Translate Document', icon: '🌐' },
-            analyze: { text: 'Analyze Document', icon: '🔍' }
-        };
-
-        const config = buttonConfig[this.selectedTool];
-        buttonText.textContent = config.text;
-        buttonIcon.textContent = config.icon;
-    }
-
-    dispatchOptionsChanged() {
-        this.dispatchEvent(new CustomEvent('options-changed', {
-            detail: {
-                tool: this.selectedTool,
-                options: this.aiOptions[this.selectedTool]
-            }
+  setupEventListeners() {
+    // Tool selection
+    const toolOptions = this.shadowRoot.querySelectorAll('.tool-option');
+    toolOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        toolOptions.forEach(opt => opt.classList.remove('selected'));
+        option.classList.add('selected');
+        this.selectedTool = option.dataset.tool;
+        this.showToolOptions(this.selectedTool);
+        this.updateActionButton();
+        this.dispatchEvent(new CustomEvent('tool-changed', {
+          detail: { tool: this.selectedTool }
         }));
-    }
+      });
+    });
 
-    setEnabled(enabled) {
-        const actionButton = this.shadowRoot.getElementById('actionButton');
-        actionButton.disabled = !enabled;
-    }
+    // Summarize options
+    this.shadowRoot.getElementById('summaryStyle').addEventListener('change', (e) => {
+      this.aiOptions.summarize.style = e.target.value;
+      this.dispatchOptionsChanged();
+    });
 
-    setProcessing(processing) {
-        const actionButton = this.shadowRoot.getElementById('actionButton');
-        const buttonIcon = actionButton.querySelector('.button-icon');
-        const buttonText = actionButton.querySelector('span:last-child');
-        
-        if (processing) {
-            actionButton.disabled = true;
-            buttonIcon.textContent = '⏳';
-            buttonText.textContent = 'Processing...';
-        } else {
-            actionButton.disabled = false;
-            this.updateActionButton();
+    this.shadowRoot.getElementById('summaryLength').addEventListener('change', (e) => {
+      this.aiOptions.summarize.length = e.target.value;
+      this.dispatchOptionsChanged();
+    });
+
+    // Translate options
+    this.shadowRoot.getElementById('targetLanguage').addEventListener('change', (e) => {
+      this.aiOptions.translate.targetLanguage = e.target.value;
+      this.dispatchOptionsChanged();
+    });
+
+    this.shadowRoot.getElementById('translationQuality').addEventListener('change', (e) => {
+      this.aiOptions.translate.quality = e.target.value;
+      this.dispatchOptionsChanged();
+    });
+
+    // Analyze options
+    this.shadowRoot.getElementById('analysisType').addEventListener('change', (e) => {
+      this.aiOptions.analyze.analysisType = e.target.value;
+      this.dispatchOptionsChanged();
+    });
+
+    // Checkboxes
+    const checkboxes = this.shadowRoot.querySelectorAll('.checkbox');
+    checkboxes.forEach(checkbox => {
+      checkbox.addEventListener('click', () => {
+        checkbox.classList.toggle('checked');
+        const option = checkbox.dataset.option;
+        const isChecked = checkbox.classList.contains('checked');
+                
+        // Update the appropriate tool options
+        if (this.selectedTool === 'summarize') {
+          this.aiOptions.summarize[option] = isChecked;
+        } else if (this.selectedTool === 'translate') {
+          this.aiOptions.translate[option] = isChecked;
+        } else if (this.selectedTool === 'analyze') {
+          this.aiOptions.analyze[option] = isChecked;
         }
-    }
+                
+        this.dispatchOptionsChanged();
+      });
+    });
 
-    getSelectedTool() {
-        return this.selectedTool;
-    }
+    // Action button
+    const actionButton = this.shadowRoot.getElementById('actionButton');
+    actionButton.addEventListener('click', () => {
+      this.dispatchEvent(new CustomEvent('ai-process-requested', {
+        detail: {
+          tool: this.selectedTool,
+          options: this.aiOptions[this.selectedTool]
+        }
+      }));
+    });
+  }
 
-    getToolOptions(tool = this.selectedTool) {
-        return { ...this.aiOptions[tool] };
-    }
+  showToolOptions(tool) {
+    // Hide all option panels
+    const optionPanels = this.shadowRoot.querySelectorAll('.options-content');
+    optionPanels.forEach(panel => panel.classList.add('hidden'));
 
-    getAllOptions() {
-        return {
-            selectedTool: this.selectedTool,
-            options: { ...this.aiOptions }
-        };
+    // Show the selected tool's options
+    const selectedPanel = this.shadowRoot.getElementById(`${tool}Options`);
+    if (selectedPanel) {
+      selectedPanel.classList.remove('hidden');
     }
+  }
+
+  updateActionButton() {
+    const button = this.shadowRoot.getElementById('actionButton');
+    const buttonText = button.querySelector('span:last-child');
+    const buttonIcon = button.querySelector('.button-icon');
+
+    const buttonConfig = {
+      summarize: { text: 'Generate Summary', icon: '📝' },
+      translate: { text: 'Translate Document', icon: '🌐' },
+      analyze: { text: 'Analyze Document', icon: '🔍' }
+    };
+
+    const config = buttonConfig[this.selectedTool];
+    buttonText.textContent = config.text;
+    buttonIcon.textContent = config.icon;
+  }
+
+  dispatchOptionsChanged() {
+    this.dispatchEvent(new CustomEvent('options-changed', {
+      detail: {
+        tool: this.selectedTool,
+        options: this.aiOptions[this.selectedTool]
+      }
+    }));
+  }
+
+  setEnabled(enabled) {
+    const actionButton = this.shadowRoot.getElementById('actionButton');
+    actionButton.disabled = !enabled;
+  }
+
+  setProcessing(processing) {
+    const actionButton = this.shadowRoot.getElementById('actionButton');
+    const buttonIcon = actionButton.querySelector('.button-icon');
+    const buttonText = actionButton.querySelector('span:last-child');
+        
+    if (processing) {
+      actionButton.disabled = true;
+      buttonIcon.textContent = '⏳';
+      buttonText.textContent = 'Processing...';
+    } else {
+      actionButton.disabled = false;
+      this.updateActionButton();
+    }
+  }
+
+  getSelectedTool() {
+    return this.selectedTool;
+  }
+
+  getToolOptions(tool = this.selectedTool) {
+    return { ...this.aiOptions[tool] };
+  }
+
+  getAllOptions() {
+    return {
+      selectedTool: this.selectedTool,
+      options: { ...this.aiOptions }
+    };
+  }
 }
 
 customElements.define('ai-tools-controls', AIToolsControls);
