@@ -1,6 +1,6 @@
 /**
  * Error Handler Utility
- * Centralized error handling and reporting
+ * Centralized error handling and reporting with enhanced UI integration
  */
 
 export class ErrorHandler {
@@ -8,6 +8,9 @@ export class ErrorHandler {
     static maxQueueSize = 100;
     static reportingEndpoint = '/api/v1/errors';
     static isReporting = false;
+    static notificationSystem = null;
+    static retryAttempts = new Map();
+    static maxRetryAttempts = 3;
 
     static handleError(error, context = {}) {
         const errorInfo = {
@@ -28,8 +31,8 @@ export class ErrorHandler {
         // Add to error queue
         this.addToQueue(errorInfo);
 
-        // Show user-friendly message
-        this.showUserNotification(this.getUserFriendlyMessage(error));
+        // Show user-friendly message using enhanced notification system
+        this.showEnhancedNotification(error, context);
 
         // Report to monitoring service
         this.reportError(errorInfo);
@@ -68,11 +71,8 @@ export class ErrorHandler {
         console.error('Network Error:', networkError);
         this.addToQueue(networkError);
         
-        if (!navigator.onLine) {
-            this.showUserNotification('You appear to be offline. Please check your internet connection.');
-        } else {
-            this.showUserNotification('Network error occurred. Please try again.');
-        }
+        // Show enhanced network error notification with retry
+        this.showNetworkErrorNotification(error, context);
         
         this.reportError(networkError);
     }
@@ -88,7 +88,7 @@ export class ErrorHandler {
         };
 
         console.warn('Validation Error:', validationError);
-        this.showUserNotification(error.message || 'Please check your input and try again.');
+        this.showValidationErrorNotification(error, context);
     }
 
     static addToQueue(errorInfo) {
@@ -440,5 +440,408 @@ export class ErrorHandler {
     // Clear error queue
     static clearErrorQueue() {
         this.errorQueue = [];
+    }
+
+    // Enhanced notification methods
+    static initializeNotificationSystem() {
+        // Find or create notification system
+        this.notificationSystem = document.querySelector('notification-system');
+        if (!this.notificationSystem) {
+            this.notificationSystem = document.createElement('notification-system');
+            this.notificationSystem.setAttribute('position', 'top-right');
+            document.body.appendChild(this.notificationSystem);
+        }
+    }
+
+    static showEnhancedNotification(error, context = {}) {
+        this.initializeNotificationSystem();
+        
+        const errorType = this.getErrorType(error);
+        const message = this.getUserFriendlyMessage(error);
+        
+        if (errorType === 'NetworkError') {
+            this.showNetworkErrorNotification(error, context);
+        } else if (errorType === 'ValidationError') {
+            this.showValidationErrorNotification(error, context);
+        } else if (errorType === 'FileError') {
+            this.showFileErrorNotification(error, context);
+        } else {
+            // Generic error notification
+            this.notificationSystem.error(message, {
+                title: this.getErrorTitle(error),
+                actions: context.retryCallback ? [{
+                    label: 'Try Again',
+                    action: 'retry',
+                    primary: true,
+                    callback: () => this.handleRetry(context.retryCallback, context)
+                }] : undefined
+            });
+        }
+    }
+
+    static showNetworkErrorNotification(error, context = {}) {
+        this.initializeNotificationSystem();
+        
+        const message = navigator.onLine 
+            ? 'Network connection failed. Please try again.'
+            : 'You appear to be offline. Please check your internet connection.';
+            
+        this.notificationSystem.error(message, {
+            title: 'Connection Error',
+            actions: context.retryCallback ? [{
+                label: 'Retry',
+                action: 'retry',
+                primary: true,
+                callback: () => this.handleRetry(context.retryCallback, context)
+            }] : undefined
+        });
+    }
+
+    static showValidationErrorNotification(error, context = {}) {
+        this.initializeNotificationSystem();
+        
+        const message = error.message || 'Please check your input and try again.';
+        
+        this.notificationSystem.warning(message, {
+            title: 'Validation Error',
+            duration: 8000
+        });
+        
+        // Focus problematic field if specified
+        if (context.field) {
+            setTimeout(() => {
+                const fieldElement = document.querySelector(`[name="${context.field}"], #${context.field}`);
+                if (fieldElement) {
+                    fieldElement.focus();
+                    fieldElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
+        }
+    }
+
+    static showFileErrorNotification(error, context = {}) {
+        this.initializeNotificationSystem();
+        
+        const fileName = context.fileName || 'file';
+        const message = `Failed to process "${fileName}": ${error.message}`;
+        
+        this.notificationSystem.error(message, {
+            title: 'File Processing Error',
+            actions: context.retryCallback ? [{
+                label: 'Try Again',
+                action: 'retry',
+                primary: true,
+                callback: () => this.handleRetry(context.retryCallback, context)
+            }] : undefined
+        });
+    }
+
+    static showSuccessNotification(message, options = {}) {
+        this.initializeNotificationSystem();
+        
+        this.notificationSystem.success(message, {
+            title: options.title || 'Success',
+            duration: options.duration || 4000,
+            actions: options.actions
+        });
+    }
+
+    static showProcessingComplete(stats) {
+        this.initializeNotificationSystem();
+        
+        const message = `Successfully processed ${stats.fileCount || 1} file(s).` +
+                       (stats.spaceSaved ? ` Space saved: ${stats.spaceSaved}` : '');
+        
+        this.notificationSystem.success(message, {
+            title: 'Processing Complete',
+            duration: 8000,
+            actions: [{
+                label: 'View Results',
+                action: 'view-results',
+                primary: true,
+                callback: () => {
+                    const resultsCard = document.getElementById('resultsCard');
+                    if (resultsCard) {
+                        resultsCard.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            }]
+        });
+    }
+
+    static handleRetry(retryCallback, context = {}) {
+        const retryKey = context.retryKey || 'default';
+        const currentAttempts = this.retryAttempts.get(retryKey) || 0;
+        
+        if (currentAttempts >= this.maxRetryAttempts) {
+            this.showEnhancedNotification(
+                new Error('Maximum retry attempts reached. Please try again later.'),
+                { ...context, retryCallback: null }
+            );
+            return;
+        }
+        
+        this.retryAttempts.set(retryKey, currentAttempts + 1);
+        
+        try {
+            const result = retryCallback();
+            
+            // If it's a promise, handle it
+            if (result && typeof result.then === 'function') {
+                result.catch(error => {
+                    this.handleError(error, { ...context, retryKey });
+                });
+            }
+            
+            // Reset retry count on successful retry
+            setTimeout(() => {
+                this.retryAttempts.delete(retryKey);
+            }, 30000); // Reset after 30 seconds
+            
+        } catch (error) {
+            this.handleError(error, { ...context, retryKey });
+        }
+    }
+
+    static getErrorType(error) {
+        if (error.name) return error.name;
+        
+        const message = error.message?.toLowerCase() || '';
+        
+        if (message.includes('network') || message.includes('fetch') || message.includes('connection')) {
+            return 'NetworkError';
+        }
+        if (message.includes('validation') || message.includes('invalid')) {
+            return 'ValidationError';
+        }
+        if (message.includes('file') || message.includes('upload') || message.includes('download')) {
+            return 'FileError';
+        }
+        
+        return 'Error';
+    }
+
+    static getErrorTitle(error) {
+        const errorTitles = {
+            'NetworkError': 'Connection Error',
+            'ValidationError': 'Validation Error',
+            'FileError': 'File Error',
+            'SecurityError': 'Security Error',
+            'AuthenticationError': 'Authentication Error',
+            'AuthorizationError': 'Permission Error',
+            'TimeoutError': 'Timeout Error',
+            'QuotaExceededError': 'Storage Full',
+            'NotSupportedError': 'Not Supported'
+        };
+        
+        return errorTitles[this.getErrorType(error)] || 'Error';
+    }
+
+    // Enhanced error creation methods
+    static createFileError(message, fileName = null, suggestions = []) {
+        const error = new Error(message);
+        error.name = 'FileError';
+        error.fileName = fileName;
+        error.suggestions = suggestions.length > 0 ? suggestions : [
+            'Make sure the file is a valid PDF',
+            'Check that the file size is under 50MB',
+            'Ensure the file is not corrupted or password-protected'
+        ];
+        return error;
+    }
+
+    static createNetworkError(message = 'Network request failed', endpoint = null) {
+        const error = new Error(message);
+        error.name = 'NetworkError';
+        error.endpoint = endpoint;
+        return error;
+    }
+
+    static createValidationError(message, field = null, value = null) {
+        const error = new Error(message);
+        error.name = 'ValidationError';
+        error.field = field;
+        error.value = value;
+        return error;
+    }
+
+    // File-specific error handlers
+    static handleFileValidationError(fileName, validationErrors, context = {}) {
+        const message = `File "${fileName}" failed validation: ${validationErrors.join(', ')}`;
+        const error = this.createFileError(message, fileName);
+        
+        this.handleError(error, {
+            ...context,
+            fileName,
+            validationErrors,
+            suggestions: [
+                'Check that the file is a valid PDF',
+                'Ensure the file size is under the limit',
+                'Try a different file if this one is corrupted'
+            ]
+        });
+    }
+
+    static handleFileProcessingError(fileName, processingError, context = {}) {
+        const message = `Failed to process "${fileName}": ${processingError}`;
+        const error = this.createFileError(message, fileName);
+        
+        this.handleError(error, {
+            ...context,
+            fileName,
+            processingError,
+            suggestions: [
+                'Try processing the file again',
+                'Check if the file is password-protected',
+                'Ensure the file is not corrupted'
+            ]
+        });
+    }
+
+    static handleUploadError(fileName, uploadError, context = {}) {
+        const message = `Failed to upload "${fileName}": ${uploadError}`;
+        const error = this.createFileError(message, fileName);
+        
+        this.handleError(error, {
+            ...context,
+            fileName,
+            uploadError,
+            retryCallback: context.retryUpload,
+            suggestions: [
+                'Check your internet connection',
+                'Try uploading again',
+                'Ensure the file size is within limits'
+            ]
+        });
+    }
+
+    // Loading state integration
+    static showLoadingState(message = 'Loading...', options = {}) {
+        const loadingElement = document.querySelector('loading-state') || 
+                              document.createElement('loading-state');
+        
+        if (!loadingElement.parentNode) {
+            document.body.appendChild(loadingElement);
+        }
+        
+        loadingElement.show({
+            message,
+            overlay: options.overlay || false,
+            type: options.type || 'spinner',
+            ...options
+        });
+        
+        return loadingElement;
+    }
+
+    static hideLoadingState() {
+        const loadingElement = document.querySelector('loading-state');
+        if (loadingElement) {
+            loadingElement.hide();
+        }
+    }
+
+    // Error message component integration
+    static showErrorMessage(error, container = null, options = {}) {
+        const errorElement = document.createElement('error-message');
+        
+        if (container) {
+            container.appendChild(errorElement);
+        } else {
+            // Find a suitable container or append to body
+            const targetContainer = document.querySelector('.error-container') ||
+                                   document.querySelector('main') ||
+                                   document.body;
+            targetContainer.appendChild(errorElement);
+        }
+        
+        errorElement.showError(error.message, {
+            title: this.getErrorTitle(error),
+            details: options.showDetails ? error.stack : null,
+            suggestions: error.suggestions || options.suggestions,
+            retryAction: !!options.retryCallback,
+            retryCallback: options.retryCallback,
+            ...options
+        });
+        
+        return errorElement;
+    }
+
+    // Batch error handling for multiple files
+    static handleBatchErrors(errors, context = {}) {
+        if (errors.length === 0) return;
+        
+        if (errors.length === 1) {
+            this.handleError(errors[0], context);
+            return;
+        }
+        
+        // Multiple errors - show summary
+        const errorTypes = {};
+        errors.forEach(error => {
+            const type = this.getErrorType(error);
+            errorTypes[type] = (errorTypes[type] || 0) + 1;
+        });
+        
+        const summary = Object.entries(errorTypes)
+            .map(([type, count]) => `${count} ${type.replace('Error', '').toLowerCase()} error(s)`)
+            .join(', ');
+            
+        this.initializeNotificationSystem();
+        this.notificationSystem.error(`Processing failed: ${summary}`, {
+            title: 'Multiple Errors',
+            actions: [{
+                label: 'View Details',
+                action: 'view-details',
+                callback: () => this.showBatchErrorDetails(errors)
+            }]
+        });
+    }
+
+    static showBatchErrorDetails(errors) {
+        // Create a detailed error display
+        const errorContainer = document.createElement('div');
+        errorContainer.className = 'batch-error-details';
+        
+        errors.forEach((error, index) => {
+            const errorElement = document.createElement('error-message');
+            errorElement.showError(error.message, {
+                title: `Error ${index + 1}: ${this.getErrorTitle(error)}`,
+                dismissible: false
+            });
+            errorContainer.appendChild(errorElement);
+        });
+        
+        // Show in a modal or dedicated area
+        const modal = this.createErrorModal('Error Details', errorContainer);
+        document.body.appendChild(modal);
+    }
+
+    static createErrorModal(title, content) {
+        const modal = document.createElement('div');
+        modal.className = 'error-modal-overlay';
+        modal.innerHTML = `
+            <div class="error-modal">
+                <div class="error-modal-header">
+                    <h3>${title}</h3>
+                    <button class="error-modal-close">&times;</button>
+                </div>
+                <div class="error-modal-content"></div>
+                <div class="error-modal-footer">
+                    <button class="error-modal-dismiss">Close</button>
+                </div>
+            </div>
+        `;
+        
+        modal.querySelector('.error-modal-content').appendChild(content);
+        
+        // Add event listeners
+        modal.querySelector('.error-modal-close').onclick = () => modal.remove();
+        modal.querySelector('.error-modal-dismiss').onclick = () => modal.remove();
+        modal.onclick = (e) => {
+            if (e.target === modal) modal.remove();
+        };
+        
+        return modal;
     }
 }

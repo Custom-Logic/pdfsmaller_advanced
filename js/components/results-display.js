@@ -617,10 +617,27 @@ export class ResultsDisplay extends BaseComponent {
     handleDownload() {
         if (!this.getState('downloadReady')) return;
         
+        const fileName = this.getState('fileName');
+        const downloadName = fileName.includes('files') 
+            ? 'compressed_files.zip' 
+            : fileName.replace('.pdf', '_compressed.pdf');
+        
+        // Create download link
+        const a = document.createElement('a');
+        a.href = this.downloadUrl;
+        a.download = downloadName;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
         this.emit('download-requested', {
             url: this.downloadUrl,
-            fileName: this.getState('fileName')
+            fileName: downloadName
         });
+        
+        // Show download success notification
+        this.emit('download-started', { fileName: downloadName });
     }
 
     handleShare() {

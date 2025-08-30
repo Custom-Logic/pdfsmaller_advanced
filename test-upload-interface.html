@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Modern Upload Interface</title>
+    
+    <!-- Design System CSS -->
+    <link rel="stylesheet" href="static/css/design-system.css">
+    <link rel="stylesheet" href="static/css/utilities.css">
+    
+    <style>
+        body {
+            font-family: var(--font-sans);
+            background: var(--gradient-primary);
+            min-height: 100vh;
+            margin: 0;
+            padding: var(--space-8);
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: var(--radius-2xl);
+            padding: var(--space-8);
+            box-shadow: var(--shadow-xl);
+        }
+        
+        .test-title {
+            font-size: var(--text-3xl);
+            font-weight: var(--font-bold);
+            color: var(--gray-800);
+            margin-bottom: var(--space-6);
+            text-align: center;
+        }
+        
+        .test-section {
+            margin-bottom: var(--space-8);
+        }
+        
+        .test-section h3 {
+            font-size: var(--text-lg);
+            font-weight: var(--font-semibold);
+            color: var(--gray-700);
+            margin-bottom: var(--space-4);
+        }
+        
+        .event-log {
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: var(--font-mono);
+            font-size: var(--text-sm);
+        }
+        
+        .event-item {
+            padding: var(--space-1) 0;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .event-item:last-child {
+            border-bottom: none;
+        }
+        
+        .event-time {
+            color: var(--gray-500);
+            font-size: var(--text-xs);
+        }
+        
+        .event-name {
+            color: var(--primary-600);
+            font-weight: var(--font-medium);
+        }
+        
+        .controls {
+            display: flex;
+            gap: var(--space-4);
+            margin-bottom: var(--space-6);
+        }
+        
+        .btn {
+            padding: var(--space-2) var(--space-4);
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: var(--text-sm);
+            font-weight: var(--font-medium);
+            cursor: pointer;
+            transition: all var(--duration-200) var(--ease-out);
+        }
+        
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-700);
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: var(--gray-200);
+            color: var(--gray-700);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--gray-300);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">Modern Upload Interface Test</h1>
+        
+        <div class="controls">
+            <button class="btn btn-primary" onclick="openFileDialog()">Open File Dialog</button>
+            <button class="btn btn-secondary" onclick="resetUploader()">Reset</button>
+            <button class="btn btn-secondary" onclick="clearLog()">Clear Log</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>Single File Upload</h3>
+            <file-uploader 
+                id="singleUploader"
+                accept=".pdf"
+                max-size="50MB">
+            </file-uploader>
+        </div>
+        
+        <div class="test-section">
+            <h3>Multiple File Upload</h3>
+            <file-uploader 
+                id="multipleUploader"
+                accept=".pdf,.doc,.docx"
+                max-size="100MB"
+                multiple>
+            </file-uploader>
+        </div>
+        
+        <div class="test-section">
+            <h3>Event Log</h3>
+            <div id="eventLog" class="event-log">
+                <div class="event-item">
+                    <span class="event-time">Ready</span> - 
+                    <span class="event-name">Upload interface initialized</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Components -->
+    <script type="module">
+        // Import base component first
+        import './js/components/base-component.js';
+        
+        // Import file uploader
+        import './js/components/file-uploader.js';
+        
+        // Setup event logging
+        function logEvent(uploaderName, eventName, data = {}) {
+            const log = document.getElementById('eventLog');
+            const time = new Date().toLocaleTimeString();
+            const eventItem = document.createElement('div');
+            eventItem.className = 'event-item';
+            eventItem.innerHTML = `
+                <span class="event-time">${time}</span> - 
+                <span class="event-name">[${uploaderName}] ${eventName}</span>
+                ${Object.keys(data).length > 0 ? `: ${JSON.stringify(data, null, 2)}` : ''}
+            `;
+            log.appendChild(eventItem);
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        // Setup event listeners for both uploaders
+        document.addEventListener('DOMContentLoaded', () => {
+            const singleUploader = document.getElementById('singleUploader');
+            const multipleUploader = document.getElementById('multipleUploader');
+            
+            // Single uploader events
+            if (singleUploader) {
+                singleUploader.addEventListener('drag-enter', (e) => {
+                    logEvent('Single', 'drag-enter', { files: e.detail.files });
+                });
+                
+                singleUploader.addEventListener('drag-leave', (e) => {
+                    logEvent('Single', 'drag-leave');
+                });
+                
+                singleUploader.addEventListener('drag-over', (e) => {
+                    // Don't log every drag over to avoid spam
+                });
+                
+                singleUploader.addEventListener('drop', (e) => {
+                    logEvent('Single', 'drop', { fileCount: e.detail.files.length });
+                });
+                
+                singleUploader.addEventListener('files-selected', (e) => {
+                    logEvent('Single', 'files-selected', { 
+                        totalFiles: e.detail.files.length,
+                        newFiles: e.detail.newFiles.length 
+                    });
+                });
+                
+                singleUploader.addEventListener('validation-error', (e) => {
+                    logEvent('Single', 'validation-error', { 
+                        errorCount: e.detail.errors.length 
+                    });
+                });
+                
+                singleUploader.addEventListener('processing-start', (e) => {
+                    logEvent('Single', 'processing-start', { 
+                        fileCount: e.detail.files.length 
+                    });
+                });
+                
+                singleUploader.addEventListener('processing-complete', (e) => {
+                    logEvent('Single', 'processing-complete');
+                });
+            }
+            
+            // Multiple uploader events
+            if (multipleUploader) {
+                multipleUploader.addEventListener('drag-enter', (e) => {
+                    logEvent('Multiple', 'drag-enter', { files: e.detail.files });
+                });
+                
+                multipleUploader.addEventListener('drag-leave', (e) => {
+                    logEvent('Multiple', 'drag-leave');
+                });
+                
+                multipleUploader.addEventListener('drop', (e) => {
+                    logEvent('Multiple', 'drop', { fileCount: e.detail.files.length });
+                });
+                
+                multipleUploader.addEventListener('files-selected', (e) => {
+                    logEvent('Multiple', 'files-selected', { 
+                        totalFiles: e.detail.files.length,
+                        newFiles: e.detail.newFiles.length 
+                    });
+                });
+                
+                multipleUploader.addEventListener('validation-error', (e) => {
+                    logEvent('Multiple', 'validation-error', { 
+                        errorCount: e.detail.errors.length 
+                    });
+                });
+                
+                multipleUploader.addEventListener('processing-start', (e) => {
+                    logEvent('Multiple', 'processing-start', { 
+                        fileCount: e.detail.files.length 
+                    });
+                });
+                
+                multipleUploader.addEventListener('processing-complete', (e) => {
+                    logEvent('Multiple', 'processing-complete');
+                });
+            }
+        });
+        
+        // Global functions for testing
+        window.openFileDialog = () => {
+            const singleUploader = document.getElementById('singleUploader');
+            if (singleUploader) {
+                singleUploader.openFileDialog();
+                logEvent('Test', 'openFileDialog called');
+            }
+        };
+        
+        window.resetUploader = () => {
+            const singleUploader = document.getElementById('singleUploader');
+            const multipleUploader = document.getElementById('multipleUploader');
+            
+            if (singleUploader) {
+                singleUploader.reset();
+                logEvent('Test', 'single uploader reset');
+            }
+            
+            if (multipleUploader) {
+                multipleUploader.reset();
+                logEvent('Test', 'multiple uploader reset');
+            }
+        };
+        
+        window.clearLog = () => {
+            const log = document.getElementById('eventLog');
+            log.innerHTML = `
+                <div class="event-item">
+                    <span class="event-time">Ready</span> - 
+                    <span class="event-name">Event log cleared</span>
+                </div>
+            `;
+        };
+    </script>
+</body>
+</html>

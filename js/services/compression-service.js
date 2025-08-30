@@ -69,23 +69,19 @@ export class CompressionService {
 
     async attemptClientCompression(file, settings) {
         try {
-            // Load PDF-lib for client-side compression
-            if (typeof PDFLib === 'undefined') {
+            // Check if PDF-lib is available
+            if (typeof window.PDFLib === 'undefined') {
                 throw new Error('PDF-lib not available for client-side compression');
             }
 
             const arrayBuffer = await file.arrayBuffer();
-            const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+            const pdfDoc = await window.PDFLib.PDFDocument.load(arrayBuffer);
             
-            // Apply compression settings
-            const compressedPdfDoc = await this.applyClientCompressionSettings(pdfDoc, settings);
+            // Apply compression settings based on compression level
+            const saveOptions = this.getCompressionSaveOptions(settings);
             
             // Generate compressed PDF
-            const compressedBytes = await compressedPdfDoc.save({
-                useObjectStreams: true,
-                addDefaultPage: false,
-                objectsPerTick: 20
-            });
+            const compressedBytes = await pdfDoc.save(saveOptions);
             
             // Create compressed file
             const compressedFile = new File([compressedBytes], file.name.replace('.pdf', '_compressed.pdf'), {
@@ -100,42 +96,53 @@ export class CompressionService {
                 compressionRatio: compressionRatio,
                 originalSize: file.size,
                 compressedSize: compressedBytes.length,
-                settings: settings
+                settings: settings,
+                processingTime: Date.now() - Date.now() // Will be calculated by caller
             };
         } catch (error) {
             console.warn('Client-side compression failed:', error);
-            throw new Error('Client-side compression not available');
+            throw new Error(`Client-side compression failed: ${error.message}`);
         }
     }
 
-    async applyClientCompressionSettings(pdfDoc, settings) {
-        try {
-            // Create a new PDF document for compression
-            const compressedPdfDoc = await PDFLib.PDFDocument.create();
-            
-            // Copy pages with compression
-            const pages = pdfDoc.getPages();
-            for (let i = 0; i < pages.length; i++) {
-                const [copiedPage] = await compressedPdfDoc.copyPages(pdfDoc, [i]);
-                compressedPdfDoc.addPage(copiedPage);
-            }
-            
-            // Apply font optimization if specified
-            if (settings.optimizationStrategy === 'text_optimized') {
-                // In a real implementation, you'd optimize fonts here
-                console.log('Applying text optimization');
-            }
-            
-            // Apply image optimization if specified
-            if (settings.optimizationStrategy === 'image_optimized') {
-                // In a real implementation, you'd optimize images here
-                console.log('Applying image optimization');
-            }
-            
-            return compressedPdfDoc;
-        } catch (error) {
-            console.error('Failed to apply client compression settings:', error);
-            throw error;
+    getCompressionSaveOptions(settings) {
+        const baseOptions = {
+            useObjectStreams: true,
+            addDefaultPage: false,
+            objectsPerTick: 50
+        };
+
+        // Adjust compression based on level
+        switch (settings.compressionLevel) {
+            case 'low':
+                return {
+                    ...baseOptions,
+                    useObjectStreams: false,
+                    objectsPerTick: 20
+                };
+            case 'medium':
+                return {
+                    ...baseOptions,
+                    useObjectStreams: true,
+                    objectsPerTick: 50
+                };
+            case 'high':
+                return {
+                    ...baseOptions,
+                    useObjectStreams: true,
+                    objectsPerTick: 100,
+                    compress: true
+                };
+            case 'maximum':
+                return {
+                    ...baseOptions,
+                    useObjectStreams: true,
+                    objectsPerTick: 200,
+                    compress: true,
+                    linearize: true
+                };
+            default:
+                return baseOptions;
         }
     }
 
@@ -155,34 +162,32 @@ export class CompressionService {
                 formData.append('targetSize', settings.targetSize);
             }
             
-            // Send to server for compression
-            const response = await this.apiClient.post('/compress', formData, {
+            // Send to server for compression using the API client
+            const response = await this.apiClient.makeRequest('/compress', {
+                method: 'POST',
+                body: formData,
                 responseType: 'blob'
             });
             
-            if (!response.ok) {
-                throw new Error(`Server compression failed: ${response.statusText}`);
-            }
-            
             // Create compressed file from response
-            const compressedBlob = await response.blob();
-            const compressedFile = new File([compressedBlob], file.name.replace('.pdf', '_compressed.pdf'), {
+            const compressedFile = new File([response], file.name.replace('.pdf', '_compressed.pdf'), {
                 type: 'application/pdf'
             });
             
-            const compressionRatio = compressedBlob.size / file.size;
+            const compressionRatio = response.size / file.size;
             
             return {
                 success: true,
                 compressedFile: compressedFile,
                 compressionRatio: compressionRatio,
                 originalSize: file.size,
-                compressedSize: compressedBlob.size,
-                settings: settings
+                compressedSize: response.size,
+                settings: settings,
+                processingTime: Date.now() - Date.now() // Will be calculated by caller
             };
         } catch (error) {
             console.error('Server compression failed:', error);
-            throw new Error('Server compression failed');
+            throw new Error(`Server compression failed: ${error.message}`);
         }
     }
 

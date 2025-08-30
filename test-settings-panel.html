@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Settings Panel Test</title>
+    
+    <!-- Design System CSS -->
+    <link rel="stylesheet" href="static/css/design-system.css">
+    <link rel="stylesheet" href="static/css/utilities.css">
+    
+    <style>
+        body {
+            font-family: var(--font-sans);
+            background: var(--gradient-primary);
+            margin: 0;
+            padding: var(--space-8);
+            min-height: 100vh;
+        }
+        
+        .test-container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .test-header {
+            text-align: center;
+            color: white;
+            margin-bottom: var(--space-8);
+        }
+        
+        .test-header h1 {
+            font-size: var(--text-3xl);
+            font-weight: var(--font-bold);
+            margin: 0 0 var(--space-2) 0;
+        }
+        
+        .test-header p {
+            font-size: var(--text-lg);
+            opacity: 0.9;
+            margin: 0;
+        }
+        
+        .test-output {
+            background: white;
+            border-radius: var(--radius-2xl);
+            padding: var(--space-6);
+            margin-top: var(--space-6);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .test-output h3 {
+            margin: 0 0 var(--space-4) 0;
+            font-size: var(--text-lg);
+            font-weight: var(--font-semibold);
+            color: var(--gray-800);
+        }
+        
+        .test-output pre {
+            background: var(--gray-100);
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            font-size: var(--text-sm);
+            overflow-x: auto;
+            margin: 0;
+        }
+        
+        .test-buttons {
+            display: flex;
+            gap: var(--space-3);
+            margin-top: var(--space-4);
+        }
+        
+        .test-btn {
+            padding: var(--space-2) var(--space-4);
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: var(--text-sm);
+            font-weight: var(--font-medium);
+            cursor: pointer;
+            transition: all var(--duration-200);
+        }
+        
+        .test-btn-primary {
+            background: var(--color-primary);
+            color: white;
+        }
+        
+        .test-btn-primary:hover {
+            background: var(--color-primary-hover);
+        }
+        
+        .test-btn-secondary {
+            background: var(--gray-200);
+            color: var(--gray-700);
+        }
+        
+        .test-btn-secondary:hover {
+            background: var(--gray-300);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>Settings Panel Test</h1>
+            <p>Testing the modern settings panel component</p>
+        </div>
+        
+        <!-- Modern Settings Panel -->
+        <modern-settings-panel id="testSettingsPanel"></modern-settings-panel>
+        
+        <!-- Test Output -->
+        <div class="test-output">
+            <h3>Current Settings</h3>
+            <pre id="settingsOutput">Loading...</pre>
+            
+            <div class="test-buttons">
+                <button class="test-btn test-btn-primary" id="getSettings">Get Settings</button>
+                <button class="test-btn test-btn-secondary" id="resetSettings">Reset</button>
+                <button class="test-btn test-btn-secondary" id="testProMode">Test Pro Mode</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Components -->
+    <script type="module">
+        import './js/components/base-component.js';
+        import './js/components/modern-settings-panel.js';
+        import './js/services/app-state.js';
+        
+        // Wait for components to load
+        document.addEventListener('DOMContentLoaded', () => {
+            const settingsPanel = document.getElementById('testSettingsPanel');
+            const settingsOutput = document.getElementById('settingsOutput');
+            const getSettingsBtn = document.getElementById('getSettings');
+            const resetSettingsBtn = document.getElementById('resetSettings');
+            const testProModeBtn = document.getElementById('testProMode');
+            
+            // Function to update output
+            function updateOutput() {
+                if (settingsPanel && settingsPanel.getSettings) {
+                    const settings = settingsPanel.getSettings();
+                    settingsOutput.textContent = JSON.stringify(settings, null, 2);
+                } else {
+                    settingsOutput.textContent = 'Settings panel not ready';
+                }
+            }
+            
+            // Initial update
+            setTimeout(updateOutput, 1000);
+            
+            // Listen for settings changes
+            document.addEventListener('settings-changed', (event) => {
+                console.log('Settings changed:', event.detail);
+                updateOutput();
+            });
+            
+            // Listen for mode changes
+            document.addEventListener('mode-changed', (event) => {
+                console.log('Mode changed:', event.detail);
+                updateOutput();
+            });
+            
+            // Listen for Pro upgrade requests
+            document.addEventListener('show-pro-upgrade', (event) => {
+                console.log('Pro upgrade requested:', event.detail);
+                alert('Pro upgrade modal would show here for: ' + event.detail.feature);
+            });
+            
+            // Button event listeners
+            getSettingsBtn.addEventListener('click', updateOutput);
+            
+            resetSettingsBtn.addEventListener('click', () => {
+                if (settingsPanel && settingsPanel.resetToDefaults) {
+                    settingsPanel.resetToDefaults();
+                    updateOutput();
+                }
+            });
+            
+            testProModeBtn.addEventListener('click', () => {
+                // Simulate clicking bulk mode to test Pro upgrade
+                const bulkModeBtn = settingsPanel.shadowRoot?.getElementById('bulkMode');
+                if (bulkModeBtn) {
+                    bulkModeBtn.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

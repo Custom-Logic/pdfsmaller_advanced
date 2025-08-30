@@ -8,6 +8,7 @@ import { CompressionFlow } from './compression-flow.js';
 import { AuthManager } from './auth-manager.js';
 import { AnalyticsService } from '../services/analytics-service.js';
 import { ErrorHandler } from '../utils/error-handler.js';
+import { getTabNavigation } from './tab-navigation.js';
 
 export class App {
     constructor() {
@@ -15,7 +16,7 @@ export class App {
         this.compressionFlow = null;
         this.authManager = null;
         this.analyticsService = null;
-        this.currentTab = 'compress';
+        this.tabNavigation = null;
         this.isInitialized = false;
     }
 
@@ -57,6 +58,12 @@ export class App {
     }
 
     async initializeManagers() {
+        // Initialize tab navigation first
+        this.tabNavigation = getTabNavigation();
+        if (!this.tabNavigation.isInitialized) {
+            await this.tabNavigation.init();
+        }
+
         // Initialize authentication manager
         this.authManager = new AuthManager();
         await this.authManager.init();
@@ -99,16 +106,8 @@ export class App {
     }
 
     setupNavigation() {
-        // Setup tab navigation
-        const tabButtons = document.querySelectorAll('.tab-button');
-        tabButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                const tab = e.target.textContent.toLowerCase().replace(' ', '_');
-                this.switchTab(tab);
-            });
-        });
-
-        // Setup mobile navigation
+        // Tab navigation is now handled by the TabNavigation module
+        // Just setup mobile navigation here
         const hamburgerMenu = document.querySelector('.hamburger-menu');
         if (hamburgerMenu) {
             hamburgerMenu.addEventListener('click', this.toggleMobileMenu.bind(this));
@@ -156,41 +155,9 @@ export class App {
 
     handleTabChanged(event) {
         const { tab } = event.detail;
-        this.switchTab(tab);
-    }
-
-    switchTab(tabName) {
-        if (this.currentTab === tabName) return;
-
-        // Hide current tab
-        const currentTabPanel = document.getElementById(`${this.currentTab}Tab`);
-        if (currentTabPanel) {
-            currentTabPanel.classList.remove('active');
-        }
-
-        // Show new tab
-        const newTabPanel = document.getElementById(`${tabName}Tab`);
-        if (newTabPanel) {
-            newTabPanel.classList.add('active');
-        }
-
-        // Update tab buttons
-        document.querySelectorAll('.tab-button').forEach(button => {
-            button.classList.remove('active');
-            if (button.textContent.toLowerCase().replace(' ', '_') === tabName) {
-                button.classList.add('active');
-            }
-        });
-
-        this.currentTab = tabName;
-
-        // Track tab change
-        this.analyticsService?.trackEvent('tab_changed', { tab: tabName });
-
-        // Dispatch tab change event
-        document.dispatchEvent(new CustomEvent('tab-changed', {
-            detail: { tab: tabName }
-        }));
+        // Tab switching is now handled by TabNavigation module
+        // Just track the change here
+        this.analyticsService?.trackEvent('tab_changed', { tab });
     }
 
     toggleMobileMenu() {
@@ -245,7 +212,11 @@ export class App {
 
     // Public API methods
     getCurrentTab() {
-        return this.currentTab;
+        return this.tabNavigation?.getCurrentTab() || 'compress';
+    }
+
+    switchTab(tabId) {
+        return this.tabNavigation?.switchTab(tabId);
     }
 
     isReady() {

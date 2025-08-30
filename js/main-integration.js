@@ -9,6 +9,10 @@ import { SubscriptionPanel } from './components/subscription-panel.js';
 import { EnhancedSettingsPanel } from './components/enhanced-settings-panel.js';
 import { APIClient } from './services/api-client.js';
 import { StorageService } from './services/storage-service.js';
+import { getTabNavigation } from './modules/tab-navigation.js';
+import { fileProcessingService } from './services/file-processing-service.js';
+import { uiIntegrationService } from './services/ui-integration-service.js';
+import { errorHandlingIntegration } from './modules/error-handling-integration.js';
 
 export class MainIntegration {
     constructor() {
@@ -16,13 +20,16 @@ export class MainIntegration {
         this.storageService = new StorageService();
         this.currentUser = null;
         this.isAuthenticated = false;
-        this.currentTab = 'compress';
+        this.tabNavigation = null;
         this.components = new Map();
         this.eventListeners = new Map();
     }
 
     async init() {
         try {
+            // Initialize error handling first
+            await errorHandlingIntegration.init();
+            
             // Initialize services
             await this.initializeServices();
             
@@ -54,6 +61,13 @@ export class MainIntegration {
         
         // Initialize storage service
         this.storageService = new StorageService();
+        
+        // Get tab navigation instance
+        this.tabNavigation = getTabNavigation();
+        
+        // Initialize file processing services
+        await fileProcessingService.init();
+        await uiIntegrationService.init();
     }
 
     async checkAuthState() {
@@ -127,8 +141,8 @@ export class MainIntegration {
         // Add new tab buttons to navigation
         this.addNavigationTabs();
         
-        // Setup tab switching
-        this.setupTabSwitching();
+        // Setup legacy compatibility
+        this.setupLegacyCompatibility();
     }
 
     addNavigationTabs() {
@@ -140,8 +154,10 @@ export class MainIntegration {
             this.addTabButton(tabNav, 'profile', 'Profile');
         }
         
-        // Add Settings tab
-        this.addTabButton(tabNav, 'settings', 'Settings');
+        // Add Settings tab if not already present
+        if (!document.querySelector('[data-tab="settings"]')) {
+            this.addTabButton(tabNav, 'settings', 'Settings');
+        }
     }
 
     addTabButton(container, tabId, label) {
@@ -149,32 +165,29 @@ export class MainIntegration {
         button.className = 'tab-button';
         button.setAttribute('data-tab', tabId);
         button.textContent = label;
-        button.onclick = () => this.switchTab(tabId);
         
         container.appendChild(button);
+        
+        // Register with tab navigation system
+        if (this.tabNavigation) {
+            this.tabNavigation.addTab(tabId, button, null);
+        }
     }
 
-    setupTabSwitching() {
-        // Override existing tab switching
-        window.switchTab = this.switchTab.bind(this);
+    setupLegacyCompatibility() {
+        // Provide legacy switchTab function for backward compatibility
+        window.switchTab = (tabId) => {
+            if (this.tabNavigation) {
+                this.tabNavigation.switchTab(tabId);
+            }
+        };
     }
 
     switchTab(tabId) {
-        this.currentTab = tabId;
-        
-        // Update tab button states
-        document.querySelectorAll('.tab-button').forEach(btn => {
-            btn.classList.remove('active');
-            if (btn.getAttribute('data-tab') === tabId) {
-                btn.classList.add('active');
-            }
-        });
-        
-        // Update tab content
-        this.updateTabContent(tabId);
-        
-        // Emit tab change event
-        this.emit('tab-changed', { tabId });
+        // Delegate to tab navigation system
+        if (this.tabNavigation) {
+            this.tabNavigation.switchTab(tabId);
+        }
     }
 
     updateTabContent(tabId) {
@@ -410,7 +423,7 @@ export class MainIntegration {
     async handleProfileUpdate(event) {
         try {
             const updateData = event.detail;
-            const response = await this.apiClient.updateProfile(updateData);
+            const response = await this.apiClient.updateUserProfile(updateData);
             
             if (response.success) {
                 this.currentUser = response.user;
@@ -523,13 +536,13 @@ export class MainIntegration {
     }
 
     getCurrentTab() {
-        return this.currentTab;
+        return this.tabNavigation?.getCurrentTab() || 'compress';
     }
 
     async refreshUserData() {
         if (this.isAuthenticated) {
             try {
-                const userInfo = await this.apiClient.getProfile();
+                const userInfo = await this.apiClient.getUserProfile();
                 this.currentUser = userInfo.user;
                 this.updateComponentStates();
                 this.updateUserInfo();

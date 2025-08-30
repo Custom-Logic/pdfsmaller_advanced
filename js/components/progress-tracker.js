@@ -27,7 +27,10 @@ export class ProgressTracker extends BaseComponent {
             showTime: true,
             animated: true,
             speed: 0,
-            isComplete: false
+            isComplete: false,
+            currentFile: null,
+            filesProcessed: 0,
+            totalFiles: 0
         });
         
         // Initialize from attributes
@@ -113,6 +116,26 @@ export class ProgressTracker extends BaseComponent {
                         </span>
                     ` : ''}
                 </div>
+                ${this.renderFileProgress()}
+            </div>
+        `;
+    }
+
+    renderFileProgress() {
+        const state = this.getState();
+        
+        if (state.totalFiles <= 1) return '';
+        
+        return `
+            <div class="file-progress">
+                <span class="file-count">
+                    Processing file ${state.filesProcessed + 1} of ${state.totalFiles}
+                </span>
+                ${state.currentFile ? `
+                    <span class="current-file">
+                        Current: ${state.currentFile}
+                    </span>
+                ` : ''}
             </div>
         `;
     }
@@ -273,6 +296,27 @@ export class ProgressTracker extends BaseComponent {
                 white-space: nowrap;
             }
             
+            .file-progress {
+                margin-top: 8px;
+                padding-top: 8px;
+                border-top: 1px solid #e2e8f0;
+                font-size: 12px;
+                color: #4a5568;
+            }
+            
+            .file-count {
+                font-weight: 600;
+                display: block;
+                margin-bottom: 4px;
+            }
+            
+            .current-file {
+                display: block;
+                font-style: italic;
+                color: #718096;
+                word-break: break-all;
+            }
+            
             .status-message {
                 font-size: 13px;
                 color: #4a5568;
@@ -388,7 +432,10 @@ export class ProgressTracker extends BaseComponent {
             estimatedTime: estimatedTime,
             elapsedTime: elapsedTime,
             speed: speed,
-            isComplete: data.progress >= 100
+            isComplete: data.progress >= 100,
+            currentFile: data.currentFile || this.getState('currentFile'),
+            filesProcessed: data.filesProcessed || this.getState('filesProcessed'),
+            totalFiles: data.totalFiles || this.getState('totalFiles')
         });
         
         // Emit progress change event
@@ -396,7 +443,10 @@ export class ProgressTracker extends BaseComponent {
             progress: data.progress,
             status: data.status,
             estimatedTime: estimatedTime,
-            elapsedTime: elapsedTime
+            elapsedTime: elapsedTime,
+            currentFile: data.currentFile,
+            filesProcessed: data.filesProcessed,
+            totalFiles: data.totalFiles
         });
         
         // Auto-complete animation
@@ -406,6 +456,15 @@ export class ProgressTracker extends BaseComponent {
                 this.emit('progress-complete');
             }, 500);
         }
+    }
+
+    updateJobInfo(jobInfo) {
+        this.setState({
+            elapsedTime: jobInfo.elapsedTime,
+            filesProcessed: jobInfo.filesProcessed,
+            totalFiles: jobInfo.totalFiles,
+            currentFile: jobInfo.currentFile
+        });
     }
 
     getStatusText() {
@@ -484,7 +543,10 @@ export class ProgressTracker extends BaseComponent {
             estimatedTime: null,
             elapsedTime: 0,
             speed: 0,
-            isComplete: false
+            isComplete: false,
+            currentFile: null,
+            filesProcessed: 0,
+            totalFiles: 0
         });
     }
 

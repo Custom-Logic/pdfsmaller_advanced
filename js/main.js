@@ -31,6 +31,11 @@ class PDFSmallerApp {
             const { default: MainIntegration } = await this.loadModule('./main-integration.js');
             this.mainIntegration = new MainIntegration();
             await this.mainIntegration.init();
+
+            // Load integration test in development
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                await this.loadModule('./utils/integration-test.js');
+            }
             
             // Hide loading indicator
             this.hideLoadingIndicator();

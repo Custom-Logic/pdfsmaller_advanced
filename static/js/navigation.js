@@ -42,8 +42,8 @@ class NavigationMenu {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 const tabName = link.getAttribute('data-tab');
-                if (tabName && typeof switchTab === 'function') {
-                    switchTab(tabName);
+                if (tabName && window.tabNavigation) {
+                    window.tabNavigation.switchTab(tabName);
                     this.closeMenu();
                 }
             });

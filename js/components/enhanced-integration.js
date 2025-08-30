@@ -158,7 +158,7 @@ export class EnhancedIntegration extends BaseComponent {
                         <div class="feature-item">✓ Advanced compression</div>
                         <div class="feature-item">✓ Priority support</div>
                     </div>
-                    <button class="btn btn-premium" onclick="switchTab('pricing')">Upgrade Now</button>
+                    <button class="btn btn-premium" onclick="window.tabNavigation?.switchTab('pricing') || switchTab('pricing')">Upgrade Now</button>
                 </div>
             </div>
         `;

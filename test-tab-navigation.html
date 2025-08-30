@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tab Navigation Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .tab-nav {
+            display: flex;
+            background: white;
+            border-bottom: 2px solid #e5e7eb;
+            padding: 0 20px;
+            gap: 8px;
+        }
+
+        .tab-button {
+            padding: 16px 24px;
+            border: none;
+            background: transparent;
+            color: #6b7280;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .tab-button::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: #3182ce;
+            transform: scaleX(0);
+            transition: transform 0.2s ease;
+            transform-origin: left;
+        }
+
+        .tab-button:hover {
+            color: #3182ce;
+            background: rgba(49, 130, 206, 0.05);
+            transform: translateY(-1px);
+        }
+
+        .tab-button.active {
+            color: #3182ce;
+            background: #f8fafc;
+            font-weight: 600;
+        }
+
+        .tab-button.active::after {
+            transform: scaleX(1);
+        }
+
+        .tab-content {
+            padding: 20px;
+        }
+
+        .tab-panel {
+            display: none;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: opacity 300ms ease, transform 300ms ease;
+        }
+
+        .tab-panel.active {
+            display: block;
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .test-info {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .test-result {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+        .test-result.success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #22c55e;
+        }
+
+        .test-result.error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-info">
+            <h2>Tab Navigation System Test</h2>
+            <p>This page tests the new tab navigation system. Click the tabs below to verify functionality.</p>
+        </div>
+
+        <nav class="tab-nav" role="tablist">
+            <button class="tab-button active" data-tab="tab1" role="tab" aria-selected="true" tabindex="0">Tab 1</button>
+            <button class="tab-button" data-tab="tab2" role="tab" aria-selected="false" tabindex="-1">Tab 2</button>
+            <button class="tab-button" data-tab="tab3" role="tab" aria-selected="false" tabindex="-1">Tab 3</button>
+        </nav>
+
+        <div class="tab-content">
+            <div id="tab1Tab" class="tab-panel active" role="tabpanel">
+                <h3>Tab 1 Content</h3>
+                <p>This is the content for tab 1. The tab navigation system should handle switching between tabs smoothly.</p>
+                <button onclick="testProgrammaticSwitch()">Switch to Tab 2 Programmatically</button>
+            </div>
+            <div id="tab2Tab" class="tab-panel" role="tabpanel">
+                <h3>Tab 2 Content</h3>
+                <p>This is the content for tab 2. Notice the smooth transition when switching tabs.</p>
+                <button onclick="testKeyboardNavigation()">Test Keyboard Navigation</button>
+            </div>
+            <div id="tab3Tab" class="tab-panel" role="tabpanel">
+                <h3>Tab 3 Content</h3>
+                <p>This is the content for tab 3. All accessibility features should be working properly.</p>
+                <button onclick="runAllTests()">Run All Tests</button>
+            </div>
+        </div>
+
+        <div id="testResults"></div>
+    </div>
+
+    <script type="module">
+        // Import the tab navigation module
+        import { getTabNavigation } from './js/modules/tab-navigation.js';
+
+        let tabNavigation;
+        let testResults = [];
+
+        async function initializeTest() {
+            try {
+                tabNavigation = getTabNavigation();
+                await tabNavigation.init();
+                
+                showTestResult('✓ Tab navigation system initialized successfully', 'success');
+                
+                // Test basic functionality
+                setTimeout(() => {
+                    testBasicFunctionality();
+                }, 500);
+                
+            } catch (error) {
+                showTestResult('✗ Failed to initialize tab navigation: ' + error.message, 'error');
+            }
+        }
+
+        function testBasicFunctionality() {
+            try {
+                // Test getting current tab
+                const currentTab = tabNavigation.getCurrentTab();
+                if (currentTab === 'tab1') {
+                    showTestResult('✓ getCurrentTab() works correctly', 'success');
+                } else {
+                    showTestResult('✗ getCurrentTab() returned: ' + currentTab, 'error');
+                }
+
+                // Test getting available tabs
+                const availableTabs = tabNavigation.getAvailableTabs();
+                if (availableTabs.includes('tab1') && availableTabs.includes('tab2') && availableTabs.includes('tab3')) {
+                    showTestResult('✓ getAvailableTabs() works correctly', 'success');
+                } else {
+                    showTestResult('✗ getAvailableTabs() returned: ' + availableTabs.join(', '), 'error');
+                }
+
+            } catch (error) {
+                showTestResult('✗ Basic functionality test failed: ' + error.message, 'error');
+            }
+        }
+
+        window.testProgrammaticSwitch = function() {
+            try {
+                tabNavigation.switchTab('tab2');
+                setTimeout(() => {
+                    if (tabNavigation.getCurrentTab() === 'tab2') {
+                        showTestResult('✓ Programmatic tab switching works', 'success');
+                    } else {
+                        showTestResult('✗ Programmatic tab switching failed', 'error');
+                    }
+                }, 100);
+            } catch (error) {
+                showTestResult('✗ Programmatic switch failed: ' + error.message, 'error');
+            }
+        };
+
+        window.testKeyboardNavigation = function() {
+            showTestResult('ℹ Try using arrow keys to navigate between tabs when focused on a tab button', 'success');
+            
+            // Focus the first tab button
+            const firstTab = document.querySelector('.tab-button');
+            if (firstTab) {
+                firstTab.focus();
+                showTestResult('✓ Tab button focused for keyboard navigation test', 'success');
+            }
+        };
+
+        window.runAllTests = function() {
+            testResults = [];
+            
+            // Test 1: Tab switching
+            tabNavigation.switchTab('tab1');
+            setTimeout(() => {
+                if (tabNavigation.getCurrentTab() === 'tab1') {
+                    showTestResult('✓ Test 1: Switch to tab1 - PASSED', 'success');
+                } else {
+                    showTestResult('✗ Test 1: Switch to tab1 - FAILED', 'error');
+                }
+            }, 100);
+
+            // Test 2: Tab switching with invalid tab
+            setTimeout(() => {
+                const currentTab = tabNavigation.getCurrentTab();
+                tabNavigation.switchTab('invalid-tab');
+                setTimeout(() => {
+                    if (tabNavigation.getCurrentTab() === currentTab) {
+                        showTestResult('✓ Test 2: Invalid tab handling - PASSED', 'success');
+                    } else {
+                        showTestResult('✗ Test 2: Invalid tab handling - FAILED', 'error');
+                    }
+                }, 100);
+            }, 200);
+
+            // Test 3: Event emission
+            setTimeout(() => {
+                let eventReceived = false;
+                const handler = () => { eventReceived = true; };
+                document.addEventListener('tab-changed', handler, { once: true });
+                
+                tabNavigation.switchTab('tab3');
+                
+                setTimeout(() => {
+                    if (eventReceived) {
+                        showTestResult('✓ Test 3: Event emission - PASSED', 'success');
+                    } else {
+                        showTestResult('✗ Test 3: Event emission - FAILED', 'error');
+                    }
+                }, 100);
+            }, 400);
+        };
+
+        function showTestResult(message, type) {
+            const resultsDiv = document.getElementById('testResults');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${type}`;
+            resultDiv.textContent = message;
+            resultsDiv.appendChild(resultDiv);
+            
+            // Auto-scroll to bottom
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', initializeTest);
+    </script>
+</body>
+</html>

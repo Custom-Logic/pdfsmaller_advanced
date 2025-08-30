@@ -61,21 +61,25 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Tab switching functionality
+// Legacy tab switching functionality - now delegates to new system
 function switchTab(tabName) {
-    // Remove active class from all tabs
-    const tabButtons = document.querySelectorAll('.tab-button');
-    const tabPanels = document.querySelectorAll('.tab-panel');
-    
-    tabButtons.forEach(btn => btn.classList.remove('active'));
-    tabPanels.forEach(panel => panel.classList.remove('active'));
-    
-    // Add active class to selected tab
-    const selectedButton = document.querySelector(`[onclick="switchTab('${tabName}')"]`);
-    const selectedPanel = document.getElementById(`${tabName}Tab`);
-    
-    if (selectedButton) selectedButton.classList.add('active');
-    if (selectedPanel) selectedPanel.classList.add('active');
+    if (window.tabNavigation) {
+        window.tabNavigation.switchTab(tabName);
+    } else {
+        // Fallback for when new system isn't loaded yet
+        console.warn('Tab navigation system not loaded, using fallback');
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabPanels = document.querySelectorAll('.tab-panel');
+        
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        tabPanels.forEach(panel => panel.classList.remove('active'));
+        
+        const selectedButton = document.querySelector(`[data-tab="${tabName}"]`);
+        const selectedPanel = document.getElementById(`${tabName}Tab`);
+        
+        if (selectedButton) selectedButton.classList.add('active');
+        if (selectedPanel) selectedPanel.classList.add('active');
+    }
 }
 
 // Handle navigation menu tab switching
@@ -86,7 +90,11 @@ document.addEventListener('DOMContentLoaded', function() {
         link.addEventListener('click', function(e) {
             e.preventDefault();
             const tabName = this.getAttribute('data-tab');
-            switchTab(tabName);
+            if (window.tabNavigation) {
+                window.tabNavigation.switchTab(tabName);
+            } else {
+                switchTab(tabName);
+            }
         });
     });
 });
