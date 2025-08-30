@@ -1,16 +1,13 @@
 /**
- * OCR Service (Refactored)
+ * OCR Service
  * Handles Optical Character Recognition for scanned PDFs and images
- * Follows the new event-driven, service-centric architecture
  */
 
-import { StandardService } from './standard-service.js';
 import { APIClient } from './api-client.js';
 import { PDFAnalyzer } from './pdf-analyzer.js';
 
-export class OCRService extends StandardService {
+export class OCRService {
     constructor() {
-        super();
         this.apiClient = new APIClient();
         this.pdfAnalyzer = new PDFAnalyzer();
         this.ocrHistory = new Map();
@@ -18,119 +15,29 @@ export class OCRService extends StandardService {
             'en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ja', 'ko', 'zh', 'ar', 'hi'
         ];
         this.ocrQualityLevels = ['fast', 'balanced', 'accurate'];
-        this.outputFormats = ['searchable_pdf', 'text', 'json'];
-    }
-
-    async init() {
-        try {
-            await super.init();
-            this.emitStatusChange('initialized');
-        } catch (error) {
-            this.emitError(error, { operation: 'initialization' });
-            throw error;
-        }
-    }
-
-    /**
-     * Primary API: Extract text from file using OCR
-     * @param {string} fileId - File ID from storage service
-     * @param {Object} ocrOptions - OCR processing options
-     * @returns {Promise<Object>} OCR result
-     */
-    async extractText(fileId, ocrOptions = {}) {
-        try {
-            this.isProcessing = true;
-            this.emitStatusChange('processing', { fileId });
-            this.emitProgress(0, 'Starting OCR processing...');
-
-            // Validate options
-            this.validateOCROptions(ocrOptions);
-
-            // Get file from storage (via event to MainController)
-            const file = await this.requestFile(fileId);
-            
-            // Perform OCR
-            const result = await this.performOCR(file, ocrOptions);
-
-            this.emitProgress(100, 'OCR processing completed');
-            this.emitComplete(result, 'OCR extraction completed successfully');
-            
-            return result;
-        } catch (error) {
-            this.emitError(error, { fileId, operation: 'ocr' });
-            throw error;
-        } finally {
-            this.isProcessing = false;
-        }
-    }
-
-    /**
-     * Validate OCR processing options
-     */
-    validateOCROptions(options) {
-        if (options.language && !this.supportedLanguages.includes(options.language)) {
-            throw new Error(`Unsupported language: ${options.language}`);
-        }
-
-        if (options.quality && !this.ocrQualityLevels.includes(options.quality)) {
-            throw new Error(`Unsupported quality level: ${options.quality}`);
-        }
-
-        if (options.outputFormat && !this.outputFormats.includes(options.outputFormat)) {
-            throw new Error(`Unsupported output format: ${options.outputFormat}`);
-        }
-    }
-
-    /**
-     * Request file from storage service via events
-     */
-    async requestFile(fileId) {
-        return new Promise((resolve, reject) => {
-            // Emit request for file
-            this.dispatchEvent(new CustomEvent('fileRequested', {
-                detail: { fileId, requestId: Date.now() }
-            }));
-
-            // Listen for file response (this would be handled by MainController)
-            const timeout = setTimeout(() => {
-                reject(new Error('File request timeout'));
-            }, 10000);
-
-            const handleFileResponse = (event) => {
-                if (event.detail.fileId === fileId) {
-                    clearTimeout(timeout);
-                    document.removeEventListener('fileResponse', handleFileResponse);
-                    
-                    if (event.detail.error) {
-                        reject(new Error(event.detail.error));
-                    } else {
-                        resolve(event.detail.file);
-                    }
-                }
-            };
-
-            document.addEventListener('fileResponse', handleFileResponse);
-        });
     }
 
     /**
      * Perform OCR on a PDF or image file
+     * @param {File} file - PDF or image file to process
+     * @param {Object} options - OCR options
+     * @returns {Promise<Object>} OCR result
      */
     async performOCR(file, options = {}) {
         try {
-            this.emitProgress(10, 'Validating file for OCR...');
+            // Validate input
             this.validateOCRRequest(file);
             
-            this.emitProgress(20, 'Analyzing file for OCR optimization...');
+            // Analyze file for OCR optimization
             const analysis = await this.analyzeFileForOCR(file);
             
-            this.emitProgress(30, 'Preparing OCR options...');
+            // Prepare OCR options
             const ocrOptions = this.prepareOCROptions(options, analysis);
             
-            this.emitProgress(40, 'Starting OCR processing...');
+            // Perform OCR
             const result = await this.executeOCR(file, ocrOptions);
             
-            this.emitProgress(90, 'Finalizing OCR results...');
+            // Add to history
             const historyEntry = this.addToHistory({
                 fileName: file.name,
                 originalSize: file.size,
@@ -208,6 +115,7 @@ export class OCRService extends StandardService {
      * Estimate image quality for OCR
      */
     estimateImageQuality(file) {
+        // This is a simplified estimation - in a real app, you'd analyze the actual image
         if (file.size > 5 * 1024 * 1024) return 'high';
         if (file.size > 1 * 1024 * 1024) return 'medium';
         return 'low';
@@ -217,6 +125,7 @@ export class OCRService extends StandardService {
      * Estimate OCR potential
      */
     estimateOCRPotential(file) {
+        // Simplified estimation based on file size and type
         if (file.type === 'image/tiff') return 'high';
         if (file.type === 'image/png') return 'high';
         if (file.type === 'image/jpeg') return 'medium';
@@ -238,11 +147,12 @@ export class OCRService extends StandardService {
             extractImages: false
         };
 
+        // Merge with user options
         const options = { ...defaultOptions, ...userOptions };
 
         // Auto-adjust quality based on file analysis
         if (analysis.imageQuality === 'low' && options.quality === 'fast') {
-            options.quality = 'balanced';
+            options.quality = 'balanced'; // Better quality for low-quality images
         }
 
         // Auto-adjust language detection if not specified
@@ -257,7 +167,8 @@ export class OCRService extends StandardService {
      * Detect language from file analysis
      */
     detectLanguage(analysis) {
-        // Simplified language detection - in real app would be more sophisticated
+        // This is a simplified language detection
+        // In a real app, you'd use more sophisticated language detection
         return 'en'; // Default to English
     }
 
@@ -271,11 +182,11 @@ export class OCRService extends StandardService {
             formData.append('file', file);
             formData.append('options', JSON.stringify(options));
             
-            // Send OCR request with progress tracking
+            // Send OCR request
             const response = await this.apiClient.post('/ocr/process', formData, {
                 responseType: 'blob',
                 onProgress: (progress) => {
-                    this.emitProgress(40 + (progress * 0.4), `Processing OCR... ${Math.round(progress)}%`);
+                    this.emitProgress(progress);
                 }
             });
             
@@ -329,7 +240,7 @@ export class OCRService extends StandardService {
             originalSize: originalFile.size,
             outputSize: blob.size,
             downloadUrl: URL.createObjectURL(blob),
-            textContent: null
+            textContent: null // Text content not extracted for PDF output
         };
     }
 
@@ -371,6 +282,193 @@ export class OCRService extends StandardService {
             textContent: jsonData.text || jsonText,
             structuredData: jsonData
         };
+    }
+
+    /**
+     * Batch OCR processing
+     */
+    async batchOCR(files, options = {}) {
+        try {
+            const batchResults = [];
+            const batchId = this.generateBatchId();
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                
+                try {
+                    const result = await this.performOCR(file, options);
+                    batchResults.push({
+                        fileIndex: i,
+                        fileName: file.name,
+                        success: true,
+                        result: result
+                    });
+                } catch (error) {
+                    batchResults.push({
+                        fileIndex: i,
+                        fileName: file.name,
+                        success: false,
+                        error: error.message
+                    });
+                }
+            }
+            
+            return {
+                batchId: batchId,
+                totalFiles: files.length,
+                successfulFiles: batchResults.filter(r => r.success).length,
+                failedFiles: batchResults.filter(r => !r.success).length,
+                results: batchResults
+            };
+        } catch (error) {
+            console.error('Batch OCR failed:', error);
+            throw new Error('Batch OCR processing failed');
+        }
+    }
+
+    /**
+     * Get OCR preview/estimate
+     */
+    async getOCRPreview(file, options = {}) {
+        try {
+            const analysis = await this.analyzeFileForOCR(file);
+            const ocrOptions = this.prepareOCROptions(options, analysis);
+            
+            // Estimate OCR complexity and time
+            const complexity = this.estimateOCRComplexity(analysis, ocrOptions);
+            const estimatedTime = this.estimateOCRTime(analysis, complexity);
+            const estimatedAccuracy = this.estimateOCRAccuracy(analysis, ocrOptions);
+            
+            return {
+                originalSize: file.size,
+                estimatedTime: estimatedTime,
+                complexity: complexity,
+                estimatedAccuracy: estimatedAccuracy,
+                options: ocrOptions,
+                analysis: analysis,
+                recommendations: this.getOCRRecommendations(analysis, ocrOptions)
+            };
+        } catch (error) {
+            console.error('OCR preview failed:', error);
+            throw new Error('Failed to generate OCR preview');
+        }
+    }
+
+    /**
+     * Estimate OCR complexity
+     */
+    estimateOCRComplexity(analysis, options) {
+        let complexity = 1; // Base complexity
+        
+        // Adjust based on file type
+        if (analysis.fileType === 'image') {
+            if (analysis.imageQuality === 'low') complexity += 2;
+            else if (analysis.imageQuality === 'medium') complexity += 1;
+        } else {
+            // PDF complexity
+            if (analysis.pageCount > 20) complexity += 2;
+            else if (analysis.pageCount > 10) complexity += 1;
+        }
+        
+        // Adjust based on quality setting
+        switch (options.quality) {
+            case 'fast':
+                complexity -= 0.5;
+                break;
+            case 'accurate':
+                complexity += 1;
+                break;
+        }
+        
+        // Adjust based on language
+        if (options.language !== 'en') complexity += 0.5;
+        
+        return Math.min(5, Math.max(1, Math.round(complexity)));
+    }
+
+    /**
+     * Estimate OCR processing time
+     */
+    estimateOCRTime(analysis, complexity) {
+        const baseTime = 3; // Base 3 seconds
+        const timePerPage = 2; // 2 seconds per page
+        const complexityMultiplier = [1, 1.3, 1.6, 2, 3]; // Time multipliers for complexity levels
+        
+        let estimatedTime;
+        if (analysis.fileType === 'image') {
+            estimatedTime = baseTime * complexityMultiplier[complexity - 1];
+        } else {
+            estimatedTime = baseTime + (analysis.pageCount * timePerPage) * complexityMultiplier[complexity - 1];
+        }
+        
+        return Math.round(estimatedTime);
+    }
+
+    /**
+     * Estimate OCR accuracy
+     */
+    estimateOCRAccuracy(analysis, options) {
+        let accuracy = 0.8; // Base accuracy
+        
+        // Adjust based on image quality
+        if (analysis.imageQuality === 'high') accuracy += 0.1;
+        else if (analysis.imageQuality === 'low') accuracy -= 0.2;
+        
+        // Adjust based on quality setting
+        switch (options.quality) {
+            case 'fast':
+                accuracy -= 0.1;
+                break;
+            case 'accurate':
+                accuracy += 0.1;
+                break;
+        }
+        
+        // Adjust based on file type
+        if (analysis.fileType === 'image') {
+            if (analysis.ocrPotential === 'high') accuracy += 0.05;
+            else if (analysis.ocrPotential === 'low') accuracy -= 0.1;
+        }
+        
+        return Math.min(0.95, Math.max(0.5, accuracy));
+    }
+
+    /**
+     * Get OCR recommendations
+     */
+    getOCRRecommendations(analysis, options) {
+        const recommendations = [];
+        
+        if (analysis.imageQuality === 'low') {
+            recommendations.push('Low image quality detected. Consider using "accurate" quality setting for better results.');
+        }
+        
+        if (analysis.fileType === 'image' && analysis.ocrPotential === 'low') {
+            recommendations.push('Image format may not be optimal for OCR. Consider converting to PNG or TIFF for better results.');
+        }
+        
+        if (options.quality === 'fast' && analysis.fileType === 'pdf' && analysis.pageCount > 10) {
+            recommendations.push('Large PDF detected. Consider using "balanced" quality for better accuracy.');
+        }
+        
+        return recommendations;
+    }
+
+    /**
+     * Emit progress event
+     */
+    emitProgress(progress) {
+        const event = new CustomEvent('ocrProgress', {
+            detail: { progress }
+        });
+        window.dispatchEvent(event);
+    }
+
+    /**
+     * Generate batch ID
+     */
+    generateBatchId() {
+        return `ocr_batch_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     }
 
     /**
@@ -430,6 +528,6 @@ export class OCRService extends StandardService {
      * Get output formats
      */
     getOutputFormats() {
-        return [...this.outputFormats];
+        return ['searchable_pdf', 'text', 'json'];
     }
 }

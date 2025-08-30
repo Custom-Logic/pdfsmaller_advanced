@@ -790,27 +790,70 @@ export class OCRPanel extends BaseComponent {
             this.updateButtonStates();
             this.showProgress();
             
-            let results;
+            // For single file processing, emit event for MainController
             if (this.selectedFiles.length === 1) {
-                results = await this.ocrService.performOCR(this.selectedFiles[0], this.ocrOptions);
+                const file = this.selectedFiles[0];
+                
+                // Emit event for MainController to handle
+                document.dispatchEvent(new CustomEvent('ocrProcessingRequested', {
+                    detail: {
+                        fileId: file.fileId || `temp_${Date.now()}`,
+                        options: this.ocrOptions
+                    }
+                }));
+                
+                // Listen for completion
+                const handleComplete = (event) => {
+                    if (event.detail.operation === 'ocr') {
+                        document.removeEventListener('processingComplete', handleComplete);
+                        this.hideProgress();
+                        this.showResults(event.detail.result);
+                        this.addToHistory({
+                            timestamp: new Date(),
+                            files: [file.name],
+                            options: this.ocrOptions,
+                            results: event.detail.result
+                        });
+                        this.isProcessing = false;
+                        this.updateButtonStates();
+                    }
+                };
+                
+                const handleError = (event) => {
+                    if (event.detail.service === 'ocr') {
+                        document.removeEventListener('processingError', handleError);
+                        this.hideProgress();
+                        this.showError(`OCR processing failed: ${event.detail.error}`);
+                        this.isProcessing = false;
+                        this.updateButtonStates();
+                    }
+                };
+                
+                document.addEventListener('processingComplete', handleComplete);
+                document.addEventListener('processingError', handleError);
+                
             } else {
-                results = await this.ocrService.batchOCR(this.selectedFiles, this.ocrOptions);
+                // For batch processing, emit multiple single file events for now
+                // TODO: Implement proper batch processing via events
+                logEvent('⚠️ Batch OCR processing not yet implemented via events');
+                this.showError('Batch OCR processing not yet implemented. Please process files individually.');
+                
+                this.hideProgress();
+                this.showResults(results);
+                this.addToHistory({
+                    timestamp: new Date(),
+                    files: this.selectedFiles.map(f => f.name),
+                    options: this.ocrOptions,
+                    results: results
+                });
+                this.isProcessing = false;
+                this.updateButtonStates();
             }
-            
-            this.hideProgress();
-            this.showResults(results);
-            this.addToHistory({
-                timestamp: new Date(),
-                files: this.selectedFiles.map(f => f.name),
-                options: this.ocrOptions,
-                results: results
-            });
             
         } catch (error) {
             console.error('OCR processing failed:', error);
             this.hideProgress();
             this.showError(`OCR processing failed: ${error.message}`);
-        } finally {
             this.isProcessing = false;
             this.updateButtonStates();
         }
@@ -824,7 +867,8 @@ export class OCRPanel extends BaseComponent {
         
         try {
             const file = this.selectedFiles[0];
-            const preview = await this.ocrService.getOCRPreview(file, this.ocrOptions);
+            // TODO: Implement OCR preview via events
+            this.showError('OCR preview not yet implemented via events');
             this.showPreview(preview);
             
         } catch (error) {

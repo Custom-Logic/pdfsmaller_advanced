@@ -501,15 +501,41 @@ export class AIPanel extends BaseComponent {
             this.updateButtonState('generateSummary', true);
             
             const options = this.getSummaryOptions();
-            const result = await this.aiService.summarizePDF(this.currentFile, options);
             
-            this.displayResults('summary', result);
-            await this.loadHistory();
+            // Emit event for MainController to handle
+            document.dispatchEvent(new CustomEvent('aiProcessingRequested', {
+                detail: {
+                    fileId: this.currentFile.fileId || `temp_${Date.now()}`,
+                    operation: 'summarize',
+                    options: options
+                }
+            }));
+            
+            // Listen for completion
+            const handleComplete = (event) => {
+                if (event.detail.operation === 'ai') {
+                    document.removeEventListener('processingComplete', handleComplete);
+                    this.displayResults('summary', event.detail.result);
+                    this.processing = false;
+                    this.updateButtonState('generateSummary', false);
+                }
+            };
+            
+            const handleError = (event) => {
+                if (event.detail.service === 'ai') {
+                    document.removeEventListener('processingError', handleError);
+                    this.showError(`Summary generation failed: ${event.detail.error}`);
+                    this.processing = false;
+                    this.updateButtonState('generateSummary', false);
+                }
+            };
+            
+            document.addEventListener('processingComplete', handleComplete);
+            document.addEventListener('processingError', handleError);
             
         } catch (error) {
             console.error('Summary generation failed:', error);
             this.showError(`Summary generation failed: ${error.message}`);
-        } finally {
             this.processing = false;
             this.updateButtonState('generateSummary', false);
         }
@@ -524,15 +550,42 @@ export class AIPanel extends BaseComponent {
             
             const options = this.getTranslationOptions();
             const targetLanguage = this.shadowRoot.getElementById('targetLanguage').value;
-            const result = await this.aiService.translatePDF(this.currentFile, targetLanguage, options);
             
-            this.displayResults('translation', result);
-            await this.loadHistory();
+            // Emit event for MainController to handle
+            document.dispatchEvent(new CustomEvent('aiProcessingRequested', {
+                detail: {
+                    fileId: this.currentFile.fileId || `temp_${Date.now()}`,
+                    operation: 'translate',
+                    targetLanguage: targetLanguage,
+                    options: options
+                }
+            }));
+            
+            // Listen for completion
+            const handleComplete = (event) => {
+                if (event.detail.operation === 'ai') {
+                    document.removeEventListener('processingComplete', handleComplete);
+                    this.displayResults('translation', event.detail.result);
+                    this.processing = false;
+                    this.updateButtonState('translatePDF', false);
+                }
+            };
+            
+            const handleError = (event) => {
+                if (event.detail.service === 'ai') {
+                    document.removeEventListener('processingError', handleError);
+                    this.showError(`PDF translation failed: ${event.detail.error}`);
+                    this.processing = false;
+                    this.updateButtonState('translatePDF', false);
+                }
+            };
+            
+            document.addEventListener('processingComplete', handleComplete);
+            document.addEventListener('processingError', handleError);
             
         } catch (error) {
             console.error('PDF translation failed:', error);
             this.showError(`PDF translation failed: ${error.message}`);
-        } finally {
             this.processing = false;
             this.updateButtonState('translatePDF', false);
         }
@@ -602,7 +655,8 @@ export class AIPanel extends BaseComponent {
         if (!this.aiService) return;
         
         try {
-            this.history = await this.aiService.getHistory();
+            // TODO: Implement history loading via events
+            this.history = [];
             this.displayHistory();
         } catch (error) {
             console.error('Failed to load AI history:', error);
@@ -664,7 +718,8 @@ export class AIPanel extends BaseComponent {
 
     async viewHistoryItem(id) {
         try {
-            const item = await this.aiService.getHistoryItem(id);
+            // TODO: Implement history item loading via events
+            this.showError('History item loading not yet implemented via events');
             this.displayResults(item.type, item.result);
         } catch (error) {
             console.error('Failed to view history item:', error);

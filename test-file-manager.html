@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FileManager Test</title>
+    <link rel="stylesheet" href="static/css/file-manager.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 8px;
+            font-size: 14px;
+        }
+        .log {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <h1>FileManager Component Test</h1>
+    
+    <div class="test-section">
+        <h2>1. Test Controls</h2>
+        <button class="button" id="addTestFilesBtn">Add Test Files</button>
+        <button class="button" id="clearFilesBtn">Clear All Files</button>
+        <button class="button" id="refreshBtn">Refresh FileManager</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. FileManager Component</h2>
+        <file-manager id="testFileManager"></file-manager>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Event Log</h2>
+        <div id="eventLog" class="log"></div>
+        <button class="button" onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <script type="module">
+        import { MainController } from './js/controllers/main-controller.js';
+        import './js/components/file-manager.js';
+        
+        let mainController;
+        let eventLog = [];
+        
+        // Initialize system
+        async function initTest() {
+            try {
+                log('🚀 Initializing FileManager test...');
+                
+                // Create and initialize MainController
+                mainController = new MainController();
+                await mainController.init();
+                
+                log('✅ MainController initialized');
+                
+                // Setup test event listeners
+                setupTestEventListeners();
+                
+                log('🎉 FileManager test ready!');
+                
+            } catch (error) {
+                log(`❌ Initialization failed: ${error.message}`);
+                console.error('Test initialization error:', error);
+            }
+        }
+        
+        function setupTestEventListeners() {
+            // Listen for FileManager events
+            const events = [
+                'requestFileList', 'fileDownloadRequested', 'fileDeleteRequested', 
+                'clearAllFilesRequested'
+            ];
+            
+            events.forEach(eventName => {
+                document.addEventListener(eventName, (event) => {
+                    log(`📡 EVENT: ${eventName}`, event.detail);
+                });
+            });
+        }
+        
+        // Test functions
+        window.addTestFiles = async function() {
+            try {
+                log('📁 Adding test files to storage...');
+                
+                const storageService = mainController.getService('storage');
+                
+                // Create test files
+                const testFiles = [
+                    {
+                        name: 'document1.pdf',
+                        content: 'Test PDF content 1',
+                        type: 'original'
+                    },
+                    {
+                        name: 'document2.pdf', 
+                        content: 'Test PDF content 2',
+                        type: 'original'
+                    },
+                    {
+                        name: 'compressed_document1.pdf',
+                        content: 'Compressed PDF content',
+                        type: 'processed',
+                        processingType: 'compression',
+                        originalFileId: 'file1'
+                    }
+                ];
+                
+                // Add files to storage
+                for (let i = 0; i < testFiles.length; i++) {
+                    const testFile = testFiles[i];
+                    const blob = new Blob([testFile.content], { type: 'application/pdf' });
+                    const fileId = `test-file-${i + 1}`;
+                    
+                    const metadata = {
+                        name: testFile.name,
+                        type: testFile.type,
+                        mimeType: 'application/pdf',
+                        processingType: testFile.processingType,
+                        originalFileId: testFile.originalFileId,
+                        uploadedAt: Date.now() - (i * 60000) // Stagger timestamps
+                    };
+                    
+                    await storageService.saveFile(fileId, blob, metadata);
+                }
+                
+                log(`✅ Added ${testFiles.length} test files`);
+                
+                // Refresh FileManager
+                const fileManager = document.getElementById('testFileManager');
+                fileManager.refresh();
+                
+            } catch (error) {
+                log(`❌ Failed to add test files: ${error.message}`);
+            }
+        };
+        
+        window.clearAllFiles = async function() {
+            try {
+                log('🗑️ Clearing all files...');
+                
+                const storageService = mainController.getService('storage');
+                const files = await storageService.getAllFiles();
+                
+                for (const file of files) {
+                    await storageService.deleteFile(file.id);
+                }
+                
+                // Refresh FileManager
+                const fileManager = document.getElementById('testFileManager');
+                fileManager.updateFiles([]);
+                
+                log(`✅ Cleared ${files.length} files`);
+                
+            } catch (error) {
+                log(`❌ Failed to clear files: ${error.message}`);
+            }
+        };
+        
+        window.refreshFileManager = function() {
+            const fileManager = document.getElementById('testFileManager');
+            fileManager.refresh();
+            log('🔄 FileManager refreshed');
+        };
+        
+        // Utility functions
+        function log(message, data = null) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            
+            if (data) {
+                console.log(logEntry, data);
+                eventLog.push(`${logEntry}\n${JSON.stringify(data, null, 2)}`);
+            } else {
+                console.log(logEntry);
+                eventLog.push(logEntry);
+            }
+            
+            updateLogDisplay();
+        }
+        
+        function updateLogDisplay() {
+            const logElement = document.getElementById('eventLog');
+            logElement.textContent = eventLog.slice(-15).join('\n');
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        window.clearLog = function() {
+            eventLog = [];
+            updateLogDisplay();
+        };
+        
+        // Setup button event listeners
+        document.getElementById('addTestFilesBtn').addEventListener('click', addTestFiles);
+        document.getElementById('clearFilesBtn').addEventListener('click', clearAllFiles);
+        document.getElementById('refreshBtn').addEventListener('click', refreshFileManager);
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initTest);
+        
+        // Make functions globally available
+        window.mainController = null;
+        window.log = log;
+        
+        // Update global reference when ready
+        document.addEventListener('controllerReady', () => {
+            window.mainController = mainController;
+        });
+    </script>
+</body>
+</html>

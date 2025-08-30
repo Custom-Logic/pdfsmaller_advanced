@@ -99,6 +99,7 @@
     <link rel="stylesheet" href="static/css/extended-features.css">
     <link rel="stylesheet" href="static/css/components.css">
     <link rel="stylesheet" href="static/css/error-handling.css">
+    <link rel="stylesheet" href="static/css/file-manager.css">
     
     <!-- Settings Light Theme - Remove Dark Backgrounds -->
     <!-- <link rel="stylesheet" href="static/css/settings-light-theme.css"> -->
@@ -135,6 +136,16 @@
     <nav class="nav-menu">
         <div class="nav-menu-overlay"></div>
         <div class="nav-menu-content">
+            <nav class="nav-menu-list">
+                <a href="#" class="nav-menu-link" data-section="compress">Compress</a>
+                <a href="#" class="nav-menu-link" data-section="convert">Convert</a>
+                <a href="#" class="nav-menu-link" data-section="ocr">OCR</a>
+                <a href="#" class="nav-menu-link" data-section="ai_tools">AI Tools</a>
+                <a href="#" class="nav-menu-link" data-section="files">Files</a>
+                <a href="#" class="nav-menu-link" data-section="settings">Settings</a>
+                <a href="#" class="nav-menu-link" data-section="pricing">Pricing</a>
+            </nav>
+            <div class="nav-menu-divider"></div>
             <!-- Auth Panel Component -->
             <div class="nav-auth-section">
                 <auth-panel id="navAuthPanel" mode="login"></auth-panel>
@@ -152,6 +163,7 @@
                 <button class="tab-button" data-tab="convert" role="tab" aria-selected="false" tabindex="-1" id="tab-convert" aria-controls="convertTab">Convert</button>
                 <button class="tab-button" data-tab="ocr" role="tab" aria-selected="false" tabindex="-1" id="tab-ocr" aria-controls="ocrTab">OCR</button>
                 <button class="tab-button" data-tab="ai_tools" role="tab" aria-selected="false" tabindex="-1" id="tab-ai_tools" aria-controls="ai_toolsTab">AI Tools</button>
+                <button class="tab-button" data-tab="files" role="tab" aria-selected="false" tabindex="-1" id="tab-files" aria-controls="filesTab">Files</button>
                 <button class="tab-button" data-tab="settings" role="tab" aria-selected="false" tabindex="-1" id="tab-settings" aria-controls="settingsTab">Settings</button>
                 <button class="tab-button" data-tab="pricing" role="tab" aria-selected="false" tabindex="-1" id="tab-pricing" aria-controls="pricingTab">Pricing</button>
             </nav>
@@ -192,9 +204,8 @@
                                     <h3 class="upload-title">Upload PDF Files</h3>
                                     <p class="upload-subtitle">Drag and drop your PDF files or click to browse</p>
                                 </div>
-                                <bulk-uploader 
-                                    id="bulkUploader">
-                                </bulk-uploader>
+                                <file-uploader id="compressUploader" multiple accept=".pdf"></file-uploader>
+                                <compression-controls id="compressControls"></compression-controls>
                             </div>
                             
                             <!-- Progress Section -->
@@ -268,6 +279,13 @@
                                 slot="controls">
                             </ai-tools-controls>
                         </ai-tools-interface>
+                    </div>
+                </div>
+
+                <!-- Files Tab -->
+                <div id="filesTab" class="tab-panel" role="tabpanel" aria-labelledby="tab-files">
+                    <div class="content-card">
+                        <file-manager id="mainFileManager"></file-manager>
                     </div>
                 </div>
 
@@ -828,6 +846,7 @@
         import './js/services/app-state.js';
         import './js/integration/settings-integration.js';
         import './js/components/bulk-uploader.js';
+        import './js/components/compression-controls.js';
         import './js/components/file-uploader.js';
         import './js/components/progress-tracker.js';
         import './js/components/results-display.js';

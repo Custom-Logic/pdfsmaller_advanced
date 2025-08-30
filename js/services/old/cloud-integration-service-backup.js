@@ -1,16 +1,13 @@
 /**
- * Cloud Storage Service (Refactored)
- * Handles integration with cloud storage providers like Google Drive, Dropbox, OneDrive
- * Follows the new event-driven, service-centric architecture
+ * Cloud Integration Service
+ * Handles integration with cloud storage providers like Google Drive
  */
 
-import { StandardService } from './standard-service.js';
 import { APIClient } from './api-client.js';
 import { SecurityService } from './security-service.js';
 
-export class CloudStorageService extends StandardService {
+export class CloudIntegrationService {
     constructor() {
-        super();
         this.apiClient = new APIClient();
         this.securityService = new SecurityService();
         this.cloudHistory = new Map();
@@ -36,146 +33,24 @@ export class CloudStorageService extends StandardService {
         this.accessTokens = new Map();
     }
 
-    async init() {
+    /**
+     * Initialize cloud integration service
+     */
+    async initialize() {
         try {
-            await super.init();
-            
             // Check for existing authentication tokens
             await this.checkExistingAuth();
             
             // Set up event listeners for OAuth callbacks
             this.setupOAuthListeners();
             
-            this.emitStatusChange('initialized');
+            console.log('Cloud integration service initialized');
         } catch (error) {
-            this.emitError(error, { operation: 'initialization' });
-            throw error;
+            console.error('Failed to initialize cloud integration service:', error);
         }
     }
 
     /**
-     * Primary API: Upload file to cloud storage
-     * @param {string} fileId - File ID from storage service
-     * @param {string} cloudProvider - Cloud provider name
-     * @param {Object} uploadOptions - Upload options
-     * @returns {Promise<Object>} Upload result
-     */
-    async uploadToCloud(fileId, cloudProvider, uploadOptions = {}) {
-        try {
-            this.isProcessing = true;
-            this.emitStatusChange('uploading', { fileId, provider: cloudProvider });
-            this.emitProgress(0, 'Starting cloud upload...');
-
-            // Validate provider
-            this.validateProvider(cloudProvider);
-
-            // Ensure authentication
-            await this.ensureAuthenticated(cloudProvider);
-
-            // Get file from storage (via event to MainController)
-            const file = await this.requestFile(fileId);
-            
-            // Perform upload
-            const result = await this.performUpload(file, cloudProvider, uploadOptions);
-
-            this.emitProgress(100, 'Cloud upload completed');
-            this.emitComplete(result, `Upload to ${cloudProvider} completed successfully`);
-            
-            return result;
-        } catch (error) {
-            this.emitError(error, { fileId, provider: cloudProvider, operation: 'upload' });
-            throw error;
-        } finally {
-            this.isProcessing = false;
-        }
-    }
-
-    /**
-     * Primary API: Download file from cloud storage
-     * @param {string} cloudProvider - Cloud provider name
-     * @param {string} filePath - File path in cloud storage
-     * @param {Object} downloadOptions - Download options
-     * @returns {Promise<Object>} Download result
-     */
-    async downloadFromCloud(cloudProvider, filePath, downloadOptions = {}) {
-        try {
-            this.isProcessing = true;
-            this.emitStatusChange('downloading', { provider: cloudProvider, filePath });
-            this.emitProgress(0, 'Starting cloud download...');
-
-            // Validate provider
-            this.validateProvider(cloudProvider);
-
-            // Ensure authentication
-            await this.ensureAuthenticated(cloudProvider);
-            
-            // Perform download
-            const result = await this.performDownload(cloudProvider, filePath, downloadOptions);
-
-            this.emitProgress(100, 'Cloud download completed');
-            this.emitComplete(result, `Download from ${cloudProvider} completed successfully`);
-            
-            return result;
-        } catch (error) {
-            this.emitError(error, { provider: cloudProvider, filePath, operation: 'download' });
-            throw error;
-        } finally {
-            this.isProcessing = false;
-        }
-    }
-
-    /**
-     * Validate cloud provider
-     */
-    validateProvider(provider) {
-        if (!this.supportedProviders.includes(provider)) {
-            throw new Error(`Unsupported provider: ${provider}. Supported providers: ${this.supportedProviders.join(', ')}`);
-        }
-    }
-
-    /**
-     * Ensure authentication with provider
-     */
-    async ensureAuthenticated(provider) {
-        if (!this.isAuthenticated.get(provider)) {
-            this.emitProgress(10, `Authenticating with ${provider}...`);
-            await this.authenticate(provider);
-        }
-    }
-
-    /**
-     * Request file from storage service via events
-     */
-    async requestFile(fileId) {
-        return new Promise((resolve, reject) => {
-            // Emit request for file
-            this.dispatchEvent(new CustomEvent('fileRequested', {
-                detail: { fileId, requestId: Date.now() }
-            }));
-
-            // Listen for file response (this would be handled by MainController)
-            const timeout = setTimeout(() => {
-                reject(new Error('File request timeout'));
-            }, 10000);
-
-            const handleFileResponse = (event) => {
-                if (event.detail.fileId === fileId) {
-                    clearTimeout(timeout);
-                    document.removeEventListener('fileResponse', handleFileResponse);
-                    
-                    if (event.detail.error) {
-                        reject(new Error(event.detail.error));
-                    } else {
-                        resolve(event.detail.file);
-                    }
-                }
-            };
-
-            document.addEventListener('fileResponse', handleFileResponse);
-        });
-    }
-    /*
-*
      * Check for existing authentication
      */
     async checkExistingAuth() {
@@ -214,9 +89,15 @@ export class CloudStorageService extends StandardService {
 
     /**
      * Authenticate with cloud provider
+     * @param {string} provider - Cloud provider name
+     * @returns {Promise<boolean>} Authentication success
      */
     async authenticate(provider) {
         try {
+            if (!this.supportedProviders.includes(provider)) {
+                throw new Error(`Unsupported provider: ${provider}`);
+            }
+
             if (this.isAuthenticated.get(provider)) {
                 return true; // Already authenticated
             }
@@ -369,26 +250,32 @@ export class CloudStorageService extends StandardService {
             console.warn(`Token validation failed for ${provider}:`, error);
             return false;
         }
-    } 
-   /**
-     * Perform file upload to cloud storage
+    }
+
+    /**
+     * Upload file to cloud storage
+     * @param {File} file - File to upload
+     * @param {string} provider - Cloud provider
+     * @param {string} destinationPath - Destination path in cloud storage
+     * @param {Object} options - Upload options
+     * @returns {Promise<Object>} Upload result
      */
-    async performUpload(file, provider, options) {
+    async uploadToCloud(file, provider, destinationPath, options = {}) {
         try {
+            if (!this.isAuthenticated.get(provider)) {
+                throw new Error(`Not authenticated with ${provider}`);
+            }
+
             const token = this.accessTokens.get(provider);
             if (!token) {
                 throw new Error(`No access token for ${provider}`);
             }
 
-            this.emitProgress(20, 'Preparing file for upload...');
-
             // Create form data
             const formData = new FormData();
             formData.append('file', file);
-            formData.append('destination_path', options.destinationPath || '/');
+            formData.append('destination_path', destinationPath);
             formData.append('options', JSON.stringify(options));
-
-            this.emitProgress(30, 'Uploading to cloud...');
 
             // Upload to cloud
             const response = await this.apiClient.post(`/cloud/${provider}/upload`, formData, {
@@ -396,7 +283,7 @@ export class CloudStorageService extends StandardService {
                     'Authorization': `Bearer ${token}`
                 },
                 onProgress: (progress) => {
-                    this.emitProgress(30 + (progress * 0.6), `Uploading... ${Math.round(progress)}%`);
+                    this.emitProgress(progress, 'upload', provider);
                 }
             });
 
@@ -412,7 +299,7 @@ export class CloudStorageService extends StandardService {
                 type: 'upload',
                 provider: provider,
                 fileName: file.name,
-                destinationPath: options.destinationPath || '/',
+                destinationPath: destinationPath,
                 fileSize: file.size,
                 success: true,
                 result: result,
@@ -427,7 +314,7 @@ export class CloudStorageService extends StandardService {
                 type: 'upload',
                 provider: provider,
                 fileName: file.name,
-                destinationPath: options.destinationPath || '/',
+                destinationPath: destinationPath,
                 fileSize: file.size,
                 success: false,
                 error: error.message,
@@ -439,16 +326,22 @@ export class CloudStorageService extends StandardService {
     }
 
     /**
-     * Perform file download from cloud storage
+     * Download file from cloud storage
+     * @param {string} provider - Cloud provider
+     * @param {string} filePath - File path in cloud storage
+     * @param {Object} options - Download options
+     * @returns {Promise<Object>} Download result
      */
-    async performDownload(provider, filePath, options) {
+    async downloadFromCloud(provider, filePath, options = {}) {
         try {
+            if (!this.isAuthenticated.get(provider)) {
+                throw new Error(`Not authenticated with ${provider}`);
+            }
+
             const token = this.accessTokens.get(provider);
             if (!token) {
                 throw new Error(`No access token for ${provider}`);
             }
-
-            this.emitProgress(20, 'Requesting file from cloud...');
 
             // Download from cloud
             const response = await this.apiClient.get(`/cloud/${provider}/download`, {
@@ -461,7 +354,7 @@ export class CloudStorageService extends StandardService {
                 },
                 responseType: 'blob',
                 onProgress: (progress) => {
-                    this.emitProgress(20 + (progress * 0.7), `Downloading... ${Math.round(progress)}%`);
+                    this.emitProgress(progress, 'download', provider);
                 }
             });
 
@@ -513,64 +406,133 @@ export class CloudStorageService extends StandardService {
     }
 
     /**
-     * Add operation to history
+     * List files in cloud storage
+     * @param {string} provider - Cloud provider
+     * @param {string} folderPath - Folder path to list
+     * @param {Object} options - List options
+     * @returns {Promise<Object>} List result
      */
-    addToHistory(operationData) {
-        const historyEntry = {
-            id: Date.now(),
-            ...operationData
-        };
+    async listCloudFiles(provider, folderPath = '/', options = {}) {
+        try {
+            if (!this.isAuthenticated.get(provider)) {
+                throw new Error(`Not authenticated with ${provider}`);
+            }
 
-        this.cloudHistory.set(historyEntry.id, historyEntry);
+            const token = this.accessTokens.get(provider);
+            if (!token) {
+                throw new Error(`No access token for ${provider}`);
+            }
 
-        // Keep only last 100 entries
-        if (this.cloudHistory.size > 100) {
-            const firstKey = this.cloudHistory.keys().next().value;
-            this.cloudHistory.delete(firstKey);
+            const response = await this.apiClient.get(`/cloud/${provider}/list`, {
+                params: {
+                    folder_path: folderPath,
+                    options: JSON.stringify(options)
+                },
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`List failed: ${errorText}`);
+            }
+
+            const result = await response.json();
+
+            // Add to history
+            this.addToHistory({
+                type: 'list',
+                provider: provider,
+                folderPath: folderPath,
+                success: true,
+                result: result,
+                timestamp: new Date()
+            });
+
+            return result;
+        } catch (error) {
+            console.error(`Cloud list failed for ${provider}:`, error);
+            
+            this.addToHistory({
+                type: 'list',
+                provider: provider,
+                folderPath: folderPath,
+                success: false,
+                error: error.message,
+                timestamp: new Date()
+            });
+            
+            throw error;
         }
-
-        return historyEntry;
     }
 
     /**
-     * Get cloud operation history
+     * Create folder in cloud storage
+     * @param {string} provider - Cloud provider
+     * @param {string} folderPath - Folder path to create
+     * @param {Object} options - Create options
+     * @returns {Promise<Object>} Create result
      */
-    getCloudHistory() {
-        return Array.from(this.cloudHistory.values());
-    }
+    async createCloudFolder(provider, folderPath, options = {}) {
+        try {
+            if (!this.isAuthenticated.get(provider)) {
+                throw new Error(`Not authenticated with ${provider}`);
+            }
 
-    /**
-     * Clear cloud operation history
-     */
-    clearHistory() {
-        this.cloudHistory.clear();
-    }
+            const token = this.accessTokens.get(provider);
+            if (!token) {
+                throw new Error(`No access token for ${provider}`);
+            }
 
-    /**
-     * Get supported providers
-     */
-    getSupportedProviders() {
-        return [...this.supportedProviders];
-    }
+            const response = await this.apiClient.post(`/cloud/${provider}/folder`, {
+                folder_path: folderPath,
+                options: options
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
 
-    /**
-     * Get authentication status for provider
-     */
-    isProviderAuthenticated(provider) {
-        return this.isAuthenticated.get(provider) || false;
-    }
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Folder creation failed: ${errorText}`);
+            }
 
-    /**
-     * Get all authenticated providers
-     */
-    getAuthenticatedProviders() {
-        return this.supportedProviders.filter(provider => 
-            this.isAuthenticated.get(provider)
-        );
+            const result = await response.json();
+
+            // Add to history
+            this.addToHistory({
+                type: 'create_folder',
+                provider: provider,
+                folderPath: folderPath,
+                success: true,
+                result: result,
+                timestamp: new Date()
+            });
+
+            return result;
+        } catch (error) {
+            console.error(`Cloud folder creation failed for ${provider}:`, error);
+            
+            this.addToHistory({
+                type: 'create_folder',
+                provider: provider,
+                folderPath: folderPath,
+                success: false,
+                error: error.message,
+                timestamp: new Date()
+            });
+            
+            throw error;
+        }
     }
 
     /**
      * Disconnect from cloud provider
+     * @param {string} provider - Cloud provider to disconnect
+     * @returns {Promise<boolean>} Disconnect success
      */
     async disconnect(provider) {
         try {
@@ -619,5 +581,82 @@ export class CloudStorageService extends StandardService {
             
             throw error;
         }
+    }
+
+    /**
+     * Get authentication status for provider
+     * @param {string} provider - Cloud provider
+     * @returns {boolean} Authentication status
+     */
+    isProviderAuthenticated(provider) {
+        return this.isAuthenticated.get(provider) || false;
+    }
+
+    /**
+     * Get all authenticated providers
+     * @returns {Array<string>} List of authenticated providers
+     */
+    getAuthenticatedProviders() {
+        return this.supportedProviders.filter(provider => 
+            this.isAuthenticated.get(provider)
+        );
+    }
+
+    /**
+     * Emit progress event
+     */
+    emitProgress(progress, operation, provider) {
+        const event = new CustomEvent('cloudProgress', {
+            detail: { progress, operation, provider }
+        });
+        window.dispatchEvent(event);
+    }
+
+    /**
+     * Add operation to history
+     */
+    addToHistory(operationData) {
+        const historyEntry = {
+            id: Date.now(),
+            ...operationData
+        };
+
+        this.cloudHistory.set(historyEntry.id, historyEntry);
+
+        // Keep only last 100 entries
+        if (this.cloudHistory.size > 100) {
+            const firstKey = this.cloudHistory.keys().next().value;
+            this.cloudHistory.delete(firstKey);
+        }
+
+        return historyEntry;
+    }
+
+    /**
+     * Get cloud operation history
+     */
+    getCloudHistory() {
+        return Array.from(this.cloudHistory.values());
+    }
+
+    /**
+     * Clear cloud operation history
+     */
+    clearHistory() {
+        this.cloudHistory.clear();
+    }
+
+    /**
+     * Get supported providers
+     */
+    getSupportedProviders() {
+        return [...this.supportedProviders];
+    }
+
+    /**
+     * Get OAuth configuration for provider
+     */
+    getOAuthConfig(provider) {
+        return this.oauthConfigs[provider] || null;
     }
 }

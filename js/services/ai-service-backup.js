@@ -1,7 +1,6 @@
 /**
- * AI Service (Refactored)
+ * AI Service
  * Handles AI-powered features like summarization and translation
- * Follows the new event-driven, service-centric architecture
  */
 
 import { StandardService } from './standard-service.js';
@@ -26,127 +25,32 @@ export class AIService extends StandardService {
             await super.init();
             this.emitStatusChange('initialized');
         } catch (error) {
-            this.emitError(error, { operation: 'initialization' });
-            throw error;
-        }
-    }
-
-    /**
-     * Primary API: Process file with AI (summarization or translation)
-     * @param {string} fileId - File ID from storage service
-     * @param {Object} aiOptions - AI processing options
-     * @returns {Promise<Object>} Processing result
-     */
-    async processWithAI(fileId, aiOptions = {}) {
-        try {
-            this.isProcessing = true;
-            this.emitStatusChange('processing', { fileId, operation: aiOptions.operation });
-            this.emitProgress(0, 'Starting AI processing...');
-
-            // Validate options
-            this.validateAIOptions(aiOptions);
-
-            // Get file from storage (via event to MainController)
-            const file = await this.requestFile(fileId);
-            
-            let result;
-            switch (aiOptions.operation) {
-                case 'summarize':
-                    result = await this.summarizePDF(file, aiOptions);
-                    break;
-                case 'translate':
-                    result = await this.translatePDF(file, aiOptions.targetLanguage, aiOptions);
-                    break;
-                default:
-                    throw new Error(`Unsupported AI operation: ${aiOptions.operation}`);
-            }
-
-            this.emitProgress(100, 'AI processing completed');
-            this.emitComplete(result, `${aiOptions.operation} completed successfully`);
-            
-            return result;
-        } catch (error) {
-            this.emitError(error, { fileId, operation: aiOptions.operation });
-            throw error;
-        } finally {
-            this.isProcessing = false;
-        }
-    }
-
-    /**
-     * Validate AI processing options
-     */
-    validateAIOptions(options) {
-        if (!options.operation) {
-            throw new Error('AI operation is required (summarize or translate)');
-        }
-
-        if (!['summarize', 'translate'].includes(options.operation)) {
-            throw new Error(`Unsupported operation: ${options.operation}`);
-        }
-
-        if (options.operation === 'translate' && !options.targetLanguage) {
-            throw new Error('Target language is required for translation');
-        }
-
-        if (options.targetLanguage && !this.supportedLanguages.includes(options.targetLanguage)) {
-            throw new Error(`Unsupported language: ${options.targetLanguage}`);
-        }
-    }
-
-    /**
-     * Request file from storage service via events
-     */
-    async requestFile(fileId) {
-        return new Promise((resolve, reject) => {
-            // Emit request for file
-            this.dispatchEvent(new CustomEvent('fileRequested', {
-                detail: { fileId, requestId: Date.now() }
-            }));
-
-            // Listen for file response (this would be handled by MainController)
-            const timeout = setTimeout(() => {
-                reject(new Error('File request timeout'));
-            }, 10000);
-
-            const handleFileResponse = (event) => {
-                if (event.detail.fileId === fileId) {
-                    clearTimeout(timeout);
-                    document.removeEventListener('fileResponse', handleFileResponse);
-                    
-                    if (event.detail.error) {
-                        reject(new Error(event.detail.error));
-                    } else {
-                        resolve(event.detail.file);
-                    }
-                }
-            };
-
-            document.addEventListener('fileResponse', handleFileResponse);
-        });
-    }
+        }}
 
     /**
      * Summarize PDF content using AI
+     * @param {File} file - PDF file to summarize
+     * @param {Object} options - Summarization options
+     * @returns {Promise<Object>} Summary result
      */
     async summarizePDF(file, options = {}) {
         try {
-            this.emitProgress(10, 'Validating file for summarization...');
+            // Validate input
             this.validateSummarizationRequest(file);
             
-            this.emitProgress(20, 'Analyzing PDF structure...');
+            // Analyze PDF for summarization optimization
             const analysis = await this.pdfAnalyzer.analyze(file);
             
-            this.emitProgress(30, 'Preparing summarization options...');
+            // Prepare summarization options
             const summaryOptions = this.prepareSummaryOptions(options, analysis);
             
-            this.emitProgress(40, 'Extracting text content...');
+            // Extract text content
             const textContent = await this.extractTextContent(file);
             
-            this.emitProgress(60, 'Performing AI summarization...');
+            // Perform AI summarization
             const result = await this.performAISummarization(textContent, summaryOptions);
             
-            this.emitProgress(90, 'Finalizing summary...');
+            // Add to history
             const historyEntry = this.addToHistory({
                 type: 'summarization',
                 fileName: file.name,
@@ -169,25 +73,29 @@ export class AIService extends StandardService {
 
     /**
      * Translate PDF content using AI
+     * @param {File} file - PDF file to translate
+     * @param {string} targetLanguage - Target language code
+     * @param {Object} options - Translation options
+     * @returns {Promise<Object>} Translation result
      */
     async translatePDF(file, targetLanguage, options = {}) {
         try {
-            this.emitProgress(10, 'Validating file for translation...');
+            // Validate input
             this.validateTranslationRequest(file, targetLanguage);
             
-            this.emitProgress(20, 'Analyzing PDF structure...');
+            // Analyze PDF for translation optimization
             const analysis = await this.pdfAnalyzer.analyze(file);
             
-            this.emitProgress(30, 'Preparing translation options...');
+            // Prepare translation options
             const translationOptions = this.prepareTranslationOptions(targetLanguage, options, analysis);
             
-            this.emitProgress(40, 'Extracting text content...');
+            // Extract text content
             const textContent = await this.extractTextContent(file);
             
-            this.emitProgress(60, 'Performing AI translation...');
+            // Perform AI translation
             const result = await this.performAITranslation(textContent, translationOptions);
             
-            this.emitProgress(90, 'Finalizing translation...');
+            // Add to history
             const historyEntry = this.addToHistory({
                 type: 'translation',
                 fileName: file.name,
@@ -244,6 +152,8 @@ export class AIService extends StandardService {
      */
     async extractTextContent(file) {
         try {
+            // For now, we'll use a simple text extraction
+            // In a real implementation, you'd use pdf.js or similar
             const formData = new FormData();
             formData.append('file', file);
             formData.append('extract_text', 'true');
@@ -275,15 +185,16 @@ export class AIService extends StandardService {
             language: 'en'
         };
 
+        // Merge with user options
         const options = { ...defaultOptions, ...userOptions };
 
         // Auto-adjust based on document analysis
         if (analysis.pageCount > 20 && options.maxLength === 'short') {
-            options.maxLength = 'medium';
+            options.maxLength = 'medium'; // Longer documents need more detailed summaries
         }
 
         if (analysis.documentType === 'academic' && options.style === 'casual') {
-            options.style = 'academic';
+            options.style = 'academic'; // Academic documents should use academic style
         }
 
         return options;
@@ -294,7 +205,6 @@ export class AIService extends StandardService {
      */
     prepareTranslationOptions(targetLanguage, userOptions, analysis) {
         const defaultOptions = {
-            targetLanguage,
             provider: 'openai',
             preserveFormatting: true,
             translateTables: true,
@@ -303,11 +213,12 @@ export class AIService extends StandardService {
             preserveContext: true
         };
 
+        // Merge with user options
         const options = { ...defaultOptions, ...userOptions };
 
         // Auto-adjust based on document analysis
         if (analysis.documentType === 'technical' && options.quality === 'fast') {
-            options.quality = 'high';
+            options.quality = 'high'; // Technical documents need high-quality translation
         }
 
         return options;
@@ -399,6 +310,204 @@ export class AIService extends StandardService {
             console.error('AI translation request failed:', error);
             throw error;
         }
+    }
+
+    /**
+     * Batch AI processing
+     */
+    async batchAIProcessing(files, operation, options = {}) {
+        try {
+            const batchResults = [];
+            const batchId = this.generateBatchId();
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+
+                try {
+                    let result;
+                    if (operation === 'summarize') {
+                        result = await this.summarizePDF(file, options);
+                    } else if (operation === 'translate') {
+                        const targetLanguage = options.targetLanguage || 'en';
+                        result = await this.translatePDF(file, targetLanguage, options);
+                    } else {
+                        throw new Error(`Unsupported operation: ${operation}`);
+                    }
+
+                    batchResults.push({
+                        fileIndex: i,
+                        fileName: file.name,
+                        success: true,
+                        result: result
+                    });
+                } catch (error) {
+                    batchResults.push({
+                        fileIndex: i,
+                        fileName: file.name,
+                        success: false,
+                        error: error.message
+                    });
+                }
+            }
+
+            return {
+                batchId: batchId,
+                operation: operation,
+                totalFiles: files.length,
+                successfulFiles: batchResults.filter(r => r.success).length,
+                failedFiles: batchResults.filter(r => !r.success).length,
+                results: batchResults
+            };
+        } catch (error) {
+            console.error('Batch AI processing failed:', error);
+            throw new Error('Batch AI processing failed');
+        }
+    }
+
+    /**
+     * Get AI processing preview/estimate
+     */
+    async getAIProcessingPreview(file, operation, options = {}) {
+        try {
+            const analysis = await this.pdfAnalyzer.analyze(file);
+            
+            let preview;
+            if (operation === 'summarize') {
+                preview = this.getSummarizationPreview(analysis, options);
+            } else if (operation === 'translate') {
+                preview = this.getTranslationPreview(analysis, options);
+            } else {
+                throw new Error(`Unsupported operation: ${operation}`);
+            }
+
+            return {
+                operation: operation,
+                originalSize: file.size,
+                analysis: analysis,
+                ...preview
+            };
+        } catch (error) {
+            console.error('AI processing preview failed:', error);
+            throw new Error('Failed to generate AI processing preview');
+        }
+    }
+
+    /**
+     * Get summarization preview
+     */
+    getSummarizationPreview(analysis, options) {
+        const estimatedWords = Math.round(analysis.pageCount * 300); // Rough estimate: 300 words per page
+        const estimatedSummaryWords = this.estimateSummaryLength(estimatedWords, options.maxLength);
+        const estimatedTime = this.estimateProcessingTime(analysis, 'summarization');
+
+        return {
+            estimatedWords: estimatedWords,
+            estimatedSummaryWords: estimatedSummaryWords,
+            estimatedTime: estimatedTime,
+            recommendations: this.getSummarizationRecommendations(analysis, options)
+        };
+    }
+
+    /**
+     * Get translation preview
+     */
+    getTranslationPreview(analysis, options) {
+        const estimatedWords = Math.round(analysis.pageCount * 300);
+        const estimatedTime = this.estimateProcessingTime(analysis, 'translation');
+        const estimatedCost = this.estimateTranslationCost(estimatedWords, options);
+
+        return {
+            estimatedWords: estimatedWords,
+            estimatedTime: estimatedTime,
+            estimatedCost: estimatedCost,
+            recommendations: this.getTranslationRecommendations(analysis, options)
+        };
+    }
+
+    /**
+     * Estimate summary length
+     */
+    estimateSummaryLength(originalWords, maxLength) {
+        const lengthRatios = {
+            'short': 0.1,
+            'medium': 0.2,
+            'long': 0.4
+        };
+        
+        return Math.round(originalWords * (lengthRatios[maxLength] || 0.2));
+    }
+
+    /**
+     * Estimate processing time
+     */
+    estimateProcessingTime(analysis, operation) {
+        const baseTime = operation === 'summarization' ? 10 : 15; // Base seconds
+        const timePerPage = operation === 'summarization' ? 2 : 3; // Seconds per page
+        
+        return Math.round(baseTime + (analysis.pageCount * timePerPage));
+    }
+
+    /**
+     * Estimate translation cost
+     */
+    estimateTranslationCost(wordCount, options) {
+        // Simplified cost estimation
+        const baseCostPerWord = 0.0001; // $0.0001 per word
+        let multiplier = 1;
+
+        if (options.quality === 'high') multiplier = 1.5;
+        if (options.provider === 'deepl') multiplier = 1.2;
+
+        return Math.round((wordCount * baseCostPerWord * multiplier) * 100) / 100;
+    }
+
+    /**
+     * Get summarization recommendations
+     */
+    getSummarizationRecommendations(analysis, options) {
+        const recommendations = [];
+
+        if (analysis.pageCount > 50) {
+            recommendations.push('Large document detected. Consider using "detailed" style for comprehensive summary.');
+        }
+
+        if (analysis.documentType === 'technical') {
+            recommendations.push('Technical document detected. "Academic" style may provide better technical accuracy.');
+        }
+
+        if (analysis.documentType === 'image_heavy') {
+            recommendations.push('Image-heavy document detected. Summary will focus on text content only.');
+        }
+
+        return recommendations;
+    }
+
+    /**
+     * Get translation recommendations
+     */
+    getTranslationRecommendations(analysis, options) {
+        const recommendations = [];
+
+        if (analysis.pageCount > 30) {
+            recommendations.push('Large document detected. Consider using "high" quality setting for better accuracy.');
+        }
+
+        if (options.targetLanguage === 'ja' || options.targetLanguage === 'ko' || options.targetLanguage === 'zh') {
+            recommendations.push('Asian language detected. Consider using specialized translation provider for better results.');
+        }
+
+        if (analysis.documentType === 'legal' || analysis.documentType === 'medical') {
+            recommendations.push('Specialized document detected. Ensure translation provider supports domain-specific terminology.');
+        }
+
+        return recommendations;
+    }
+
+    /**
+     * Generate batch ID
+     */
+    generateBatchId() {
+        return `ai_batch_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     }
 
     /**

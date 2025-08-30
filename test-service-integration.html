@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Integration Test</title>
+    <link rel="stylesheet" href="static/css/progress-results.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 8px;
+            font-size: 14px;
+        }
+        .button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .button.success {
+            background: #059669;
+        }
+        .log {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e9ecef;
+        }
+        .status {
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+            margin: 4px;
+        }
+        .status.ready { background: #d1fae5; color: #065f46; }
+        .status.processing { background: #dbeafe; color: #1e40af; }
+        .status.complete { background: #dcfce7; color: #166534; }
+        .status.error { background: #fee2e2; color: #dc2626; }
+    </style>
+</head>
+<body>
+    <h1>Service Integration Test</h1>
+    <p>Testing the complete event-driven architecture with MainController orchestration</p>
+    
+    <div class="test-section">
+        <h2>1. System Status</h2>
+        <div id="systemStatus">
+            <span class="status" id="controllerStatus">Controller: Initializing...</span>
+            <span class="status" id="storageStatus">Storage: Not Ready</span>
+            <span class="status" id="compressionStatus">Compression: Not Ready</span>
+            <span class="status" id="conversionStatus">Conversion: Not Ready</span>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. File Upload Simulation</h2>
+        <button class="button" id="simulateUploadBtn">Simulate File Upload</button>
+        <button class="button" id="clearFilesBtn">Clear Files</button>
+        <div id="fileStatus">No files uploaded</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Processing Controls</h2>
+        <button class="button compress-btn" id="compressBtn" disabled>Compress Files</button>
+        <button class="button convert-btn" id="convertBtn" disabled>Convert to Word</button>
+        <p><small>Buttons will be enabled after files are uploaded</small></p>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Progress Tracking</h2>
+        <progress-tracker id="progressTracker"></progress-tracker>
+    </div>
+    
+    <div class="test-section">
+        <h2>5. Results Display</h2>
+        <results-display id="resultsDisplay"></results-display>
+    </div>
+    
+    <div class="test-section">
+        <h2>6. Event Log</h2>
+        <div id="eventLog" class="log"></div>
+        <button class="button" onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <script type="module">
+        import { MainController } from './js/controllers/main-controller.js';
+        import './js/components/progress-tracker.js';
+        import './js/components/results-display.js';
+        
+        let mainController;
+        let eventLog = [];
+        
+        // Status elements
+        const statusElements = {
+            controller: document.getElementById('controllerStatus'),
+            storage: document.getElementById('storageStatus'),
+            compression: document.getElementById('compressionStatus'),
+            conversion: document.getElementById('conversionStatus')
+        };
+        
+        // Initialize the system
+        async function initSystem() {
+            try {
+                log('🚀 Initializing service integration test...');
+                updateStatus('controller', 'processing', 'Controller: Initializing...');
+                
+                // Create and initialize MainController
+                mainController = new MainController();
+                await mainController.init();
+                
+                updateStatus('controller', 'complete', 'Controller: Ready');
+                log('✅ MainController initialized successfully');
+                
+                // Check service status
+                const services = ['storage', 'compression', 'conversion'];
+                services.forEach(serviceName => {
+                    const service = mainController.getService(serviceName);
+                    if (service && service.isInitialized) {
+                        updateStatus(serviceName, 'complete', `${serviceName}: Ready`);
+                        log(`✅ ${serviceName} service ready`);
+                    } else {
+                        updateStatus(serviceName, 'error', `${serviceName}: Failed`);
+                        log(`❌ ${serviceName} service failed`);
+                    }
+                });
+                
+                // Setup test event listeners
+                setupTestEventListeners();
+                
+                log('🎉 System initialization complete!');
+                
+            } catch (error) {
+                log(`❌ System initialization failed: ${error.message}`);
+                updateStatus('controller', 'error', 'Controller: Failed');
+                console.error('Initialization error:', error);
+            }
+        }
+        
+        function setupTestEventListeners() {
+            // Listen for all major events
+            const events = [
+                'fileUploaded', 'compressionRequested', 'conversionRequested',
+                'controllerReady', 'progressUpdated', 'resultsShown'
+            ];
+            
+            events.forEach(eventName => {
+                document.addEventListener(eventName, (event) => {
+                    log(`📡 EVENT: ${eventName}`, event.detail);
+                });
+            });
+            
+            // Listen for service events
+            if (mainController) {
+                ['storage', 'compression', 'conversion'].forEach(serviceName => {
+                    const service = mainController.getService(serviceName);
+                    if (service) {
+                        service.addEventListener('progress', (event) => {
+                            log(`⚡ ${serviceName.toUpperCase()}: ${event.detail.percentage}% - ${event.detail.message}`);
+                            
+                            // Update progress tracker
+                            const progressTracker = document.getElementById('progressTracker');
+                            progressTracker.updateProgress(event.detail);
+                        });
+                        
+                        service.addEventListener('complete', (event) => {
+                            log(`✅ ${serviceName.toUpperCase()}: Complete`, event.detail);
+                            
+                            // Update results display
+                            const resultsDisplay = document.getElementById('resultsDisplay');
+                            resultsDisplay.showResults(event.detail);
+                        });
+                        
+                        service.addEventListener('error', (event) => {
+                            log(`❌ ${serviceName.toUpperCase()}: Error - ${event.detail.error}`);
+                        });
+                    }
+                });
+            }
+        }
+        
+        // Test functions
+        window.simulateFileUpload = function() {
+            log('📁 Simulating file upload...');
+            
+            const mockFiles = [{
+                fileId: `test-file-${Date.now()}`,
+                name: 'test-document.pdf',
+                size: 1024 * 1024, // 1MB
+                type: 'application/pdf',
+                metadata: {
+                    name: 'test-document.pdf',
+                    type: 'original',
+                    uploadedAt: Date.now()
+                }
+            }];
+            
+            // Dispatch file upload event
+            document.dispatchEvent(new CustomEvent('fileUploaded', {
+                detail: {
+                    files: mockFiles,
+                    source: 'test',
+                    timestamp: Date.now()
+                }
+            }));
+            
+            // Update UI
+            document.getElementById('fileStatus').textContent = `${mockFiles.length} file(s) uploaded`;
+            document.getElementById('compressBtn').disabled = false;
+            document.getElementById('convertBtn').disabled = false;
+            
+            log(`✅ Simulated upload of ${mockFiles.length} file(s)`);
+        };
+        
+        window.clearFiles = function() {
+            if (mainController) {
+                mainController.clearCurrentFiles();
+            }
+            
+            document.getElementById('fileStatus').textContent = 'No files uploaded';
+            document.getElementById('compressBtn').disabled = true;
+            document.getElementById('convertBtn').disabled = true;
+            
+            // Reset components
+            document.getElementById('progressTracker').reset();
+            document.getElementById('resultsDisplay').reset();
+            
+            log('🗑️ Files cleared');
+        };
+        
+        // Utility functions
+        function updateStatus(service, status, text) {
+            const element = statusElements[service];
+            if (element) {
+                element.className = `status ${status}`;
+                element.textContent = text;
+            }
+        }
+        
+        function log(message, data = null) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            
+            if (data) {
+                console.log(logEntry, data);
+                eventLog.push(`${logEntry}\n${JSON.stringify(data, null, 2)}`);
+            } else {
+                console.log(logEntry);
+                eventLog.push(logEntry);
+            }
+            
+            updateLogDisplay();
+        }
+        
+        function updateLogDisplay() {
+            const logElement = document.getElementById('eventLog');
+            logElement.textContent = eventLog.slice(-20).join('\n'); // Show last 20 entries
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        window.clearLog = function() {
+            eventLog = [];
+            updateLogDisplay();
+        };
+        
+        // Setup button event listeners
+        document.getElementById('simulateUploadBtn').addEventListener('click', simulateFileUpload);
+        document.getElementById('clearFilesBtn').addEventListener('click', clearFiles);
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initSystem);
+        
+        // Make functions globally available
+        window.mainController = null;
+        window.log = log;
+        
+        // Update global reference when ready
+        document.addEventListener('controllerReady', () => {
+            window.mainController = mainController;
+        });
+    </script>
+</body>
+</html>

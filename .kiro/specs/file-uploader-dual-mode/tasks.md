@@ -103,6 +103,8 @@
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
 
 - [ ] 9. Add comprehensive unit tests for dual-mode functionality
+
+
   - Write tests for mode switching functionality and state management
   - Create tests for file adaptation logic during mode transitions
   - Add tests for session preference saving and loading

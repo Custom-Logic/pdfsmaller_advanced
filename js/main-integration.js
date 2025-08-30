@@ -140,9 +140,65 @@ export class MainIntegration {
         this.addEventListener('settings:save', this.handleSettingsSave.bind(this));
         this.addEventListener('settings:edit-profile', this.handleEditProfile.bind(this));
         this.addEventListener('settings:manage-subscription', this.handleManageSubscription.bind(this));
+
+        // File Manager events
+        this.addEventListener('requestFileList', this.handleRequestFileList.bind(this));
+        this.addEventListener('fileDownloadRequested', this.handleFileDownload.bind(this));
+        this.addEventListener('fileDeleteRequested', this.handleFileDelete.bind(this));
+        this.addEventListener('clearAllFilesRequested', this.handleClearAllFiles.bind(this));
         
         // Navigation events
         this.addEventListener('tab-changed', this.handleTabChange.bind(this));
+        this.setupSideNavListener();
+
+        // Listen for auth state changes from the AuthManager
+        authManager.addEventListener('statusChanged', (event) => {
+            if (event.detail.status === 'auth_state_changed') {
+                this.handleAuthStateChange(event.detail);
+            }
+        });
+    }
+
+    handleAuthStateChange(detail) {
+        const { isAuthenticated, user } = detail;
+        this.isAuthenticated = isAuthenticated;
+        this.currentUser = user;
+
+        // Update all UI elements
+        this.updateUI();
+    }
+
+    setupSideNavListener() {
+        const navMenu = document.querySelector('.nav-menu-content');
+        if (!navMenu) return;
+
+        navMenu.addEventListener('click', (event) => {
+            const target = event.target.closest('[data-section]');
+            if (!target) return;
+
+            event.preventDefault();
+            const section = target.dataset.section;
+
+            // Dispatch the standard navigation event
+            document.dispatchEvent(new CustomEvent('navigationRequested', {
+                detail: { section },
+                bubbles: true,
+                composed: true
+            }));
+
+            // Close the menu
+            document.querySelector('.nav-menu').classList.remove('active');
+            document.querySelector('.hamburger-menu').classList.remove('active');
+        });
+
+        // Add a listener for the new top-level event
+        document.addEventListener('navigationRequested', (event) => {
+            const { section } = event.detail;
+            if (section) {
+                this.switchTab(section);
+            }
+        });
+    }
     }
 
     setupNavigation() {
@@ -603,6 +659,64 @@ export class MainIntegration {
     handleError(error) {
         console.error('Error in main integration:', error);
         this.showNotification(error.message || 'An error occurred', 'error');
+    }
+
+    // File Manager Event Handlers
+    async handleRequestFileList() {
+        const fileManager = document.getElementById('mainFileManager');
+        if (!fileManager) return;
+
+        try {
+            const files = await this.storageService.getAllFiles();
+            fileManager.updateFiles(files);
+        } catch (error) {
+            fileManager.showError(error);
+            this.handleError(error);
+        }
+    }
+
+    async handleFileDownload(event) {
+        const { fileId } = event.detail;
+        try {
+            const file = await this.storageService.getFile(fileId);
+            if (file && file.blob) {
+                const url = URL.createObjectURL(file.blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = file.metadata.name || 'download';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        } catch (error) {
+            this.handleError(error);
+        }
+    }
+
+    async handleFileDelete(event) {
+        const { fileId } = event.detail;
+        try {
+            const success = await this.storageService.deleteFile(fileId);
+            if (success) {
+                this.showNotification('File deleted successfully', 'success');
+                // Refresh the file list
+                await this.handleRequestFileList();
+            }
+        } catch (error) {
+            this.handleError(error);
+        }
+    }
+
+    async handleClearAllFiles() {
+        try {
+            await this.storageService.clear();
+            this.showNotification('All files deleted successfully', 'success');
+            // Refresh the file list
+            await this.handleRequestFileList();
+        } catch (error) {
+            this.handleError(error);
+        }
     }
 
     // Public API methods

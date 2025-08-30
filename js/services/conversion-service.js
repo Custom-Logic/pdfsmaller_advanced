@@ -1,17 +1,28 @@
 /**
- * PDF Conversion Service
+ * PDF Conversion Service (Refactored)
  * Handles conversion of PDFs to Word, Excel, and other formats
  */
 
+import { StandardService } from './standard-service.js';
 import { APIClient } from './api-client.js';
 import { PDFAnalyzer } from './pdf-analyzer.js';
 
-export class ConversionService {
+export class ConversionService extends StandardService {
     constructor() {
+        super();
         this.apiClient = new APIClient();
         this.pdfAnalyzer = new PDFAnalyzer();
         this.conversionHistory = new Map();
         this.supportedFormats = ['docx', 'xlsx', 'txt', 'html'];
+    }
+
+    async init() {
+        // Initialize dependencies
+        await this.apiClient.init?.();
+        await this.pdfAnalyzer.init?.();
+        
+        // Call parent init
+        await super.init();
     }
 
     /**
@@ -23,17 +34,24 @@ export class ConversionService {
      */
     async convertPDF(file, targetFormat, options = {}) {
         try {
+            this.isProcessing = true;
+            this.emitProgress(0, 'Starting conversion...');
+            
             // Validate input
             this.validateConversionRequest(file, targetFormat);
             
             // Analyze PDF for conversion optimization
+            this.emitProgress(20, 'Analyzing PDF structure...');
             const analysis = await this.pdfAnalyzer.analyze(file);
             
             // Prepare conversion options
             const conversionOptions = this.prepareConversionOptions(targetFormat, options, analysis);
             
             // Start conversion
+            this.emitProgress(50, 'Converting PDF...');
             const result = await this.performConversion(file, targetFormat, conversionOptions);
+            
+            this.emitProgress(100, 'Conversion complete');
             
             // Add to history
             const historyEntry = this.addToHistory({
@@ -45,14 +63,22 @@ export class ConversionService {
                 analysis: analysis
             });
             
-            return {
+            const finalResult = {
                 ...result,
                 historyId: historyEntry.id,
                 analysis: analysis
             };
+            
+            // Emit completion event
+            this.emitComplete(finalResult, `File converted to ${targetFormat} successfully`);
+            
+            return finalResult;
+            
         } catch (error) {
-            console.error('PDF conversion failed:', error);
-            throw new Error(`PDF conversion to ${targetFormat} failed: ${error.message}`);
+            this.emitError(error, { operation: 'convertPDF', fileName: file.name, targetFormat });
+            throw error;
+        } finally {
+            this.isProcessing = false;
         }
     }
 

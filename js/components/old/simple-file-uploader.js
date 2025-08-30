@@ -1,13 +1,13 @@
 /**
- * File Uploader Web Component (Refactored)
- * Simplified version that follows the new event-driven architecture
- * Maintains backward compatibility with existing API
+ * Simple File Uploader Component
+ * Generic widget for file input and validation - follows new architecture specification
+ * Emits events only, contains no business logic
  */
 
 import { BaseComponent } from './base-component.js';
 import { StorageService } from '../services/storage-service.js';
 
-export class FileUploader extends BaseComponent {
+export class SimpleFileUploader extends BaseComponent {
     static get observedAttributes() {
         return ['accept', 'multiple', 'max-size', 'disabled'];
     }
@@ -21,9 +21,6 @@ export class FileUploader extends BaseComponent {
         this.isMultiple = false;
         this.isDisabled = false;
         this.storageService = new StorageService();
-        
-        // Maintain backward compatibility properties
-        this.hasInitializationError = false;
     }
 
     async connectedCallback() {
@@ -37,11 +34,8 @@ export class FileUploader extends BaseComponent {
             // Initialize storage service
             await this.storageService.init();
             
-            // Initialize props from attributes with fallbacks
-            this.updateProp('accept', this.getAttribute('accept') || '.pdf');
-            this.updateProp('multiple', this.hasAttribute('multiple'));
-            this.updateProp('max-size', this.getAttribute('max-size') || '50MB');
-            this.updateProp('disabled', this.hasAttribute('disabled'));
+            // Initialize props from attributes
+            this.updatePropsFromAttributes();
             
             this.setState({
                 isDragOver: false,
@@ -50,50 +44,41 @@ export class FileUploader extends BaseComponent {
                 files: []
             });
             
-            this.hasInitializationError = false;
-            
-            // Emit initialization complete event (backward compatibility)
-            this.emit('initialized', {
-                success: true,
-                timestamp: new Date().toISOString()
-            });
+            // Emit initialization complete event
+            this.dispatchEvent(new CustomEvent('initialized', {
+                detail: {
+                    success: true,
+                    timestamp: Date.now()
+                }
+            }));
             
         } catch (error) {
-            console.error('FileUploader init error:', error);
-            this.hasInitializationError = true;
-            
+            console.error('SimpleFileUploader init error:', error);
             this.setState({
                 error: 'Failed to initialize file uploader'
             });
             
-            this.emit('initialization-error', {
-                error: error.message,
-                originalError: error,
-                timestamp: new Date().toISOString()
-            });
+            this.dispatchEvent(new CustomEvent('initialization-error', {
+                detail: {
+                    error: error.message,
+                    timestamp: Date.now()
+                }
+            }));
         }
     }
 
-    updateProp(name, value) {
-        switch (name) {
-            case 'accept':
-                this.acceptedTypes = value.split(',').map(type => type.trim());
-                break;
-            case 'multiple':
-                this.isMultiple = Boolean(value);
-                break;
-            case 'max-size':
-                this.maxFileSize = this.parseFileSize(value);
-                break;
-            case 'disabled':
-                this.isDisabled = Boolean(value);
-                break;
+    updatePropsFromAttributes() {
+        this.acceptedTypes = (this.getAttribute('accept') || '.pdf').split(',');
+        this.isMultiple = this.hasAttribute('multiple');
+        this.isDisabled = this.hasAttribute('disabled');
+        
+        const maxSizeAttr = this.getAttribute('max-size');
+        if (maxSizeAttr) {
+            this.maxFileSize = this.parseFileSize(maxSizeAttr);
         }
     }
 
     parseFileSize(sizeStr) {
-        if (typeof sizeStr === 'number') return sizeStr;
-        
         const units = { 'KB': 1024, 'MB': 1024 * 1024, 'GB': 1024 * 1024 * 1024 };
         const match = sizeStr.match(/^(\d+)\s*(KB|MB|GB)?$/i);
         if (match) {
@@ -335,7 +320,7 @@ export class FileUploader extends BaseComponent {
             }
         }
 
-        // Emit fileUploaded event with saved files (NEW ARCHITECTURE)
+        // Emit fileUploaded event with saved files
         if (savedFiles.length > 0) {
             this.dispatchEvent(new CustomEvent('fileUploaded', {
                 detail: {
@@ -370,9 +355,7 @@ export class FileUploader extends BaseComponent {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
 
-    // ===== BACKWARD COMPATIBILITY API =====
-    // These methods maintain compatibility with existing code
-
+    // Public API methods (for backward compatibility)
     getSelectedFiles() {
         return this.getState('files') || [];
     }
@@ -406,57 +389,7 @@ export class FileUploader extends BaseComponent {
         this.isDisabled = Boolean(disabled);
         this.render();
     }
-
-    // Legacy emit method for backward compatibility
-    emit(eventName, detail) {
-        this.dispatchEvent(new CustomEvent(eventName, { detail }));
-    }
-
-    // Stub methods for backward compatibility (business logic removed)
-    getMode() {
-        return this.isMultiple ? 'batch' : 'single';
-    }
-
-    setMode(mode) {
-        this.setMultiple(mode === 'batch');
-        return true;
-    }
-
-    // Placeholder methods that were in original (now just emit events)
-    initializeMode() {
-        // Business logic removed - now just emits event
-        this.emit('mode-initialized', {
-            initialMode: this.getMode(),
-            success: true
-        });
-    }
-
-    ensureBackwardCompatibility() {
-        // Always return true - compatibility maintained through API
-        return true;
-    }
-
-    verifyBackwardCompatibility() {
-        const expectedMethods = [
-            'getSelectedFiles', 'clearFiles', 'setAcceptedTypes', 
-            'setMaxFileSize', 'setMultiple', 'setDisabled',
-            'getMode', 'setMode', 'emit'
-        ];
-        
-        const availableMethods = expectedMethods.filter(method => 
-            typeof this[method] === 'function'
-        );
-        
-        return {
-            compatible: availableMethods.length === expectedMethods.length,
-            totalAvailable: availableMethods.length,
-            availableMethods: availableMethods,
-            missingMethods: expectedMethods.filter(method => 
-                !availableMethods.includes(method)
-            )
-        };
-    }
 }
 
 // Register the component
-customElements.define('file-uploader', FileUploader);
+customElements.define('simple-file-uploader', SimpleFileUploader);

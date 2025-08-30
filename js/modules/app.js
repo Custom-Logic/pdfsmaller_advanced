@@ -1,49 +1,46 @@
 /**
- * Main Application Controller
- * Orchestrates all application modules and components
+ * Main Application Controller (Refactored)
+ * Now delegates to MainController for event orchestration
  */
 
-import { UploadManager } from './upload-manager.js';
-import { CompressionFlow } from './compression-flow.js';
+import { MainController } from '../controllers/main-controller.js';
 import { AuthManager } from './auth-manager.js';
-import { AnalyticsService } from '../services/analytics-service.js';
 import { ErrorHandler } from '../utils/error-handler.js';
 import { getTabNavigation } from './tab-navigation.js';
 
 export class App {
     constructor() {
-        this.uploadManager = null;
-        this.compressionFlow = null;
+        this.mainController = null;
         this.authManager = null;
-        this.analyticsService = null;
         this.tabNavigation = null;
         this.isInitialized = false;
     }
 
     async init() {
         try {
-            // Initialize core services
-            await this.initializeServices();
+            // Initialize MainController (new architecture)
+            this.mainController = new MainController();
+            await this.mainController.init();
             
-            // Initialize managers
+            // Initialize remaining managers
             await this.initializeManagers();
-            
-            // Setup event listeners
-            this.setupEventListeners();
-            
-            // Initialize UI components
-            await this.initializeComponents();
             
             // Setup navigation
             this.setupNavigation();
             
+            // Initialize UI components
+            await this.initializeComponents();
+            
             this.isInitialized = true;
             
             // Track application initialization
-            this.analyticsService?.trackEvent('app_initialized', {
+            const analyticsService = this.mainController.getService('analytics');
+            analyticsService?.trackEvent('app_initialized', {
                 timestamp: Date.now(),
                 userAgent: navigator.userAgent
             });
+            
+            console.log('App: Initialization complete with new architecture');
             
         } catch (error) {
             ErrorHandler.handleError(error, { context: 'App initialization' });
@@ -51,14 +48,8 @@ export class App {
         }
     }
 
-    async initializeServices() {
-        // Initialize analytics service
-        this.analyticsService = new AnalyticsService();
-        await this.analyticsService.init();
-    }
-
     async initializeManagers() {
-        // Initialize tab navigation first
+        // Initialize tab navigation
         this.tabNavigation = getTabNavigation();
         if (!this.tabNavigation.isInitialized) {
             await this.tabNavigation.init();
@@ -67,31 +58,13 @@ export class App {
         // Initialize authentication manager
         this.authManager = new AuthManager();
         await this.authManager.init();
-
-        // Initialize upload manager
-        this.uploadManager = new UploadManager();
-        await this.uploadManager.init();
-
-        // Initialize compression flow
-        this.compressionFlow = new CompressionFlow();
-        await this.compressionFlow.init();
+        
+        // Note: UploadManager and CompressionFlow are now replaced by MainController
+        // which handles event orchestration between components and services
     }
 
-    setupEventListeners() {
-        // Listen for file upload events
-        document.addEventListener('file-selected', this.handleFileSelected.bind(this));
-        
-        // Listen for compression events
-        document.addEventListener('compression-started', this.handleCompressionStarted.bind(this));
-        document.addEventListener('compression-progress', this.handleCompressionProgress.bind(this));
-        document.addEventListener('compression-completed', this.handleCompressionCompleted.bind(this));
-        
-        // Listen for authentication events
-        document.addEventListener('auth-state-changed', this.handleAuthStateChanged.bind(this));
-        
-        // Listen for navigation events
-        document.addEventListener('tab-changed', this.handleTabChanged.bind(this));
-    }
+    // Event listeners are now handled by MainController
+    // App only handles high-level application events
 
     async initializeComponents() {
         // Dynamically import and initialize Web Components
@@ -114,51 +87,8 @@ export class App {
         }
     }
 
-    handleFileSelected(event) {
-        const { file } = event.detail;
-        this.analyticsService?.trackEvent('file_selected', {
-            fileSize: file.size,
-            fileType: file.type,
-            fileName: file.name
-        });
-    }
-
-    handleCompressionStarted(event) {
-        const { jobId, settings } = event.detail;
-        this.analyticsService?.trackEvent('compression_started', {
-            jobId,
-            settings,
-            timestamp: Date.now()
-        });
-    }
-
-    handleCompressionProgress(event) {
-        const { progress, estimatedTime } = event.detail;
-        // Update UI progress indicators
-        this.updateProgressIndicators(progress, estimatedTime);
-    }
-
-    handleCompressionCompleted(event) {
-        const { result, processingTime } = event.detail;
-        this.analyticsService?.trackEvent('compression_completed', {
-            originalSize: result.originalSize,
-            compressedSize: result.compressedSize,
-            reductionPercent: result.reductionPercent,
-            processingTime
-        });
-    }
-
-    handleAuthStateChanged(event) {
-        const { isAuthenticated, user } = event.detail;
-        this.updateUIForAuthState(isAuthenticated, user);
-    }
-
-    handleTabChanged(event) {
-        const { tab } = event.detail;
-        // Tab switching is now handled by TabNavigation module
-        // Just track the change here
-        this.analyticsService?.trackEvent('tab_changed', { tab });
-    }
+    // Event handlers moved to MainController
+    // App now focuses on high-level application coordination
 
     toggleMobileMenu() {
         const navMenu = document.querySelector('.nav-menu');
@@ -171,44 +101,8 @@ export class App {
         }
     }
 
-    updateProgressIndicators(progress, estimatedTime) {
-        // Update all progress indicators in the UI
-        const progressBars = document.querySelectorAll('.progress-bar');
-        const progressPercentages = document.querySelectorAll('[id$="ProgressPercentage"]');
-        
-        progressBars.forEach(bar => {
-            bar.style.width = `${progress}%`;
-        });
-        
-        progressPercentages.forEach(element => {
-            element.textContent = `${Math.round(progress)}%`;
-        });
-    }
-
-    updateUIForAuthState(isAuthenticated, user) {
-        const guestSection = document.getElementById('guestAuthSection');
-        const userSection = document.getElementById('userAuthSection');
-        
-        if (isAuthenticated && user) {
-            guestSection?.classList.add('hidden');
-            userSection?.classList.remove('hidden');
-            
-            // Update user info
-            const userNameElement = document.getElementById('userNameNav');
-            const userPlanElement = document.getElementById('userPlanNav');
-            const userInitialsElement = document.getElementById('userInitialsNav');
-            
-            if (userNameElement) userNameElement.textContent = user.name || 'User';
-            if (userPlanElement) userPlanElement.textContent = user.plan || 'Free Plan';
-            if (userInitialsElement) {
-                const initials = (user.name || 'U').split(' ').map(n => n[0]).join('').toUpperCase();
-                userInitialsElement.textContent = initials;
-            }
-        } else {
-            guestSection?.classList.remove('hidden');
-            userSection?.classList.add('hidden');
-        }
-    }
+    // UI update methods moved to MainController
+    // App delegates UI coordination to MainController
 
     // Public API methods
     getCurrentTab() {
@@ -220,6 +114,14 @@ export class App {
     }
 
     isReady() {
-        return this.isInitialized;
+        return this.isInitialized && this.mainController?.isReady();
+    }
+
+    getMainController() {
+        return this.mainController;
+    }
+
+    getService(serviceName) {
+        return this.mainController?.getService(serviceName);
     }
 }

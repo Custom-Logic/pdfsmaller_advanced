@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Refactored Services</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .test-button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #1976D2;
+        }
+        .test-results {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            min-height: 100px;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Refactored Services</h1>
+    <p>This page tests the new event-driven, service-centric architecture for AI, OCR, and Cloud services.</p>
+
+    <div class="test-section">
+        <h2>AI Service Test</h2>
+        <button class="test-button" onclick="testAISummarization()">Test AI Summarization</button>
+        <button class="test-button" onclick="testAITranslation()">Test AI Translation</button>
+        <div class="test-results" id="aiResults">Results will appear here...</div>
+    </div>
+
+    <div class="test-section">
+        <h2>OCR Service Test</h2>
+        <button class="test-button" onclick="testOCRProcessing()">Test OCR Processing</button>
+        <div class="test-results" id="ocrResults">Results will appear here...</div>
+    </div>
+
+    <div class="test-section">
+        <h2>Cloud Service Test</h2>
+        <button class="test-button" onclick="testCloudUpload()">Test Cloud Upload</button>
+        <button class="test-button" onclick="testCloudDownload()">Test Cloud Download</button>
+        <div class="test-results" id="cloudResults">Results will appear here...</div>
+    </div>
+
+    <div class="test-section">
+        <h2>Event Log</h2>
+        <div class="test-results" id="eventLog">Events will be logged here...</div>
+    </div>
+
+    <script type="module">
+        import { MainController } from './js/controllers/main-controller.js';
+
+        let mainController;
+        let eventLog = [];
+
+        // Initialize the main controller
+        async function initializeController() {
+            try {
+                mainController = new MainController();
+                await mainController.init();
+                logEvent('✅ MainController initialized successfully', 'success');
+            } catch (error) {
+                logEvent(`❌ MainController initialization failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Event logging
+        function logEvent(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            eventLog.push(`[${timestamp}] ${message}`);
+            
+            const logElement = document.getElementById('eventLog');
+            logElement.innerHTML = eventLog.map(log => 
+                `<div class="${type}">${log}</div>`
+            ).join('');
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        // Listen for processing events
+        document.addEventListener('processingComplete', (event) => {
+            logEvent(`✅ Processing completed: ${event.detail.operation}`, 'success');
+        });
+
+        document.addEventListener('processingError', (event) => {
+            logEvent(`❌ Processing error in ${event.detail.service}: ${event.detail.error}`, 'error');
+        });
+
+        // Test functions
+        window.testAISummarization = function() {
+            logEvent('🤖 Testing AI Summarization...');
+            
+            document.dispatchEvent(new CustomEvent('aiProcessingRequested', {
+                detail: {
+                    fileId: 'test_file_1',
+                    operation: 'summarize',
+                    options: {
+                        style: 'concise',
+                        maxLength: 'medium'
+                    }
+                }
+            }));
+            
+            document.getElementById('aiResults').innerHTML = 'AI Summarization test initiated...';
+        };
+
+        window.testAITranslation = function() {
+            logEvent('🌐 Testing AI Translation...');
+            
+            document.dispatchEvent(new CustomEvent('aiProcessingRequested', {
+                detail: {
+                    fileId: 'test_file_1',
+                    operation: 'translate',
+                    targetLanguage: 'es',
+                    options: {
+                        quality: 'high'
+                    }
+                }
+            }));
+            
+            document.getElementById('aiResults').innerHTML = 'AI Translation test initiated...';
+        };
+
+        window.testOCRProcessing = function() {
+            logEvent('👁️ Testing OCR Processing...');
+            
+            document.dispatchEvent(new CustomEvent('ocrProcessingRequested', {
+                detail: {
+                    fileId: 'test_file_2',
+                    options: {
+                        language: 'en',
+                        quality: 'balanced',
+                        outputFormat: 'searchable_pdf'
+                    }
+                }
+            }));
+            
+            document.getElementById('ocrResults').innerHTML = 'OCR Processing test initiated...';
+        };
+
+        window.testCloudUpload = function() {
+            logEvent('☁️ Testing Cloud Upload...');
+            
+            document.dispatchEvent(new CustomEvent('cloudUploadRequested', {
+                detail: {
+                    fileId: 'test_file_1',
+                    provider: 'google_drive',
+                    options: {
+                        destinationPath: '/test_uploads/'
+                    }
+                }
+            }));
+            
+            document.getElementById('cloudResults').innerHTML = 'Cloud Upload test initiated...';
+        };
+
+        window.testCloudDownload = function() {
+            logEvent('📥 Testing Cloud Download...');
+            
+            document.dispatchEvent(new CustomEvent('cloudDownloadRequested', {
+                detail: {
+                    provider: 'google_drive',
+                    filePath: '/test_uploads/sample.pdf',
+                    options: {}
+                }
+            }));
+            
+            document.getElementById('cloudResults').innerHTML = 'Cloud Download test initiated...';
+        };
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initializeController);
+    </script>
+</body>
+</html>

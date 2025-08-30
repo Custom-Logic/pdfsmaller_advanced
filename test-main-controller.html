@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MainController Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .log {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .file-uploader {
+            border: 2px dashed #ddd;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>MainController Architecture Test</h1>
+    
+    <div class="test-section">
+        <h2>1. File Upload Test</h2>
+        <div class="file-uploader">
+            <p>Drop files here or click to browse</p>
+            <input type="file" accept=".pdf" multiple>
+        </div>
+        <file-uploader id="testUploader" accept=".pdf" multiple></file-uploader>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Processing Buttons</h2>
+        <button class="button compress-btn" disabled>Compress Files</button>
+        <button class="button convert-btn" disabled>Convert to Word</button>
+        <p>Buttons will be enabled after files are uploaded</p>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Progress & Results</h2>
+        <div id="progressCard" style="display: none;">
+            <h3>Processing...</h3>
+            <progress-tracker id="progressTracker"></progress-tracker>
+        </div>
+        
+        <div id="resultsCard" style="display: none;">
+            <h3>Results</h3>
+            <results-display id="resultsDisplay"></results-display>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Event Log</h2>
+        <div id="eventLog" class="log"></div>
+        <button class="button" onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <script type="module">
+        import { MainController } from './js/controllers/main-controller.js';
+        import './js/components/file-uploader.js';
+        
+        let mainController;
+        let eventLog = [];
+        
+        // Initialize MainController
+        async function initTest() {
+            try {
+                log('Initializing MainController...');
+                mainController = new MainController();
+                await mainController.init();
+                log('MainController initialized successfully!');
+                
+                // Setup additional event listeners for testing
+                setupTestEventListeners();
+                
+            } catch (error) {
+                log(`ERROR: ${error.message}`);
+                console.error('Test initialization failed:', error);
+            }
+        }
+        
+        function setupTestEventListeners() {
+            // Listen for all events to log them
+            const events = [
+                'fileUploaded', 'fileValidationError', 'compressionRequested', 
+                'conversionRequested', 'controllerReady'
+            ];
+            
+            events.forEach(eventName => {
+                document.addEventListener(eventName, (event) => {
+                    log(`EVENT: ${eventName}`, event.detail);
+                });
+            });
+            
+            // Listen for service events
+            if (mainController) {
+                const services = ['storage', 'compression', 'conversion'];
+                services.forEach(serviceName => {
+                    const service = mainController.getService(serviceName);
+                    if (service) {
+                        service.addEventListener('progress', (event) => {
+                            log(`SERVICE: ${serviceName} progress: ${event.detail.percentage}% - ${event.detail.message}`);
+                        });
+                        
+                        service.addEventListener('complete', (event) => {
+                            log(`SERVICE: ${serviceName} completed`, event.detail);
+                        });
+                        
+                        service.addEventListener('error', (event) => {
+                            log(`SERVICE: ${serviceName} error: ${event.detail.error}`);
+                        });
+                    }
+                });
+            }
+        }
+        
+        function log(message, data = null) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            
+            if (data) {
+                console.log(logEntry, data);
+                eventLog.push(`${logEntry} ${JSON.stringify(data, null, 2)}`);
+            } else {
+                console.log(logEntry);
+                eventLog.push(logEntry);
+            }
+            
+            updateLogDisplay();
+        }
+        
+        function updateLogDisplay() {
+            const logElement = document.getElementById('eventLog');
+            logElement.textContent = eventLog.join('\n');
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        window.clearLog = function() {
+            eventLog = [];
+            updateLogDisplay();
+        };
+        
+        // Test file upload simulation
+        window.simulateFileUpload = function() {
+            const mockFile = new File(['test content'], 'test.pdf', { type: 'application/pdf' });
+            
+            document.dispatchEvent(new CustomEvent('fileUploaded', {
+                detail: {
+                    files: [{
+                        fileId: 'test-file-1',
+                        name: 'test.pdf',
+                        size: mockFile.size,
+                        type: mockFile.type,
+                        metadata: {
+                            name: 'test.pdf',
+                            type: 'original'
+                        }
+                    }],
+                    source: 'test',
+                    timestamp: Date.now()
+                }
+            }));
+        };
+        
+        // Initialize test when page loads
+        document.addEventListener('DOMContentLoaded', initTest);
+        
+        // Make functions available globally for testing
+        window.mainController = null;
+        window.log = log;
+        window.simulateFileUpload = simulateFileUpload;
+        
+        // Update global reference when controller is ready
+        document.addEventListener('controllerReady', () => {
+            window.mainController = mainController;
+        });
+    </script>
+    
+    <div class="test-section">
+        <h2>5. Manual Tests</h2>
+        <button class="button" onclick="simulateFileUpload()">Simulate File Upload</button>
+        <button class="button" onclick="log('Manual test button clicked')">Test Logging</button>
+        <p>Open browser console to see detailed logs</p>
+    </div>
+</body>
+</html>

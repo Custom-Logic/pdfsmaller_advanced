@@ -1,0 +1,261 @@
+/**
+ * Simple File Uploader Styles
+ * Clean, modern styling for the simplified file uploader component
+ */
+
+.file-uploader {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.upload-area {
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #f9fafb;
+    position: relative;
+}
+
+.upload-area:hover {
+    border-color: #3b82f6;
+    background: #eff6ff;
+}
+
+.file-uploader[data-drag-over="true"] .upload-area {
+    border-color: #3b82f6;
+    background: #dbeafe;
+    transform: scale(1.02);
+}
+
+.file-uploader.disabled .upload-area {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f3f4f6;
+}
+
+.upload-icon {
+    margin-bottom: 1rem;
+    color: #6b7280;
+}
+
+.file-uploader[data-drag-over="true"] .upload-icon {
+    color: #3b82f6;
+}
+
+.upload-text {
+    margin-bottom: 1rem;
+}
+
+.upload-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0 0 0.5rem 0;
+}
+
+.upload-subtitle {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+.file-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.file-input:disabled {
+    cursor: not-allowed;
+}
+
+/* File List */
+.file-list {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.file-list h4 {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.file-item:last-child {
+    border-bottom: none;
+}
+
+.file-name {
+    font-weight: 500;
+    color: #374151;
+    flex: 1;
+    text-align: left;
+}
+
+.file-size {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-left: 1rem;
+}
+
+.remove-file {
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    margin-left: 0.5rem;
+    transition: background-color 0.2s ease;
+}
+
+.remove-file:hover {
+    background: #dc2626;
+}
+
+/* Error Message */
+.error-message {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.error-icon {
+    font-size: 1.25rem;
+}
+
+.error-text {
+    color: #dc2626;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Processing State */
+.file-uploader.processing .upload-area {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.file-uploader.processing .upload-area::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 24px;
+    height: 24px;
+    margin: -12px 0 0 -12px;
+    border: 2px solid #3b82f6;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+    .upload-area {
+        padding: 1.5rem 1rem;
+    }
+    
+    .upload-title {
+        font-size: 1rem;
+    }
+    
+    .upload-subtitle {
+        font-size: 0.8rem;
+    }
+    
+    .file-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+    
+    .file-size {
+        margin-left: 0;
+    }
+    
+    .remove-file {
+        align-self: flex-end;
+        margin-left: 0;
+        margin-top: 0.25rem;
+    }
+}
+
+/* Accessibility */
+.upload-area:focus-within {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+.file-input:focus {
+    outline: none;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .upload-area {
+        border-width: 3px;
+    }
+    
+    .error-message {
+        border-width: 2px;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .upload-area,
+    .remove-file {
+        transition: none;
+    }
+    
+    .file-uploader[data-drag-over="true"] .upload-area {
+        transform: none;
+    }
+    
+    @keyframes spin {
+        to {
+            transform: none;
+        }
+    }
+}

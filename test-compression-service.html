@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Compression Service</title>
+</head>
+<body>
+    <h1>Test Compression Service</h1>
+    <div id="result">Loading...</div>
+
+    <script type="module">
+        try {
+            console.log('Attempting to import CompressionService...');
+            
+            const { CompressionService } = await import('./js/services/compression-service.js');
+            console.log('CompressionService imported successfully:', CompressionService);
+            
+            const service = new CompressionService();
+            console.log('CompressionService instantiated successfully:', service);
+            
+            await service.init();
+            console.log('CompressionService initialized successfully');
+            
+            document.getElementById('result').innerHTML = '✅ CompressionService loaded and initialized successfully!';
+            
+        } catch (error) {
+            console.error('Error loading CompressionService:', error);
+            document.getElementById('result').innerHTML = `❌ Error: ${error.message}`;
+        }
+    </script>
+</body>
+</html>
