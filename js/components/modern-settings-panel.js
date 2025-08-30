@@ -427,11 +427,11 @@ export class ModernSettingsPanel extends BaseComponent {
         const singleMode = shadow.getElementById('singleMode');
         const bulkMode = shadow.getElementById('bulkMode');
 
-        singleMode.addEventListener('click', () => this.setProcessingMode('single'));
-        bulkMode.addEventListener('click', () => this.setProcessingMode('bulk'));
+        this.addEventListener(singleMode, 'click', () => this.setProcessingMode('single'));
+        this.addEventListener(bulkMode, 'click', () => this.setProcessingMode('bulk'));
 
         // Compression level change
-        shadow.getElementById('compressionLevel').addEventListener('change', (e) => {
+        this.addEventListener(shadow.getElementById('compressionLevel'), 'change', (e) => {
             this.state.compressionLevel = e.target.value;
             this.notifySettingsChange();
         });
@@ -440,7 +440,7 @@ export class ModernSettingsPanel extends BaseComponent {
         const imageQualitySlider = shadow.getElementById('imageQuality');
         const qualityValue = shadow.getElementById('qualityValue');
 
-        imageQualitySlider.addEventListener('input', (e) => {
+        this.addEventListener(imageQualitySlider, 'input', (e) => {
             const value = parseInt(e.target.value);
             this.state.imageQuality = value;
             qualityValue.textContent = `${value}%`;
@@ -448,7 +448,7 @@ export class ModernSettingsPanel extends BaseComponent {
         });
 
         // Server processing toggle
-        shadow.getElementById('serverProcessing').addEventListener('change', (e) => {
+        this.addEventListener(shadow.getElementById('serverProcessing'), 'change', (e) => {
             this.state.useServerProcessing = e.target.checked;
             this.notifySettingsChange();
         });

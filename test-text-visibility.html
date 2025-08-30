@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Visibility and Contrast Test</title>
+    
+    <!-- Include the design system and text visibility fixes -->
+    <link rel="stylesheet" href="static/css/design-system.css">
+    <link rel="stylesheet" href="static/css/components-modern.css">
+    <link rel="stylesheet" href="static/css/layout-modern.css">
+    <link rel="stylesheet" href="static/css/text-visibility-fixes.css">
+    
+    <style>
+        body {
+            font-family: var(--font-sans);
+            margin: 0;
+            padding: 20px;
+            background: var(--gradient-primary);
+            min-height: 100vh;
+        }
+        
+        .test-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            gap: var(--space-6);
+        }
+        
+        .test-section {
+            background: var(--bg-primary);
+            padding: var(--space-6);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-light);
+        }
+        
+        .test-header {
+            text-align: center;
+            padding: var(--space-8);
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-2xl);
+            backdrop-filter: blur(10px);
+            margin-bottom: var(--space-6);
+        }
+        
+        .contrast-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-4);
+        }
+        
+        .contrast-example {
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-light);
+        }
+        
+        .example-title {
+            font-size: var(--text-sm);
+            font-weight: var(--font-semibold);
+            margin-bottom: var(--space-2);
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: var(--tracking-wide);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <!-- Header Section -->
+        <div class="test-header">
+            <h1 class="interface-title">Text Visibility Test</h1>
+            <p class="interface-subtitle">Testing WCAG AA compliant text contrast ratios</p>
+        </div>
+        
+        <!-- Primary Text Elements -->
+        <div class="test-section">
+            <h2 class="section-title">Primary Text Elements</h2>
+            <div class="contrast-grid">
+                <div class="contrast-example">
+                    <div class="example-title">Primary Text</div>
+                    <h3 style="color: var(--text-primary);">Main Heading Text</h3>
+                    <p style="color: var(--text-primary);">This is primary body text that should have high contrast against the background for maximum readability.</p>
+                </div>
+                
+                <div class="contrast-example">
+                    <div class="example-title">Secondary Text</div>
+                    <h4 style="color: var(--text-secondary);">Secondary Heading</h4>
+                    <p style="color: var(--text-secondary);">This is secondary text used for descriptions and less important information.</p>
+                </div>
+                
+                <div class="contrast-example">
+                    <div class="example-title">Muted Text</div>
+                    <h5 style="color: var(--text-muted);">Muted Heading</h5>
+                    <p style="color: var(--text-muted);">This is muted text used for hints, placeholders, and supplementary information.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Interactive Elements -->
+        <div class="test-section">
+            <h2 class="section-title">Interactive Elements</h2>
+            <div class="contrast-grid">
+                <div class="contrast-example">
+                    <div class="example-title">Links</div>
+                    <p><a href="#" style="color: var(--text-link);">Primary Link Text</a></p>
+                    <p><a href="#" style="color: var(--text-link-hover);">Hovered Link Text</a></p>
+                </div>
+                
+                <div class="contrast-example">
+                    <div class="example-title">Buttons</div>
+                    <button class="btn btn-primary">Primary Button</button>
+                    <button class="btn btn-secondary">Secondary Button</button>
+                    <button class="btn btn-outline">Outline Button</button>
+                </div>
+                
+                <div class="contrast-example">
+                    <div class="example-title">Form Elements</div>
+                    <label class="form-label">Form Label</label>
+                    <input type="text" class="form-input" placeholder="Placeholder text" value="Input text">
+                    <select class="form-select">
+                        <option>Select option</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab Navigation -->
+        <div class="test-section">
+            <h2 class="section-title">Tab Navigation</h2>
+            <div class="tab-navigation">
+                <div class="tab-nav-container">
+                    <button class="tab-button active">Active Tab</button>
+                    <button class="tab-button">Inactive Tab</button>
+                    <button class="tab-button">Another Tab</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Settings Interface -->
+        <div class="test-section">
+            <h2 class="section-title">Settings Interface</h2>
+            <div class="quick-settings-container">
+                <div class="quick-settings-header">
+                    <h4>Quick Settings</h4>
+                    <button class="full-settings-link">All Settings →</button>
+                </div>
+                <div class="quick-setting-item">
+                    <label class="quick-setting-label">Setting Label:</label>
+                    <select class="quick-setting-control">
+                        <option>Option 1</option>
+                        <option>Option 2</option>
+                    </select>
+                </div>
+                <p class="settings-note">
+                    This is a settings note with an 
+                    <button class="inline-settings-link">inline link</button>.
+                </p>
+            </div>
+        </div>
+        
+        <!-- Mode Toggle -->
+        <div class="test-section">
+            <h2 class="section-title">Mode Toggle</h2>
+            <div class="mode-toggle-container">
+                <div class="mode-toggle">
+                    <button class="toggle-option active">
+                        <span>Single File</span>
+                    </button>
+                    <button class="toggle-option">
+                        <span>Bulk Processing</span>
+                        <span class="pro-badge">PRO</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Upload Interface -->
+        <div class="test-section">
+            <h2 class="section-title">Upload Interface</h2>
+            <div class="upload-header">
+                <h3 class="upload-title">Upload PDF Files</h3>
+                <p class="upload-subtitle">Drag and drop your PDF files or click to browse</p>
+            </div>
+        </div>
+        
+        <!-- Progress and Results -->
+        <div class="test-section">
+            <h2 class="section-title">Progress and Results</h2>
+            <div class="contrast-grid">
+                <div class="contrast-example">
+                    <div class="example-title">Progress</div>
+                    <div class="progress-label">
+                        <span>Processing...</span>
+                        <span class="progress-percentage">75%</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" style="width: 75%;"></div>
+                    </div>
+                </div>
+                
+                <div class="contrast-example">
+                    <div class="example-title">Results</div>
+                    <div class="result-value">2.5 MB</div>
+                    <div class="result-label">Compressed Size</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Alert Messages -->
+        <div class="test-section">
+            <h2 class="section-title">Alert Messages</h2>
+            <div class="contrast-grid">
+                <div class="alert alert-info">
+                    <div class="alert-title">Information</div>
+                    <div class="alert-message">This is an informational message.</div>
+                </div>
+                
+                <div class="alert alert-success">
+                    <div class="alert-title">Success</div>
+                    <div class="alert-message">Operation completed successfully.</div>
+                </div>
+                
+                <div class="alert alert-warning">
+                    <div class="alert-title">Warning</div>
+                    <div class="alert-message">Please review your settings.</div>
+                </div>
+                
+                <div class="alert alert-error">
+                    <div class="alert-title">Error</div>
+                    <div class="alert-message">An error occurred during processing.</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- High Contrast Test -->
+        <div class="test-section">
+            <h2 class="section-title">High Contrast Test</h2>
+            <p>This section tests text visibility in high contrast mode. All text should remain clearly readable.</p>
+            <div class="contrast-grid">
+                <div class="contrast-example" style="background: var(--bg-primary);">
+                    <div class="example-title">Light Background</div>
+                    <p style="color: var(--text-primary);">Primary text on light background</p>
+                    <p style="color: var(--text-secondary);">Secondary text on light background</p>
+                </div>
+                
+                <div class="contrast-example" style="background: var(--gray-800); color: var(--text-inverse);">
+                    <div class="example-title" style="color: rgba(255,255,255,0.7);">Dark Background</div>
+                    <p style="color: var(--text-inverse);">Primary text on dark background</p>
+                    <p style="color: rgba(255,255,255,0.8);">Secondary text on dark background</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

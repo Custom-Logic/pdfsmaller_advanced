@@ -577,6 +577,7 @@ export class MainIntegration {
 
     handleOrientationChange() {
         // Adjust layout for orientation changes
+        // TODO - orientation deprecated can we fix this
         const isLandscape = window.orientation === 90 || window.orientation === -90;
         document.body.classList.toggle('landscape', isLandscape);
         document.body.classList.toggle('portrait', !isLandscape);

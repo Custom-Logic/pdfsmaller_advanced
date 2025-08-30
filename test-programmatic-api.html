@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Uploader Programmatic API Test</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #f8fafc;
+        }
+        
+        .test-container {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        button {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid #3b82f6;
+            background: #3b82f6;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        button:hover {
+            background: #2563eb;
+            border-color: #2563eb;
+        }
+        
+        button.secondary {
+            background: white;
+            color: #3b82f6;
+        }
+        
+        button.secondary:hover {
+            background: #eff6ff;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .status {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            font-family: monospace;
+            font-size: 0.875rem;
+        }
+        
+        .event-log {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+        
+        .event-entry {
+            margin-bottom: 0.5rem;
+            padding: 0.25rem 0;
+            border-bottom: 1px solid #334155;
+        }
+        
+        .event-entry:last-child {
+            border-bottom: none;
+        }
+        
+        .event-type {
+            color: #60a5fa;
+            font-weight: bold;
+        }
+        
+        .event-data {
+            color: #94a3b8;
+            margin-left: 1rem;
+        }
+        
+        .success {
+            color: #22c55e;
+        }
+        
+        .error {
+            color: #ef4444;
+        }
+        
+        .warning {
+            color: #f59e0b;
+        }
+        
+        h1, h2 {
+            color: #1e293b;
+        }
+        
+        h2 {
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .test-description {
+            color: #64748b;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <h1>File Uploader Programmatic API Test</h1>
+    <p class="test-description">
+        This page tests the programmatic API methods for the FileUploader component's dual-mode functionality.
+        Use the controls below to test the setMode(), getMode(), and event emission features.
+    </p>
+
+    <div class="test-container">
+        <h2>API Controls</h2>
+        <div class="controls">
+            <div class="control-group">
+                <label>Mode Control:</label>
+                <button id="setSingleMode">Set Single Mode</button>
+                <button id="setBatchMode">Set Batch Mode</button>
+                <button id="toggleMode" class="secondary">Toggle Mode</button>
+            </div>
+            
+            <div class="control-group">
+                <label>State Query:</label>
+                <button id="getCurrentMode" class="secondary">Get Current Mode</button>
+                <button id="getFiles" class="secondary">Get Files</button>
+            </div>
+            
+            <div class="control-group">
+                <label>Toggle Control:</label>
+                <button id="disableToggle" class="secondary">Disable Toggle</button>
+                <button id="enableToggle" class="secondary">Enable Toggle</button>
+            </div>
+            
+            <div class="control-group">
+                <label>Test Actions:</label>
+                <button id="clearLog" class="secondary">Clear Log</button>
+                <button id="runTests" class="secondary">Run All Tests</button>
+            </div>
+        </div>
+        
+        <div class="status" id="status">
+            Current Mode: <span id="currentMode">Loading...</span> | 
+            Toggle Disabled: <span id="toggleDisabled">Loading...</span> | 
+            Files Count: <span id="filesCount">0</span>
+        </div>
+    </div>
+
+    <div class="test-container">
+        <h2>File Uploader Component</h2>
+        <file-uploader 
+            id="testUploader"
+            accept=".pdf"
+            max-size="50MB"
+            default-mode="single"
+            remember-preference="true">
+        </file-uploader>
+    </div>
+
+    <div class="test-container">
+        <h2>Event Log</h2>
+        <div class="event-log" id="eventLog">
+            <div class="event-entry">
+                <span class="event-type">INFO:</span>
+                <span class="event-data">Event log initialized. Programmatic API events will appear here.</span>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import './js/components/file-uploader.js';
+        
+        // Wait for component to be ready
+        await customElements.whenDefined('file-uploader');
+        
+        const uploader = document.getElementById('testUploader');
+        const eventLog = document.getElementById('eventLog');
+        const statusElements = {
+            currentMode: document.getElementById('currentMode'),
+            toggleDisabled: document.getElementById('toggleDisabled'),
+            filesCount: document.getElementById('filesCount')
+        };
+        
+        // Event logging function
+        function logEvent(type, data, className = '') {
+            const entry = document.createElement('div');
+            entry.className = `event-entry ${className}`;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            entry.innerHTML = `
+                <span class="event-type">[${timestamp}] ${type}:</span>
+                <span class="event-data">${JSON.stringify(data, null, 2)}</span>
+            `;
+            
+            eventLog.appendChild(entry);
+            eventLog.scrollTop = eventLog.scrollHeight;
+        }
+        
+        // Update status display
+        function updateStatus() {
+            try {
+                statusElements.currentMode.textContent = uploader.getMode();
+                statusElements.toggleDisabled.textContent = uploader.isToggleDisabledState();
+                statusElements.filesCount.textContent = uploader.getFiles().length;
+            } catch (error) {
+                logEvent('ERROR', { message: 'Failed to update status', error: error.message }, 'error');
+            }
+        }
+        
+        // Set up event listeners for the uploader
+        uploader.addEventListener('mode-changed', (e) => {
+            logEvent('MODE-CHANGED', e.detail, 'success');
+            updateStatus();
+        });
+        
+        uploader.addEventListener('mode-change-error', (e) => {
+            logEvent('MODE-CHANGE-ERROR', e.detail, 'error');
+            updateStatus();
+        });
+        
+        uploader.addEventListener('files-adapted', (e) => {
+            logEvent('FILES-ADAPTED', e.detail, 'warning');
+            updateStatus();
+        });
+        
+        uploader.addEventListener('files-selected', (e) => {
+            logEvent('FILES-SELECTED', {
+                filesCount: e.detail.files.length,
+                mode: e.detail.mode,
+                replaced: e.detail.replaced
+            });
+            updateStatus();
+        });
+        
+        // Control button handlers
+        document.getElementById('setSingleMode').addEventListener('click', () => {
+            const success = uploader.setMode('single');
+            logEvent('SET-MODE', { mode: 'single', success }, success ? 'success' : 'error');
+            updateStatus();
+        });
+        
+        document.getElementById('setBatchMode').addEventListener('click', () => {
+            const success = uploader.setMode('batch');
+            logEvent('SET-MODE', { mode: 'batch', success }, success ? 'success' : 'error');
+            updateStatus();
+        });
+        
+        document.getElementById('toggleMode').addEventListener('click', () => {
+            const oldMode = uploader.getMode();
+            const success = uploader.toggleMode();
+            const newMode = uploader.getMode();
+            logEvent('TOGGLE-MODE', { oldMode, newMode, success }, success ? 'success' : 'error');
+            updateStatus();
+        });
+        
+        document.getElementById('getCurrentMode').addEventListener('click', () => {
+            const mode = uploader.getMode();
+            logEvent('GET-MODE', { mode });
+            updateStatus();
+        });
+        
+        document.getElementById('getFiles').addEventListener('click', () => {
+            const files = uploader.getFiles();
+            logEvent('GET-FILES', { 
+                count: files.length,
+                files: files.map(f => ({ name: f.name, size: f.size, type: f.type }))
+            });
+            updateStatus();
+        });
+        
+        document.getElementById('disableToggle').addEventListener('click', () => {
+            uploader.setAttribute('toggle-disabled', '');
+            logEvent('DISABLE-TOGGLE', { disabled: true });
+            updateStatus();
+        });
+        
+        document.getElementById('enableToggle').addEventListener('click', () => {
+            uploader.removeAttribute('toggle-disabled');
+            logEvent('ENABLE-TOGGLE', { disabled: false });
+            updateStatus();
+        });
+        
+        document.getElementById('clearLog').addEventListener('click', () => {
+            eventLog.innerHTML = `
+                <div class="event-entry">
+                    <span class="event-type">INFO:</span>
+                    <span class="event-data">Event log cleared.</span>
+                </div>
+            `;
+        });
+        
+        document.getElementById('runTests').addEventListener('click', async () => {
+            logEvent('TEST-SUITE', { message: 'Starting automated tests...' });
+            
+            // Test 1: Basic mode switching
+            logEvent('TEST', { name: 'Test 1: Basic mode switching' });
+            let success = uploader.setMode('single');
+            if (success && uploader.getMode() === 'single') {
+                logEvent('TEST-RESULT', { test: 'Set single mode', result: 'PASS' }, 'success');
+            } else {
+                logEvent('TEST-RESULT', { test: 'Set single mode', result: 'FAIL' }, 'error');
+            }
+            
+            success = uploader.setMode('batch');
+            if (success && uploader.getMode() === 'batch') {
+                logEvent('TEST-RESULT', { test: 'Set batch mode', result: 'PASS' }, 'success');
+            } else {
+                logEvent('TEST-RESULT', { test: 'Set batch mode', result: 'FAIL' }, 'error');
+            }
+            
+            // Test 2: Invalid mode handling
+            logEvent('TEST', { name: 'Test 2: Invalid mode handling' });
+            success = uploader.setMode('invalid');
+            if (!success) {
+                logEvent('TEST-RESULT', { test: 'Reject invalid mode', result: 'PASS' }, 'success');
+            } else {
+                logEvent('TEST-RESULT', { test: 'Reject invalid mode', result: 'FAIL' }, 'error');
+            }
+            
+            // Test 3: Toggle functionality
+            logEvent('TEST', { name: 'Test 3: Toggle functionality' });
+            const initialMode = uploader.getMode();
+            success = uploader.toggleMode();
+            const newMode = uploader.getMode();
+            if (success && initialMode !== newMode) {
+                logEvent('TEST-RESULT', { test: 'Toggle mode', result: 'PASS' }, 'success');
+            } else {
+                logEvent('TEST-RESULT', { test: 'Toggle mode', result: 'FAIL' }, 'error');
+            }
+            
+            // Test 4: Disabled toggle handling
+            logEvent('TEST', { name: 'Test 4: Disabled toggle handling' });
+            uploader.setAttribute('toggle-disabled', '');
+            success = uploader.setMode('single');
+            if (!success) {
+                logEvent('TEST-RESULT', { test: 'Respect disabled toggle', result: 'PASS' }, 'success');
+            } else {
+                logEvent('TEST-RESULT', { test: 'Respect disabled toggle', result: 'FAIL' }, 'error');
+            }
+            uploader.removeAttribute('toggle-disabled');
+            
+            logEvent('TEST-SUITE', { message: 'Automated tests completed.' });
+            updateStatus();
+        });
+        
+        // Initial status update
+        setTimeout(updateStatus, 100);
+        
+        logEvent('INIT', { message: 'Programmatic API test page loaded successfully.' });
+    </script>
+</body>
+</html>

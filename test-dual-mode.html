@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Uploader Dual-Mode Test</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #f5f5f5;
+        }
+        
+        .test-section {
+            background: white;
+            padding: 2rem;
+            margin: 2rem 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .controls {
+            margin: 1rem 0;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #f0f0f0;
+        }
+        
+        .status {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        
+        file-uploader {
+            display: block;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>File Uploader Dual-Mode Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Default Single Mode</h2>
+        <file-uploader id="uploader1"></file-uploader>
+        <div class="controls">
+            <button onclick="testGetMode('uploader1')">Get Mode</button>
+            <button onclick="testSetMode('uploader1', 'batch')">Set to Batch</button>
+            <button onclick="testSetMode('uploader1', 'single')">Set to Single</button>
+            <button onclick="testToggleMode('uploader1')">Toggle Mode</button>
+        </div>
+        <div id="status1" class="status">Ready</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: Default Batch Mode</h2>
+        <file-uploader id="uploader2" default-mode="batch"></file-uploader>
+        <div class="controls">
+            <button onclick="testGetMode('uploader2')">Get Mode</button>
+            <button onclick="testSetMode('uploader2', 'single')">Set to Single</button>
+            <button onclick="testSetMode('uploader2', 'batch')">Set to Batch</button>
+            <button onclick="testToggleMode('uploader2')">Toggle Mode</button>
+        </div>
+        <div id="status2" class="status">Ready</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 3: Toggle Disabled</h2>
+        <file-uploader id="uploader3" toggle-disabled></file-uploader>
+        <div class="controls">
+            <button onclick="testGetMode('uploader3')">Get Mode</button>
+            <button onclick="testSetMode('uploader3', 'batch')">Try Set to Batch (should fail)</button>
+            <button onclick="testToggleMode('uploader3')">Try Toggle (should fail)</button>
+        </div>
+        <div id="status3" class="status">Ready</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 4: No Preference Memory</h2>
+        <file-uploader id="uploader4" remember-preference="false"></file-uploader>
+        <div class="controls">
+            <button onclick="testGetMode('uploader4')">Get Mode</button>
+            <button onclick="testSetMode('uploader4', 'batch')">Set to Batch</button>
+            <button onclick="testToggleMode('uploader4')">Toggle Mode</button>
+        </div>
+        <div id="status4" class="status">Ready</div>
+    </div>
+
+    <script type="module">
+        import './js/components/base-component.js';
+        import './js/components/file-uploader.js';
+        
+        // Global test functions
+        window.testGetMode = function(uploaderId) {
+            const uploader = document.getElementById(uploaderId);
+            const mode = uploader.getMode();
+            updateStatus(uploaderId, `Current mode: ${mode}`);
+        };
+        
+        window.testSetMode = function(uploaderId, mode) {
+            const uploader = document.getElementById(uploaderId);
+            const success = uploader.setMode(mode);
+            updateStatus(uploaderId, `Set mode to ${mode}: ${success ? 'SUCCESS' : 'FAILED'}`);
+        };
+        
+        window.testToggleMode = function(uploaderId) {
+            const uploader = document.getElementById(uploaderId);
+            const oldMode = uploader.getMode();
+            const success = uploader.toggleMode();
+            const newMode = uploader.getMode();
+            updateStatus(uploaderId, `Toggle from ${oldMode} to ${newMode}: ${success ? 'SUCCESS' : 'FAILED'}`);
+        };
+        
+        function updateStatus(uploaderId, message) {
+            const statusId = uploaderId.replace('uploader', 'status');
+            const statusEl = document.getElementById(statusId);
+            const timestamp = new Date().toLocaleTimeString();
+            statusEl.textContent = `[${timestamp}] ${message}`;
+        }
+        
+        // Set up event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            const uploaders = document.querySelectorAll('file-uploader');
+            uploaders.forEach(uploader => {
+                uploader.addEventListener('mode-changed', (e) => {
+                    const uploaderId = uploader.id;
+                    updateStatus(uploaderId, `Mode changed: ${e.detail.oldMode} → ${e.detail.newMode}`);
+                });
+                
+                uploader.addEventListener('files-adapted', (e) => {
+                    const uploaderId = uploader.id;
+                    updateStatus(uploaderId, `Files adapted: ${e.detail.originalFiles.length} → ${e.detail.adaptedFiles.length}`);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

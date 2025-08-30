@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Programmatic API Implementation</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #f8fafc;
+        }
+        
+        .test-section {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .test-result {
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        .pass {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .fail {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+        
+        button {
+            padding: 0.5rem 1rem;
+            margin: 0.25rem;
+            border: 1px solid #3b82f6;
+            background: #3b82f6;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #2563eb;
+        }
+        
+        .status {
+            background: #f1f5f9;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>Programmatic API Verification</h1>
+    <p>This page verifies that the programmatic API methods work correctly for task 6.</p>
+
+    <div class="test-section">
+        <h2>File Uploader Component</h2>
+        <file-uploader id="testUploader" accept=".pdf" default-mode="single"></file-uploader>
+    </div>
+
+    <div class="test-section">
+        <h2>Current Status</h2>
+        <div class="status" id="status">Loading...</div>
+    </div>
+
+    <div class="test-section">
+        <h2>API Tests</h2>
+        <button onclick="runTests()">Run All Tests</button>
+        <button onclick="clearResults()">Clear Results</button>
+        <div id="testResults"></div>
+    </div>
+
+    <script type="module">
+        import './js/components/file-uploader.js';
+        
+        await customElements.whenDefined('file-uploader');
+        
+        const uploader = document.getElementById('testUploader');
+        const statusDiv = document.getElementById('status');
+        const resultsDiv = document.getElementById('testResults');
+        
+        let eventLog = [];
+        
+        // Listen for events
+        uploader.addEventListener('mode-changed', (e) => {
+            eventLog.push({ type: 'mode-changed', data: e.detail, timestamp: Date.now() });
+            updateStatus();
+        });
+        
+        uploader.addEventListener('mode-change-error', (e) => {
+            eventLog.push({ type: 'mode-change-error', data: e.detail, timestamp: Date.now() });
+            updateStatus();
+        });
+        
+        function updateStatus() {
+            const mode = uploader.getMode();
+            const files = uploader.getFiles();
+            const isDisabled = uploader.isToggleDisabledState();
+            
+            statusDiv.innerHTML = `
+                Current Mode: <strong>${mode}</strong><br>
+                Files Count: <strong>${files.length}</strong><br>
+                Toggle Disabled: <strong>${isDisabled}</strong><br>
+                Events Logged: <strong>${eventLog.length}</strong>
+            `;
+        }
+        
+        function addResult(test, passed, message) {
+            const div = document.createElement('div');
+            div.className = `test-result ${passed ? 'pass' : 'fail'}`;
+            div.innerHTML = `<strong>${test}:</strong> ${passed ? 'PASS' : 'FAIL'} - ${message}`;
+            resultsDiv.appendChild(div);
+        }
+        
+        window.runTests = function() {
+            clearResults();
+            eventLog = [];
+            
+            console.log('Running programmatic API tests...');
+            
+            // Test 1: getMode() returns current mode (Requirement 7.3)
+            try {
+                const mode = uploader.getMode();
+                if (typeof mode === 'string' && (mode === 'single' || mode === 'batch')) {
+                    addResult('getMode() returns valid mode', true, `Returned: ${mode}`);
+                } else {
+                    addResult('getMode() returns valid mode', false, `Invalid mode: ${mode}`);
+                }
+            } catch (error) {
+                addResult('getMode() returns valid mode', false, `Error: ${error.message}`);
+            }
+            
+            // Test 2: setMode('batch') switches to batch mode (Requirement 7.2)
+            try {
+                const success = uploader.setMode('batch');
+                const newMode = uploader.getMode();
+                if (success && newMode === 'batch') {
+                    addResult('setMode("batch") works', true, `Mode changed to: ${newMode}`);
+                } else {
+                    addResult('setMode("batch") works', false, `Success: ${success}, Mode: ${newMode}`);
+                }
+            } catch (error) {
+                addResult('setMode("batch") works', false, `Error: ${error.message}`);
+            }
+            
+            // Test 3: setMode('single') switches to single mode (Requirement 7.1)
+            try {
+                const success = uploader.setMode('single');
+                const newMode = uploader.getMode();
+                if (success && newMode === 'single') {
+                    addResult('setMode("single") works', true, `Mode changed to: ${newMode}`);
+                } else {
+                    addResult('setMode("single") works', false, `Success: ${success}, Mode: ${newMode}`);
+                }
+            } catch (error) {
+                addResult('setMode("single") works', false, `Error: ${error.message}`);
+            }
+            
+            // Test 4: setMode with invalid mode returns false
+            try {
+                const success = uploader.setMode('invalid');
+                if (!success) {
+                    addResult('setMode("invalid") returns false', true, 'Correctly rejected invalid mode');
+                } else {
+                    addResult('setMode("invalid") returns false', false, 'Should have returned false');
+                }
+            } catch (error) {
+                addResult('setMode("invalid") returns false', false, `Error: ${error.message}`);
+            }
+            
+            // Test 5: Mode change events are emitted (Requirement 7.5)
+            setTimeout(() => {
+                const modeChangeEvents = eventLog.filter(e => e.type === 'mode-changed');
+                if (modeChangeEvents.length >= 2) {
+                    addResult('Mode change events emitted', true, `${modeChangeEvents.length} events logged`);
+                    
+                    // Test event data structure
+                    const lastEvent = modeChangeEvents[modeChangeEvents.length - 1];
+                    const requiredFields = ['oldMode', 'newMode', 'triggeredBy', 'success'];
+                    const hasAllFields = requiredFields.every(field => field in lastEvent.data);
+                    
+                    if (hasAllFields) {
+                        addResult('Event data structure correct', true, 'All required fields present');
+                    } else {
+                        addResult('Event data structure correct', false, 'Missing required fields');
+                    }
+                } else {
+                    addResult('Mode change events emitted', false, `Only ${modeChangeEvents.length} events logged`);
+                }
+                
+                // Test 6: Toggle UI updates (Requirement 7.4)
+                try {
+                    uploader.setMode('batch');
+                    setTimeout(() => {
+                        const toggleSwitch = uploader.shadowRoot?.querySelector('.toggle-switch') || 
+                                           uploader.querySelector('.toggle-switch');
+                        if (toggleSwitch) {
+                            const ariaChecked = toggleSwitch.getAttribute('aria-checked');
+                            if (ariaChecked === 'true') {
+                                addResult('Toggle UI updates correctly', true, 'aria-checked updated to true');
+                            } else {
+                                addResult('Toggle UI updates correctly', false, `aria-checked is ${ariaChecked}`);
+                            }
+                        } else {
+                            addResult('Toggle UI updates correctly', false, 'Toggle switch not found');
+                        }
+                        
+                        updateStatus();
+                    }, 100);
+                } catch (error) {
+                    addResult('Toggle UI updates correctly', false, `Error: ${error.message}`);
+                }
+            }, 200);
+        };
+        
+        window.clearResults = function() {
+            resultsDiv.innerHTML = '';
+        };
+        
+        // Initial status update
+        setTimeout(updateStatus, 100);
+    </script>
+</body>
+</html>

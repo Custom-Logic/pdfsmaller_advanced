@@ -253,7 +253,7 @@
     margin-bottom: var(--space-2);
     font-size: var(--text-sm);
     font-weight: var(--font-semibold);
-    color: var(--gray-700);
+    color: var(--text-primary);
     line-height: var(--leading-tight);
 }
 
@@ -263,12 +263,12 @@
     display: block;
     width: 100%;
     padding: var(--space-3) var(--space-4);
-    border: 2px solid var(--gray-300);
+    border: 2px solid var(--border-medium);
     border-radius: var(--radius-lg);
     font-size: var(--text-sm);
     line-height: var(--leading-tight);
-    color: var(--gray-800);
-    background: white;
+    color: var(--text-primary);
+    background: var(--bg-primary);
     transition: all var(--duration-200) var(--ease-in-out);
     min-height: var(--input-height-md);
 }

@@ -128,6 +128,22 @@
   --bg-overlay: rgba(0, 0, 0, 0.5);
   --bg-glass: rgba(255, 255, 255, 0.95);
   
+  /* Text Colors - WCAG AA Compliant */
+  --text-primary: var(--gray-900);     /* #111827 - High contrast for main text */
+  --text-secondary: var(--gray-700);   /* #374151 - Medium contrast for secondary text */
+  --text-tertiary: var(--gray-600);    /* #4b5563 - Lower contrast for tertiary text */
+  --text-muted: var(--gray-500);       /* #6b7280 - Muted text for hints/placeholders */
+  --text-disabled: var(--gray-400);    /* #9ca3af - Disabled text */
+  --text-inverse: #ffffff;             /* White text for dark backgrounds */
+  --text-link: var(--primary-600);     /* #2563eb - Link text */
+  --text-link-hover: var(--primary-700); /* #1d4ed8 - Link hover */
+  
+  /* Border Colors - Enhanced for better visibility */
+  --border-light: var(--gray-200);     /* #e5e7eb - Light borders */
+  --border-medium: var(--gray-300);    /* #d1d5db - Medium borders */
+  --border-dark: var(--gray-400);      /* #9ca3af - Dark borders */
+  --border-focus: var(--primary-500);  /* #3b82f6 - Focus borders */
+  
   /* Gradient Backgrounds */
   --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --gradient-secondary: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);

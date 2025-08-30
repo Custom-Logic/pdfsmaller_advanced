@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Uploader Session Preferences Test</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        
+        .uploader-container {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            background: white;
+        }
+        
+        .status-display {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+        
+        .event-log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        
+        .event-entry {
+            margin: 2px 0;
+            padding: 2px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .event-entry:last-child {
+            border-bottom: none;
+        }
+        
+        button {
+            margin: 5px;
+            padding: 8px 16px;
+            border: 1px solid #007bff;
+            background: #007bff;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        button.secondary {
+            background: #6c757d;
+            border-color: #6c757d;
+        }
+        
+        button.secondary:hover {
+            background: #545b62;
+        }
+        
+        .preference-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .test-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>File Uploader Session Preferences Test</h1>
+    <p>This page tests the integration between FileUploader component and SessionPreferenceManager.</p>
+    
+    <div class="preference-info">
+        <h3>Test Instructions:</h3>
+        <ol>
+            <li>Toggle the mode on any uploader and observe that the preference is saved</li>
+            <li>Create new uploaders and see they use the saved preference</li>
+            <li>Refresh the page to verify preferences are session-based (not persistent)</li>
+            <li>Test with remember-preference disabled to see no preference saving</li>
+        </ol>
+    </div>
+    
+    <div class="status-display">
+        <strong>Current Session Preference:</strong> <span id="current-preference">Loading...</span><br>
+        <strong>All Session Preferences:</strong> <span id="all-preferences">Loading...</span>
+    </div>
+    
+    <div class="test-section">
+        <h2>Control Panel</h2>
+        <button onclick="refreshStatus()">Refresh Status</button>
+        <button onclick="clearAllPreferences()" class="secondary">Clear All Preferences</button>
+        <button onclick="createNewUploader()">Create New Uploader</button>
+        <button onclick="clearEventLog()" class="secondary">Clear Event Log</button>
+    </div>
+    
+    <div class="test-grid">
+        <div class="test-section">
+            <h3>Uploader 1: Default Settings</h3>
+            <p>remember-preference="true" (default)</p>
+            <div class="uploader-container">
+                <file-uploader 
+                    id="uploader1"
+                    accept=".pdf"
+                    max-size="50MB">
+                </file-uploader>
+            </div>
+            <div class="status-display">
+                Mode: <span id="mode1">Loading...</span><br>
+                Remember Preference: <span id="remember1">Loading...</span>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Uploader 2: Preference Disabled</h3>
+            <p>remember-preference="false"</p>
+            <div class="uploader-container">
+                <file-uploader 
+                    id="uploader2"
+                    accept=".pdf"
+                    max-size="50MB"
+                    remember-preference="false">
+                </file-uploader>
+            </div>
+            <div class="status-display">
+                Mode: <span id="mode2">Loading...</span><br>
+                Remember Preference: <span id="remember2">Loading...</span>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Uploader 3: Default Mode Batch</h3>
+            <p>default-mode="batch"</p>
+            <div class="uploader-container">
+                <file-uploader 
+                    id="uploader3"
+                    accept=".pdf"
+                    max-size="50MB"
+                    default-mode="batch">
+                </file-uploader>
+            </div>
+            <div class="status-display">
+                Mode: <span id="mode3">Loading...</span><br>
+                Remember Preference: <span id="remember3">Loading...</span>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Uploader 4: Multiple Attribute</h3>
+            <p>multiple attribute set</p>
+            <div class="uploader-container">
+                <file-uploader 
+                    id="uploader4"
+                    accept=".pdf"
+                    max-size="50MB"
+                    multiple>
+                </file-uploader>
+            </div>
+            <div class="status-display">
+                Mode: <span id="mode4">Loading...</span><br>
+                Remember Preference: <span id="remember4">Loading...</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Event Log</h2>
+        <div id="event-log" class="event-log">
+            <div class="event-entry">Event log will appear here...</div>
+        </div>
+    </div>
+    
+    <div id="dynamic-uploaders"></div>
+
+    <script type="module">
+        import { SessionPreferenceManager } from './js/utils/session-preference-manager.js';
+        import './js/components/file-uploader.js';
+        
+        // Make functions available globally
+        window.SessionPreferenceManager = SessionPreferenceManager;
+        
+        let uploaderCounter = 5;
+        
+        window.refreshStatus = function() {
+            // Update current preference
+            const currentPref = SessionPreferenceManager.loadPreference();
+            document.getElementById('current-preference').textContent = currentPref || 'None';
+            
+            // Update all preferences
+            const allPrefs = SessionPreferenceManager.getAllPreferences();
+            document.getElementById('all-preferences').textContent = 
+                Object.keys(allPrefs).length > 0 ? JSON.stringify(allPrefs) : 'None';
+            
+            // Update individual uploader status
+            for (let i = 1; i <= 4; i++) {
+                const uploader = document.getElementById(`uploader${i}`);
+                if (uploader && uploader.getMode) {
+                    document.getElementById(`mode${i}`).textContent = uploader.getMode();
+                    document.getElementById(`remember${i}`).textContent = 
+                        uploader.getProp('remember-preference', true) ? 'Enabled' : 'Disabled';
+                }
+            }
+        };
+        
+        window.clearAllPreferences = function() {
+            const cleared = SessionPreferenceManager.clearAllPreferences();
+            logEvent(`Cleared ${cleared} preferences`);
+            refreshStatus();
+        };
+        
+        window.createNewUploader = function() {
+            const container = document.getElementById('dynamic-uploaders');
+            const uploaderId = `dynamic-uploader-${uploaderCounter}`;
+            
+            const section = document.createElement('div');
+            section.className = 'test-section';
+            section.innerHTML = `
+                <h3>Dynamic Uploader ${uploaderCounter}</h3>
+                <p>Created at ${new Date().toLocaleTimeString()} - Should use current session preference</p>
+                <div class="uploader-container">
+                    <file-uploader 
+                        id="${uploaderId}"
+                        accept=".pdf"
+                        max-size="50MB">
+                    </file-uploader>
+                </div>
+                <div class="status-display">
+                    Mode: <span id="mode-${uploaderId}">Loading...</span><br>
+                    Remember Preference: <span id="remember-${uploaderId}">Loading...</span>
+                </div>
+                <button onclick="removeUploader('${uploaderId}')" class="secondary">Remove This Uploader</button>
+            `;
+            
+            container.appendChild(section);
+            
+            // Set up event listener for the new uploader
+            setTimeout(() => {
+                const newUploader = document.getElementById(uploaderId);
+                if (newUploader) {
+                    setupUploaderEvents(newUploader, uploaderId);
+                    updateUploaderStatus(uploaderId);
+                    logEvent(`Created dynamic uploader ${uploaderCounter} with mode: ${newUploader.getMode()}`);
+                }
+            }, 100);
+            
+            uploaderCounter++;
+        };
+        
+        window.removeUploader = function(uploaderId) {
+            const uploader = document.getElementById(uploaderId);
+            if (uploader) {
+                const section = uploader.closest('.test-section');
+                if (section) {
+                    section.remove();
+                    logEvent(`Removed uploader: ${uploaderId}`);
+                }
+            }
+        };
+        
+        window.clearEventLog = function() {
+            document.getElementById('event-log').innerHTML = 
+                '<div class="event-entry">Event log cleared...</div>';
+        };
+        
+        function logEvent(message) {
+            const eventLog = document.getElementById('event-log');
+            const entry = document.createElement('div');
+            entry.className = 'event-entry';
+            entry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            eventLog.appendChild(entry);
+            
+            // Keep only last 20 events
+            while (eventLog.children.length > 20) {
+                eventLog.removeChild(eventLog.firstChild);
+            }
+            
+            // Scroll to bottom
+            eventLog.scrollTop = eventLog.scrollHeight;
+        }
+        
+        function setupUploaderEvents(uploader, uploaderId) {
+            uploader.addEventListener('mode-changed', function(e) {
+                logEvent(`${uploaderId}: Mode changed ${e.detail.oldMode} → ${e.detail.newMode}`);
+                updateUploaderStatus(uploaderId);
+                refreshStatus();
+            });
+            
+            uploader.addEventListener('files-selected', function(e) {
+                logEvent(`${uploaderId}: Files selected (${e.detail.files.length} files, mode: ${e.detail.mode})`);
+            });
+            
+            uploader.addEventListener('files-adapted', function(e) {
+                logEvent(`${uploaderId}: Files adapted for mode ${e.detail.mode} (${e.detail.reason})`);
+            });
+        }
+        
+        function updateUploaderStatus(uploaderId) {
+            const uploader = document.getElementById(uploaderId);
+            if (uploader && uploader.getMode) {
+                const modeElement = document.getElementById(`mode-${uploaderId}`);
+                const rememberElement = document.getElementById(`remember-${uploaderId}`);
+                
+                if (modeElement) {
+                    modeElement.textContent = uploader.getMode();
+                }
+                if (rememberElement) {
+                    rememberElement.textContent = 
+                        uploader.getProp('remember-preference', true) ? 'Enabled' : 'Disabled';
+                }
+            }
+        }
+        
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            logEvent('Page loaded, initializing uploaders...');
+            
+            // Set up event listeners for all uploaders
+            for (let i = 1; i <= 4; i++) {
+                const uploader = document.getElementById(`uploader${i}`);
+                if (uploader) {
+                    setupUploaderEvents(uploader, `uploader${i}`);
+                }
+            }
+            
+            // Initial status update
+            setTimeout(() => {
+                refreshStatus();
+                logEvent('Initial status updated');
+            }, 200);
+        });
+        
+        // Auto-refresh status every 5 seconds
+        setInterval(refreshStatus, 5000);
+    </script>
+</body>
+</html>

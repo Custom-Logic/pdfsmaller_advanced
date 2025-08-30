@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Accessibility Test</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .test-container {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        
+        .controls {
+            margin: 15px 0;
+        }
+        
+        .controls button {
+            margin: 5px;
+            padding: 8px 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #f5f5f5;
+            cursor: pointer;
+        }
+        
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>File Uploader Accessibility Test</h1>
+    
+    <div class="test-container">
+        <h2>Basic Functionality Test</h2>
+        <file-uploader id="basic-test" accept=".pdf" default-mode="single"></file-uploader>
+        
+        <div class="controls">
+            <button onclick="toggleMode()">Toggle Mode</button>
+            <button onclick="disableComponent()">Toggle Disabled</button>
+            <button onclick="disableToggle()">Toggle Switch Disabled</button>
+            <button onclick="inspectAccessibility()">Inspect Accessibility</button>
+        </div>
+        
+        <div id="log" class="log">
+            <strong>Test Log:</strong><br>
+        </div>
+    </div>
+
+    <script type="module">
+        import { FileUploader } from './js/components/file-uploader.js';
+        
+        // Register the custom element
+        if (!customElements.get('file-uploader')) {
+            customElements.define('file-uploader', FileUploader);
+        }
+
+        const uploader = document.getElementById('basic-test');
+        const log = document.getElementById('log');
+
+        function logMessage(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            log.innerHTML += `[${timestamp}] ${message}<br>`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Global test functions
+        window.toggleMode = function() {
+            const currentMode = uploader.getMode();
+            const newMode = currentMode === 'single' ? 'batch' : 'single';
+            const success = uploader.setMode(newMode);
+            logMessage(`Mode toggle: ${currentMode} → ${newMode} (${success ? 'success' : 'failed'})`);
+        };
+
+        window.disableComponent = function() {
+            if (uploader.hasAttribute('disabled')) {
+                uploader.removeAttribute('disabled');
+                logMessage('Component enabled');
+            } else {
+                uploader.setAttribute('disabled', '');
+                logMessage('Component disabled');
+            }
+        };
+
+        window.disableToggle = function() {
+            if (uploader.hasAttribute('toggle-disabled')) {
+                uploader.removeAttribute('toggle-disabled');
+                logMessage('Toggle enabled');
+            } else {
+                uploader.setAttribute('toggle-disabled', '');
+                logMessage('Toggle disabled');
+            }
+        };
+
+        window.inspectAccessibility = function() {
+            const toggle = uploader.shadowRoot.querySelector('.toggle-switch');
+            if (toggle) {
+                const attributes = {
+                    'role': toggle.getAttribute('role'),
+                    'aria-checked': toggle.getAttribute('aria-checked'),
+                    'aria-label': toggle.getAttribute('aria-label'),
+                    'aria-disabled': toggle.getAttribute('aria-disabled'),
+                    'tabindex': toggle.getAttribute('tabindex'),
+                    'disabled': toggle.hasAttribute('disabled')
+                };
+                
+                logMessage('=== ACCESSIBILITY INSPECTION ===');
+                Object.entries(attributes).forEach(([key, value]) => {
+                    logMessage(`${key}: ${value || 'not set'}`);
+                });
+                
+                // Check for ARIA live regions
+                const liveRegions = uploader.shadowRoot.querySelectorAll('[aria-live]');
+                logMessage(`ARIA live regions: ${liveRegions.length}`);
+                
+                // Check for screen reader only content
+                const srOnly = uploader.shadowRoot.querySelectorAll('.sr-only');
+                logMessage(`Screen reader only elements: ${srOnly.length}`);
+            }
+        };
+
+        // Monitor events
+        uploader.addEventListener('mode-changed', function(event) {
+            logMessage(`Event: mode-changed (${event.detail.oldMode} → ${event.detail.newMode})`);
+        });
+
+        // Monitor screen reader announcements
+        const originalAnnounce = uploader.announceToScreenReader;
+        uploader.announceToScreenReader = function(message) {
+            originalAnnounce.call(this, message);
+            logMessage(`Screen reader: ${message}`);
+        };
+
+        // Initial log
+        logMessage('Test page loaded. Use keyboard Tab to navigate to toggle, Space/Enter to activate.');
+        logMessage('Current mode: ' + uploader.getMode());
+    </script>
+</body>
+</html>

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Preference Manager Test</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        .test-result.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .test-result.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .test-result.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        button {
+            margin: 5px;
+            padding: 8px 16px;
+            border: 1px solid #007bff;
+            background: #007bff;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        button.secondary {
+            background: #6c757d;
+            border-color: #6c757d;
+        }
+        
+        button.secondary:hover {
+            background: #545b62;
+        }
+        
+        .file-uploader-test {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .mode-display {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+        
+        .preference-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Session Preference Manager Test</h1>
+    <p>This page tests the SessionPreferenceManager utility class functionality.</p>
+    
+    <div class="test-section">
+        <h2>Basic Functionality Tests</h2>
+        <button onclick="runBasicTests()">Run Basic Tests</button>
+        <button onclick="clearResults()" class="secondary">Clear Results</button>
+        <div id="basic-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Mode Resolution Tests</h2>
+        <button onclick="runModeResolutionTests()">Run Mode Resolution Tests</button>
+        <div id="resolution-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Error Handling Tests</h2>
+        <button onclick="runErrorHandlingTests()">Run Error Handling Tests</button>
+        <div id="error-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>File Uploader Integration Test</h2>
+        <p>Test the SessionPreferenceManager with a real file uploader component:</p>
+        
+        <div class="preference-info">
+            <strong>Current Session Preference:</strong> <span id="current-preference">None</span>
+        </div>
+        
+        <file-uploader 
+            id="test-uploader"
+            accept=".pdf"
+            max-size="50MB"
+            remember-preference="true">
+        </file-uploader>
+        
+        <div class="mode-display">
+            Current Mode: <span id="current-mode">Unknown</span>
+        </div>
+        
+        <button onclick="toggleUploaderMode()">Toggle Mode</button>
+        <button onclick="refreshPreferenceDisplay()">Refresh Preference Display</button>
+        <button onclick="clearAllPreferences()" class="secondary">Clear All Preferences</button>
+        
+        <div id="uploader-events"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Debug Information</h2>
+        <button onclick="showDebugInfo()">Show Debug Info</button>
+        <button onclick="clearDebugInfo()" class="secondary">Clear Debug Info</button>
+        <div id="debug-info"></div>
+    </div>
+
+    <script type="module">
+        import { SessionPreferenceManager } from './js/utils/session-preference-manager.js';
+        import './js/components/file-uploader.js';
+        
+        // Make SessionPreferenceManager available globally for testing
+        window.SessionPreferenceManager = SessionPreferenceManager;
+        
+        // Test functions
+        window.runBasicTests = function() {
+            const results = document.getElementById('basic-results');
+            results.innerHTML = '';
+            
+            try {
+                // Test 1: Save and load preference
+                addResult(results, 'info', 'Test 1: Save and load preference');
+                const testKey = 'test_preference_key';
+                const testMode = 'batch';
+                
+                const saved = SessionPreferenceManager.savePreference(testMode, testKey);
+                addResult(results, saved ? 'success' : 'error', `Save preference: ${saved}`);
+                
+                const loaded = SessionPreferenceManager.loadPreference(testKey);
+                addResult(results, loaded === testMode ? 'success' : 'error', `Load preference: ${loaded} (expected: ${testMode})`);
+                
+                // Test 2: Clear preference
+                addResult(results, 'info', 'Test 2: Clear preference');
+                const cleared = SessionPreferenceManager.clearPreference(testKey);
+                addResult(results, cleared ? 'success' : 'error', `Clear preference: ${cleared}`);
+                
+                const loadedAfterClear = SessionPreferenceManager.loadPreference(testKey);
+                addResult(results, loadedAfterClear === null ? 'success' : 'error', `Load after clear: ${loadedAfterClear} (expected: null)`);
+                
+                // Test 3: Invalid mode handling
+                addResult(results, 'info', 'Test 3: Invalid mode handling');
+                const invalidSaved = SessionPreferenceManager.savePreference('invalid_mode', testKey);
+                addResult(results, !invalidSaved ? 'success' : 'error', `Save invalid mode: ${invalidSaved} (expected: false)`);
+                
+                // Test 4: Default mode
+                addResult(results, 'info', 'Test 4: Default mode');
+                const defaultMode = SessionPreferenceManager.getDefaultMode();
+                addResult(results, defaultMode === 'single' ? 'success' : 'error', `Default mode: ${defaultMode} (expected: single)`);
+                
+                const customDefault = SessionPreferenceManager.getDefaultMode('batch');
+                addResult(results, customDefault === 'batch' ? 'success' : 'error', `Custom default mode: ${customDefault} (expected: batch)`);
+                
+                addResult(results, 'success', 'Basic tests completed successfully!');
+                
+            } catch (error) {
+                addResult(results, 'error', `Test error: ${error.message}`);
+            }
+        };
+        
+        window.runModeResolutionTests = function() {
+            const results = document.getElementById('resolution-results');
+            results.innerHTML = '';
+            
+            try {
+                // Test 1: Default resolution
+                addResult(results, 'info', 'Test 1: Default resolution');
+                const defaultResolution = SessionPreferenceManager.resolveInitialMode({});
+                addResult(results, defaultResolution === 'single' ? 'success' : 'error', `Default resolution: ${defaultResolution} (expected: single)`);
+                
+                // Test 2: Multiple attribute resolution
+                addResult(results, 'info', 'Test 2: Multiple attribute resolution');
+                const multipleResolution = SessionPreferenceManager.resolveInitialMode({ multipleAttribute: true });
+                addResult(results, multipleResolution === 'batch' ? 'success' : 'error', `Multiple attribute resolution: ${multipleResolution} (expected: batch)`);
+                
+                // Test 3: Default mode attribute resolution
+                addResult(results, 'info', 'Test 3: Default mode attribute resolution');
+                const defaultModeResolution = SessionPreferenceManager.resolveInitialMode({ defaultMode: 'batch' });
+                addResult(results, defaultModeResolution === 'batch' ? 'success' : 'error', `Default mode resolution: ${defaultModeResolution} (expected: batch)`);
+                
+                // Test 4: Session preference resolution
+                addResult(results, 'info', 'Test 4: Session preference resolution');
+                const testKey = 'test_resolution_key';
+                SessionPreferenceManager.savePreference('batch', testKey);
+                const preferenceResolution = SessionPreferenceManager.resolveInitialMode({ 
+                    preferenceKey: testKey,
+                    rememberPreference: true 
+                });
+                addResult(results, preferenceResolution === 'batch' ? 'success' : 'error', `Preference resolution: ${preferenceResolution} (expected: batch)`);
+                
+                // Test 5: Preference disabled resolution
+                addResult(results, 'info', 'Test 5: Preference disabled resolution');
+                const disabledResolution = SessionPreferenceManager.resolveInitialMode({ 
+                    preferenceKey: testKey,
+                    rememberPreference: false 
+                });
+                addResult(results, disabledResolution === 'single' ? 'success' : 'error', `Disabled preference resolution: ${disabledResolution} (expected: single)`);
+                
+                // Cleanup
+                SessionPreferenceManager.clearPreference(testKey);
+                
+                addResult(results, 'success', 'Mode resolution tests completed successfully!');
+                
+            } catch (error) {
+                addResult(results, 'error', `Test error: ${error.message}`);
+            }
+        };
+        
+        window.runErrorHandlingTests = function() {
+            const results = document.getElementById('error-results');
+            results.innerHTML = '';
+            
+            try {
+                // Test 1: Invalid mode validation
+                addResult(results, 'info', 'Test 1: Invalid mode validation');
+                const isValidSingle = SessionPreferenceManager.isValidMode('single');
+                const isValidBatch = SessionPreferenceManager.isValidMode('batch');
+                const isValidInvalid = SessionPreferenceManager.isValidMode('invalid');
+                
+                addResult(results, isValidSingle ? 'success' : 'error', `Valid 'single': ${isValidSingle}`);
+                addResult(results, isValidBatch ? 'success' : 'error', `Valid 'batch': ${isValidBatch}`);
+                addResult(results, !isValidInvalid ? 'success' : 'error', `Invalid 'invalid': ${!isValidInvalid}`);
+                
+                // Test 2: Session storage availability
+                addResult(results, 'info', 'Test 2: Session storage availability');
+                const isAvailable = SessionPreferenceManager.isSessionStorageAvailable();
+                addResult(results, isAvailable ? 'success' : 'error', `Session storage available: ${isAvailable}`);
+                
+                // Test 3: Handle mode change with invalid mode
+                addResult(results, 'info', 'Test 3: Handle invalid mode change');
+                const invalidHandled = SessionPreferenceManager.handleModeChange('invalid_mode');
+                addResult(results, !invalidHandled ? 'success' : 'error', `Invalid mode change handled: ${!invalidHandled} (expected: false)`);
+                
+                // Test 4: Preference enabled check
+                addResult(results, 'info', 'Test 4: Preference enabled check');
+                const enabledTrue = SessionPreferenceManager.isPreferenceEnabled(true);
+                const enabledFalse = SessionPreferenceManager.isPreferenceEnabled(false);
+                const enabledString = SessionPreferenceManager.isPreferenceEnabled('true');
+                
+                addResult(results, enabledTrue ? 'success' : 'error', `Enabled (true): ${enabledTrue}`);
+                addResult(results, !enabledFalse ? 'success' : 'error', `Disabled (false): ${!enabledFalse}`);
+                addResult(results, enabledString ? 'success' : 'error', `Enabled ('true'): ${enabledString}`);
+                
+                addResult(results, 'success', 'Error handling tests completed successfully!');
+                
+            } catch (error) {
+                addResult(results, 'error', `Test error: ${error.message}`);
+            }
+        };
+        
+        window.toggleUploaderMode = function() {
+            const uploader = document.getElementById('test-uploader');
+            if (uploader && uploader.toggleMode) {
+                uploader.toggleMode();
+                updateModeDisplay();
+                refreshPreferenceDisplay();
+            }
+        };
+        
+        window.refreshPreferenceDisplay = function() {
+            const currentPref = SessionPreferenceManager.loadPreference();
+            document.getElementById('current-preference').textContent = currentPref || 'None';
+        };
+        
+        window.clearAllPreferences = function() {
+            const cleared = SessionPreferenceManager.clearAllPreferences();
+            refreshPreferenceDisplay();
+            addUploaderEvent(`Cleared ${cleared} preferences`);
+        };
+        
+        window.showDebugInfo = function() {
+            const debugDiv = document.getElementById('debug-info');
+            const allPrefs = SessionPreferenceManager.getAllPreferences();
+            
+            debugDiv.innerHTML = `
+                <h4>All Session Preferences:</h4>
+                <pre>${JSON.stringify(allPrefs, null, 2)}</pre>
+                
+                <h4>SessionPreferenceManager Constants:</h4>
+                <pre>DEFAULT_PREFERENCE_KEY: ${SessionPreferenceManager.DEFAULT_PREFERENCE_KEY}
+VALID_MODES: ${JSON.stringify(SessionPreferenceManager.VALID_MODES)}
+DEFAULT_MODE: ${SessionPreferenceManager.DEFAULT_MODE}</pre>
+                
+                <h4>Session Storage Info:</h4>
+                <pre>Available: ${SessionPreferenceManager.isSessionStorageAvailable()}
+Items count: ${sessionStorage.length}</pre>
+            `;
+        };
+        
+        window.clearDebugInfo = function() {
+            document.getElementById('debug-info').innerHTML = '';
+        };
+        
+        window.clearResults = function() {
+            document.getElementById('basic-results').innerHTML = '';
+            document.getElementById('resolution-results').innerHTML = '';
+            document.getElementById('error-results').innerHTML = '';
+        };
+        
+        function addResult(container, type, message) {
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.textContent = message;
+            container.appendChild(div);
+        }
+        
+        function updateModeDisplay() {
+            const uploader = document.getElementById('test-uploader');
+            if (uploader && uploader.getMode) {
+                document.getElementById('current-mode').textContent = uploader.getMode();
+            }
+        }
+        
+        function addUploaderEvent(message) {
+            const eventsDiv = document.getElementById('uploader-events');
+            const div = document.createElement('div');
+            div.className = 'test-result info';
+            div.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            eventsDiv.appendChild(div);
+            
+            // Keep only last 5 events
+            while (eventsDiv.children.length > 5) {
+                eventsDiv.removeChild(eventsDiv.firstChild);
+            }
+        }
+        
+        // Set up file uploader event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploader = document.getElementById('test-uploader');
+            
+            if (uploader) {
+                uploader.addEventListener('mode-changed', function(e) {
+                    addUploaderEvent(`Mode changed: ${e.detail.oldMode} → ${e.detail.newMode}`);
+                    updateModeDisplay();
+                    refreshPreferenceDisplay();
+                });
+                
+                // Initial display update
+                setTimeout(() => {
+                    updateModeDisplay();
+                    refreshPreferenceDisplay();
+                }, 100);
+            }
+        });
+    </script>
+</body>
+</html>

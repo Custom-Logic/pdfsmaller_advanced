@@ -65,17 +65,29 @@ export class CompressionFlow {
     }
 
     async handleSingleCompression() {
+        /**
+         * This method is just patched we could just create events local to the compression component to hook up to.
+         */
         try {
+            // Get current tab
+            const currentTab = getTabNavigation().getCurrentTab();
+   
+            // Only proceed if the current tab is the compression tab
+            if (currentTab !== 'compress') {
+                console.log('File selected in another tab, skipping compression.');
+                return;
+            }
+            
             // Get current file from upload manager
             const fileSelectedEvent = await this.waitForFileSelection();
             const { fileId, file } = fileSelectedEvent.detail;
-
+   
             // Get compression settings
             const settings = this.getCompressionSettings();
-
+   
             // Start compression
             await this.startCompression(fileId, file, settings);
-
+   
         } catch (error) {
             ErrorHandler.handleError(error, { context: 'Single file compression' });
         }

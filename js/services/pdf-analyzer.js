@@ -36,6 +36,7 @@ export class PDFAnalyzer {
     async analyze(file) {
         if (!this.initialized) {
             await this.init();
+            console.log('PDF LIB Analyzer Initialized');
         }
 
         try {

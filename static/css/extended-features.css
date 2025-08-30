@@ -35,12 +35,12 @@
 .upload-area .upload-text {
     font-size: 1.125rem;
     font-weight: 600;
-    color: #374151;
+    color: var(--text-primary);
     margin-bottom: 8px;
 }
 
 .upload-area .upload-subtext {
-    color: #6b7280;
+    color: var(--text-secondary);
     font-size: 0.875rem;
 }
 
@@ -69,14 +69,14 @@
 
 .file-info .file-details h4 {
     margin: 0 0 4px 0;
-    color: #1f2937;
+    color: var(--text-primary);
     font-size: 1rem;
     font-weight: 600;
 }
 
 .file-info .file-details p {
     margin: 0;
-    color: #6b7280;
+    color: var(--text-secondary);
     font-size: 0.875rem;
 }
 
@@ -167,7 +167,7 @@
 
 .mode-label {
     font-weight: 600;
-    color: #374151;
+    color: var(--text-primary);
 }
 
 .switch {
@@ -237,7 +237,7 @@ input:checked + .slider:before {
 
 .compression-options h3 {
     margin: 0 0 16px 0;
-    color: #1f2937;
+    color: var(--text-primary);
     font-size: 1.125rem;
 }
 
@@ -255,7 +255,7 @@ input:checked + .slider:before {
 
 .option-group label {
     font-weight: 600;
-    color: #374151;
+    color: var(--text-primary);
     font-size: 0.875rem;
 }
 
@@ -285,7 +285,7 @@ input:checked + .slider:before {
     min-width: 40px;
     text-align: center;
     font-weight: 600;
-    color: #3b82f6;
+    color: var(--text-link);
     font-size: 0.875rem;
 }
 
@@ -302,7 +302,7 @@ input:checked + .slider:before {
     gap: 8px;
     cursor: pointer;
     font-weight: 600;
-    color: #374151;
+    color: var(--text-primary);
 }
 
 .processing-mode input[type="checkbox"] {
@@ -314,9 +314,9 @@ input:checked + .slider:before {
 .processing-info {
     margin-top: 8px;
     padding: 12px;
-    background: #eff6ff;
+    background: var(--info-50);
     border-radius: 6px;
-    color: #1e40af;
+    color: var(--info-800);
     font-size: 0.875rem;
     line-height: 1.4;
 }
@@ -341,7 +341,7 @@ input:checked + .slider:before {
     align-items: center;
     margin-bottom: 12px;
     font-weight: 600;
-    color: #374151;
+    color: var(--text-primary);
 }
 
 .progress-bar-container {
@@ -390,7 +390,7 @@ input:checked + .slider:before {
 .result-value {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #3b82f6;
+    color: var(--text-link);
     margin-bottom: 8px;
 }
 

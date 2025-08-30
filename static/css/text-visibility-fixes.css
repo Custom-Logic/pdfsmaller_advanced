@@ -1,0 +1,571 @@
+/* Text Visibility and Contrast Fixes */
+/* WCAG AA Compliant Color Scheme Implementation */
+
+/* === GLOBAL TEXT CONTRAST FIXES === */
+
+/* Ensure all text elements use proper contrast colors */
+body {
+    color: var(--text-primary);
+    background: var(--bg-primary);
+}
+
+/* Headings with proper contrast */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary);
+}
+
+/* Paragraph text */
+p {
+    color: var(--text-primary);
+}
+
+/* Secondary text elements */
+.text-secondary,
+.subtitle,
+.description,
+.help-text {
+    color: var(--text-secondary);
+}
+
+/* Muted text elements */
+.text-muted,
+.hint,
+.placeholder {
+    color: var(--text-muted);
+}
+
+/* Link elements */
+a,
+.link {
+    color: var(--text-link);
+    text-decoration: underline;
+}
+
+a:hover,
+.link:hover {
+    color: var(--text-link-hover);
+}
+
+/* Button text contrast */
+.btn {
+    color: var(--text-inverse);
+}
+
+.btn-outline,
+.btn-ghost {
+    color: var(--text-primary);
+}
+
+.btn-outline:hover,
+.btn-ghost:hover {
+    color: var(--text-inverse);
+}
+
+/* === NAVIGATION TEXT FIXES === */
+
+/* Navbar text */
+.navbar-title {
+    color: var(--text-inverse);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Tab navigation text */
+.tab-button {
+    color: var(--text-secondary);
+}
+
+.tab-button:hover {
+    color: var(--text-link);
+}
+
+.tab-button.active {
+    color: var(--text-link);
+}
+
+/* Mobile menu text */
+.nav-menu-content {
+    color: var(--text-primary);
+}
+
+/* === FORM ELEMENT TEXT FIXES === */
+
+/* Form labels */
+label,
+.form-label,
+.input-label {
+    color: var(--text-primary);
+    font-weight: var(--font-semibold);
+}
+
+/* Form inputs */
+input,
+select,
+textarea,
+.form-input,
+.form-select,
+.form-textarea {
+    color: var(--text-primary);
+    background: var(--bg-primary);
+    border-color: var(--border-medium);
+}
+
+input::placeholder,
+textarea::placeholder,
+.form-input::placeholder,
+.form-textarea::placeholder {
+    color: var(--text-muted);
+}
+
+/* Form validation states */
+.form-error {
+    color: var(--error-700);
+}
+
+.form-success {
+    color: var(--success-700);
+}
+
+.form-warning {
+    color: var(--warning-700);
+}
+
+/* === COMPONENT TEXT FIXES === */
+
+/* Card components */
+.card-title,
+.panel-title,
+.section-title {
+    color: var(--text-primary);
+}
+
+.card-subtitle,
+.panel-subtitle,
+.section-subtitle {
+    color: var(--text-secondary);
+}
+
+.card-text,
+.panel-text,
+.section-text {
+    color: var(--text-primary);
+}
+
+/* Alert components */
+.alert {
+    color: var(--text-primary);
+}
+
+.alert-title {
+    color: var(--text-primary);
+    font-weight: var(--font-semibold);
+}
+
+.alert-message {
+    color: var(--text-primary);
+}
+
+/* Badge components */
+.badge {
+    color: var(--text-inverse);
+}
+
+.badge-outline {
+    color: var(--text-primary);
+}
+
+/* Progress components */
+.progress-label {
+    color: var(--text-primary);
+}
+
+.progress-percentage {
+    color: var(--text-link);
+    font-weight: var(--font-bold);
+}
+
+/* === UPLOAD INTERFACE TEXT FIXES === */
+
+/* Upload area text */
+.upload-title,
+.upload-header h3 {
+    color: var(--text-primary);
+}
+
+.upload-subtitle,
+.upload-description {
+    color: var(--text-secondary);
+}
+
+.upload-text {
+    color: var(--text-primary);
+}
+
+.upload-subtext {
+    color: var(--text-secondary);
+}
+
+.upload-limits,
+.upload-help {
+    color: var(--text-muted);
+}
+
+/* File info text */
+.file-name {
+    color: var(--text-primary);
+    font-weight: var(--font-semibold);
+}
+
+.file-size,
+.file-type {
+    color: var(--text-secondary);
+}
+
+/* === SETTINGS INTERFACE TEXT FIXES === */
+
+/* Settings panel text */
+.settings-title {
+    color: var(--text-primary);
+}
+
+.settings-description {
+    color: var(--text-secondary);
+}
+
+.settings-note {
+    color: var(--text-muted);
+}
+
+/* Quick settings text */
+.quick-setting-label {
+    color: var(--text-primary);
+}
+
+.quick-settings-header h4 {
+    color: var(--text-primary);
+}
+
+/* Settings links */
+.full-settings-link,
+.inline-settings-link,
+.settings-link-btn {
+    color: var(--text-link);
+}
+
+.full-settings-link:hover,
+.inline-settings-link:hover,
+.settings-link-btn:hover {
+    color: var(--text-link-hover);
+}
+
+/* === COMPRESSION INTERFACE TEXT FIXES === */
+
+/* Mode toggle text */
+.mode-label {
+    color: var(--text-primary);
+}
+
+.toggle-option {
+    color: var(--text-secondary);
+}
+
+.toggle-option.active {
+    color: var(--text-link);
+}
+
+.toggle-option:hover:not(.active) {
+    color: var(--text-primary);
+}
+
+/* Compression options text */
+.compression-options h3,
+.option-group label {
+    color: var(--text-primary);
+}
+
+.range-value {
+    color: var(--text-link);
+    font-weight: var(--font-bold);
+}
+
+/* Processing info text */
+.processing-info {
+    color: var(--info-800);
+    background: var(--info-50);
+}
+
+/* === RESULTS INTERFACE TEXT FIXES === */
+
+/* Results display text */
+.result-value {
+    color: var(--text-link);
+}
+
+.result-label {
+    color: var(--text-secondary);
+}
+
+.results-title {
+    color: var(--text-primary);
+}
+
+.results-description {
+    color: var(--text-secondary);
+}
+
+/* === INTERFACE HEADER TEXT FIXES === */
+
+/* Interface titles and subtitles */
+.interface-title {
+    color: var(--text-inverse);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.interface-subtitle {
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* === LOADING AND STATUS TEXT FIXES === */
+
+/* Loading text */
+.loading-text {
+    color: var(--text-secondary);
+}
+
+/* Status messages */
+.status-message {
+    color: var(--text-primary);
+}
+
+.status-success {
+    color: var(--success-700);
+}
+
+.status-error {
+    color: var(--error-700);
+}
+
+.status-warning {
+    color: var(--warning-700);
+}
+
+.status-info {
+    color: var(--info-700);
+}
+
+/* === ACCESSIBILITY ENHANCEMENTS === */
+
+/* Focus indicators with proper contrast */
+*:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+}
+
+/* High contrast mode enhancements */
+@media (prefers-contrast: high) {
+    /* Ensure maximum contrast for all text */
+    body,
+    h1, h2, h3, h4, h5, h6,
+    p,
+    .text-primary {
+        color: #000000;
+    }
+    
+    .text-secondary {
+        color: #1a1a1a;
+    }
+    
+    .text-muted {
+        color: #333333;
+    }
+    
+    .text-link {
+        color: #0000ee;
+    }
+    
+    .text-link:hover {
+        color: #0000cc;
+    }
+    
+    /* High contrast backgrounds */
+    .bg-primary {
+        background: #ffffff;
+    }
+    
+    .bg-secondary {
+        background: #f5f5f5;
+    }
+    
+    /* High contrast borders */
+    input,
+    select,
+    textarea,
+    .form-input,
+    .form-select,
+    .form-textarea {
+        border-color: #333333;
+    }
+    
+    input:focus,
+    select:focus,
+    textarea:focus,
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+        border-color: #0000ff;
+        box-shadow: 0 0 0 2px #0000ff;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    /* Remove text shadows for users who prefer reduced motion */
+    .interface-title,
+    .interface-subtitle,
+    .navbar-title {
+        text-shadow: none;
+    }
+}
+
+/* Dark mode text adjustments */
+@media (prefers-color-scheme: dark) {
+    /* Ensure proper contrast in dark mode */
+    .interface-title {
+        color: var(--text-inverse);
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+    
+    .interface-subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+    
+    /* Dark mode form elements */
+    input,
+    select,
+    textarea,
+    .form-input,
+    .form-select,
+    .form-textarea {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        border-color: var(--border-medium);
+    }
+}
+
+/* Print styles for text visibility */
+@media print {
+    /* Ensure all text is black for printing */
+    body,
+    h1, h2, h3, h4, h5, h6,
+    p,
+    .text-primary,
+    .text-secondary,
+    .text-muted {
+        color: #000000 !important;
+    }
+    
+    /* Remove text shadows for printing */
+    .interface-title,
+    .interface-subtitle,
+    .navbar-title {
+        text-shadow: none !important;
+    }
+    
+    /* Ensure backgrounds are white for printing */
+    .bg-primary,
+    .bg-secondary,
+    .bg-tertiary {
+        background: #ffffff !important;
+    }
+}
+
+/* === UTILITY CLASSES FOR TEXT CONTRAST === */
+
+/* Text color utilities */
+.text-high-contrast {
+    color: var(--text-primary);
+    font-weight: var(--font-semibold);
+}
+
+.text-medium-contrast {
+    color: var(--text-secondary);
+}
+
+.text-low-contrast {
+    color: var(--text-muted);
+}
+
+.text-inverse-high-contrast {
+    color: var(--text-inverse);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Background utilities for text contrast */
+.bg-text-primary {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.bg-text-secondary {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.bg-text-dark {
+    background: var(--gray-800);
+    color: var(--text-inverse);
+}
+
+/* Border utilities for text elements */
+.border-text-focus {
+    border-color: var(--border-focus);
+}
+
+.border-text-light {
+    border-color: var(--border-light);
+}
+
+.border-text-medium {
+    border-color: var(--border-medium);
+}
+
+/* === COMPONENT-SPECIFIC FIXES === */
+
+/* Fix any remaining white-on-white issues */
+.white-text-fix {
+    color: var(--text-primary) !important;
+}
+
+.white-bg-text-fix {
+    background: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Ensure proper contrast for overlays */
+.overlay-text {
+    color: var(--text-inverse);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Ensure proper contrast for tooltips */
+.tooltip {
+    background: var(--gray-800);
+    color: var(--text-inverse);
+}
+
+/* Ensure proper contrast for dropdowns */
+.dropdown-menu {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-medium);
+}
+
+.dropdown-item {
+    color: var(--text-primary);
+}
+
+.dropdown-item:hover {
+    background: var(--interactive-hover);
+    color: var(--text-primary);
+}

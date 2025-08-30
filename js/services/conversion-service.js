@@ -135,7 +135,7 @@ export class ConversionService {
             formData.append('file', file);
             formData.append('target_format', targetFormat);
             formData.append('options', JSON.stringify(options));
-            
+            console.log("Will now attempt file conversion with this options: ", options);
             // Send conversion request
             const response = await this.apiClient.post(`/convert/pdf-to-${targetFormat}`, formData, {
                 responseType: 'blob',

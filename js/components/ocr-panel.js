@@ -644,65 +644,65 @@ export class OCRPanel extends BaseComponent {
         const fileInput = this.shadowRoot.getElementById('fileInput');
         const browseBtn = this.shadowRoot.getElementById('browseBtn');
         const fileDropZone = this.shadowRoot.getElementById('fileDropZone');
-        
-        browseBtn.addEventListener('click', () => fileInput.click());
-        
-        fileInput.addEventListener('change', (e) => {
+
+        this.addEventListener(browseBtn, 'click', () => fileInput.click());
+
+        this.addEventListener(fileInput, 'change', (e) => {
             this.handleFileSelection(Array.from(e.target.files));
         });
-        
+
         // Drag and drop handling
-        fileDropZone.addEventListener('dragover', (e) => {
+        this.addEventListener(fileDropZone, 'dragover', (e) => {
             e.preventDefault();
             fileDropZone.classList.add('drag-over');
         });
-        
-        fileDropZone.addEventListener('dragleave', () => {
+
+        this.addEventListener(fileDropZone, 'dragleave', () => {
             fileDropZone.classList.remove('drag-over');
         });
-        
-        fileDropZone.addEventListener('drop', (e) => {
+
+        this.addEventListener(fileDropZone, 'drop', (e) => {
             e.preventDefault();
             fileDropZone.classList.remove('drag-over');
             const files = Array.from(e.dataTransfer.files);
             this.handleFileSelection(files);
         });
-        
+
         // OCR settings
         const language = this.shadowRoot.getElementById('language');
         const outputFormat = this.shadowRoot.getElementById('outputFormat');
         const quality = this.shadowRoot.getElementById('quality');
-        
-        language.addEventListener('change', (e) => {
+
+        this.addEventListener(language, 'change', (e) => {
             this.ocrOptions.language = e.target.value;
         });
-        
-        outputFormat.addEventListener('change', (e) => {
+
+        this.addEventListener(outputFormat, 'change', (e) => {
             this.ocrOptions.outputFormat = e.target.value;
         });
-        
-        quality.addEventListener('change', (e) => {
+
+        this.addEventListener(quality, 'change', (e) => {
             this.ocrOptions.quality = e.target.value;
         });
-        
+
         // Checkbox options
         ['extractTables', 'preserveLayout', 'detectColumns', 'enhanceImages'].forEach(id => {
             const checkbox = this.shadowRoot.getElementById(id);
             if (checkbox) {
-                checkbox.addEventListener('change', (e) => {
+                this.addEventListener(checkbox, 'change', (e) => {
                     this.ocrOptions[id] = e.target.checked;
                 });
             }
         });
-        
+
         // Action buttons
         const processBtn = this.shadowRoot.getElementById('processBtn');
         const previewBtn = this.shadowRoot.getElementById('previewBtn');
         const batchBtn = this.shadowRoot.getElementById('batchBtn');
-        
-        processBtn.addEventListener('click', () => this.startOCRProcessing());
-        previewBtn.addEventListener('click', () => this.previewOCR());
-        batchBtn.addEventListener('click', () => this.startBatchProcessing());
+
+        this.addEventListener(processBtn, 'click', () => this.startOCRProcessing());
+        this.addEventListener(previewBtn, 'click', () => this.previewOCR());
+        this.addEventListener(batchBtn, 'click', () => this.startBatchProcessing());
     }
 
     handleFileSelection(files) {

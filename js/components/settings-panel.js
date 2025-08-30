@@ -269,7 +269,7 @@ export class SettingsPanel extends BaseComponent {
         const shadow = this.shadowRoot;
         
         // Compression level change
-        shadow.getElementById('compressionLevel').addEventListener('change', (e) => {
+        this.addEventListener(shadow.getElementById('compressionLevel'), 'change', (e) => {
             this.settings.compressionLevel = e.target.value;
             this.updateSettings();
         });
@@ -278,7 +278,7 @@ export class SettingsPanel extends BaseComponent {
         const imageQualitySlider = shadow.getElementById('imageQuality');
         const qualityValue = shadow.getElementById('qualityValue');
         
-        imageQualitySlider.addEventListener('input', (e) => {
+        this.addEventListener(imageQualitySlider, 'input', (e) => {
             const value = e.target.value;
             qualityValue.textContent = `${value}%`;
             this.settings.imageQuality = parseInt(value);
@@ -286,24 +286,24 @@ export class SettingsPanel extends BaseComponent {
         });
 
         // Target size change
-        shadow.getElementById('targetSize').addEventListener('change', (e) => {
+        this.addEventListener(shadow.getElementById('targetSize'), 'change', (e) => {
             this.settings.targetSize = e.target.value;
             this.updateSettings();
         });
 
         // Optimization strategy change
-        shadow.getElementById('optimizationStrategy').addEventListener('change', (e) => {
+        this.addEventListener(shadow.getElementById('optimizationStrategy'), 'change', (e) => {
             this.settings.optimizationStrategy = e.target.value;
             this.updateSettings();
         });
 
         // Reset settings
-        shadow.getElementById('resetSettings').addEventListener('click', () => {
+        this.addEventListener(shadow.getElementById('resetSettings'), 'click', () => {
             this.resetToDefaults();
         });
 
         // Apply recommendations
-        shadow.getElementById('applyRecommendations').addEventListener('click', () => {
+        this.addEventListener(shadow.getElementById('applyRecommendations'), 'click', () => {
             this.applyRecommendations();
         });
     }

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Handling Adaptation Test</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+
+        .test-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .test-description {
+            margin-bottom: 15px;
+            color: #666;
+        }
+
+        .event-log {
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        .log-entry {
+            margin: 2px 0;
+            padding: 2px 0;
+        }
+
+        .log-entry.mode-changed {
+            color: #0066cc;
+            font-weight: bold;
+        }
+
+        .log-entry.files-adapted {
+            color: #cc6600;
+            font-weight: bold;
+        }
+
+        .log-entry.files-selected {
+            color: #006600;
+        }
+
+        .log-entry.validation-warning {
+            color: #cc9900;
+        }
+
+        .clear-log {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .test-instructions {
+            background: #e6f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+        .test-instructions ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>File Handling Adaptation Test</h1>
+    <p>This page tests the file handling adaptation functionality for the dual-mode file uploader component.</p>
+
+    <div class="test-section">
+        <div class="test-title">Test 1: Single File Mode - Multiple File Selection (Requirement 3.1)</div>
+        <div class="test-description">
+            Tests that when in single file mode and multiple files are selected, only the last selected file is
+            accepted.
+        </div>
+        <div class="test-instructions">
+            <strong>Instructions:</strong>
+            <ol>
+                <li>Ensure the toggle is in "Single File" mode</li>
+                <li>Click the upload area and select multiple files</li>
+                <li>Observe that only the last selected file is kept</li>
+                <li>Check the event log for validation warnings</li>
+            </ol>
+        </div>
+
+        <file-uploader id="test1" default-mode="single" accept=".pdf,.txt,.jpg,.png"></file-uploader>
+
+        <div class="event-log" id="log1"></div>
+        <button class="clear-log" onclick="clearLog('log1')">Clear Log</button>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">Test 2: Single File Mode - Multiple File Drag & Drop (Requirement 3.2)</div>
+        <div class="test-description">
+            Tests that when in single file mode and multiple files are dragged, only one file is accepted.
+        </div>
+        <div class="test-instructions">
+            <strong>Instructions:</strong>
+            <ol>
+                <li>Ensure the toggle is in "Single File" mode</li>
+                <li>Drag and drop multiple files onto the upload area</li>
+                <li>Observe that only one file is accepted</li>
+                <li>Check the event log for adaptation messages</li>
+            </ol>
+        </div>
+
+        <file-uploader id="test2" default-mode="single" accept=".pdf,.txt,.jpg,.png"></file-uploader>
+
+        <div class="event-log" id="log2"></div>
+        <button class="clear-log" onclick="clearLog('log2')">Clear Log</button>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">Test 3: Batch Mode - Multiple Files (Requirement 3.3)</div>
+        <div class="test-description">
+            Tests that batch mode accepts multiple files as expected.
+        </div>
+        <div class="test-instructions">
+            <strong>Instructions:</strong>
+            <ol>
+                <li>Ensure the toggle is in "Batch Files" mode</li>
+                <li>Select or drag multiple files</li>
+                <li>Observe that all valid files are accepted</li>
+                <li>Check that no adaptation warnings are shown</li>
+            </ol>
+        </div>
+
+        <file-uploader id="test3" default-mode="batch" accept=".pdf,.txt,.jpg,.png"></file-uploader>
+
+        <div class="event-log" id="log3"></div>
+        <button class="clear-log" onclick="clearLog('log3')">Clear Log</button>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">Test 4: Mode Transition - Batch to Single (Requirement 3.4)</div>
+        <div class="test-description">
+            Tests that when switching from batch to single mode with multiple files selected, only the first file is
+            kept.
+        </div>
+        <div class="test-instructions">
+            <strong>Instructions:</strong>
+            <ol>
+                <li>Start in "Batch Files" mode</li>
+                <li>Select multiple files</li>
+                <li>Switch to "Single File" mode using the toggle</li>
+                <li>Observe that only the first file is kept</li>
+                <li>Check the event log for mode-changed and files-adapted events</li>
+            </ol>
+        </div>
+
+        <file-uploader id="test4" default-mode="batch" accept=".pdf,.txt,.jpg,.png"></file-uploader>
+
+        <div class="event-log" id="log4"></div>
+        <button class="clear-log" onclick="clearLog('log4')">Clear Log</button>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">Test 5: Mode Transition - Single to Batch (Requirement 3.5)</div>
+        <div class="test-description">
+            Tests that when switching from single to batch mode, the currently selected file is maintained.
+        </div>
+        <div class="test-instructions">
+            <strong>Instructions:</strong>
+            <ol>
+                <li>Start in "Single File" mode</li>
+                <li>Select one file</li>
+                <li>Switch to "Batch Files" mode using the toggle</li>
+                <li>Observe that the selected file is maintained</li>
+                <li>Add more files to verify batch mode is working</li>
+            </ol>
+        </div>
+
+        <file-uploader id="test5" default-mode="single" accept=".pdf,.txt,.jpg,.png"></file-uploader>
+
+        <div class="event-log" id="log5"></div>
+        <button class="clear-log" onclick="clearLog('log5')">Clear Log</button>
+    </div>
+
+    <script type="module">
+        import './js/components/file-uploader.js';
+
+        function logEvent(logId, eventType, data) {
+            const log = document.getElementById(logId);
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${eventType}`;
+
+            const timestamp = new Date().toLocaleTimeString();
+            let message = `[${timestamp}] ${eventType}: `;
+
+            switch (eventType) {
+                case 'mode-changed':
+                    message += `${data.oldMode} → ${data.newMode}`;
+                    if (data.filesAffected > 0) {
+                        message += ` (${data.filesAffected} files affected)`;
+                    }
+                    break;
+
+                case 'files-adapted':
+                    message += `${data.originalFiles.length} → ${data.adaptedFiles.length} files (reason: ${data.reason})`;
+                    break;
+
+                case 'files-selected':
+                    message += `${data.files.length} files selected in ${data.mode} mode`;
+                    if (data.replaced) {
+                        message += ' (replaced existing)';
+                    }
+                    break;
+
+                case 'files-processed':
+                    message += `${data.validFiles.length}/${data.totalFiles} files processed`;
+                    if (data.adaptedFiles !== undefined && data.adaptedFiles !== data.totalFiles) {
+                        message += ` (${data.adaptedFiles} after mode adaptation)`;
+                    }
+                    if (data.warnings > 0) {
+                        message += `, ${data.warnings} warnings`;
+                    }
+                    break;
+
+                case 'validation-warning':
+                    message += `${data.warnings.join('; ')}`;
+                    break;
+
+                default:
+                    message += JSON.stringify(data);
+            }
+
+            entry.textContent = message;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function setupEventListeners(uploaderId, logId) {
+            const uploader = document.getElementById(uploaderId);
+
+            uploader.addEventListener('mode-changed', (e) => {
+                logEvent(logId, 'mode-changed', e.detail);
+            });
+
+            uploader.addEventListener('files-adapted', (e) => {
+                logEvent(logId, 'files-adapted', e.detail);
+            });
+
+            uploader.addEventListener('files-selected', (e) => {
+                logEvent(logId, 'files-selected', e.detail);
+            });
+
+            uploader.addEventListener('files-processed', (e) => {
+                logEvent(logId, 'files-processed', e.detail);
+            });
+
+            uploader.addEventListener('validation-warning', (e) => {
+                logEvent(logId, 'validation-warning', e.detail);
+            });
+        }
+
+        // Setup event listeners for all test uploaders
+        setupEventListeners('test1', 'log1');
+        setupEventListeners('test2', 'log2');
+        setupEventListeners('test3', 'log3');
+        setupEventListeners('test4', 'log4');
+        setupEventListeners('test5', 'log5');
+
+        // Make clearLog function available globally
+        window.clearLog = function (logId) {
+            document.getElementById(logId).innerHTML = '';
+        };
+    </script>
+</body>
+
+</html>

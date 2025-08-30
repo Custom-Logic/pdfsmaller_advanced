@@ -191,13 +191,31 @@ export class UIIntegrationService {
         uploader.addEventListener('files-processed', async (event) => {
             const files = event.detail.validFiles;
             if (files && files.length > 0) {
-                try {
-                    await this.processFiles(files);
-                } catch (error) {
-                    errorHandlingService.handleError(error, { 
-                        context: 'File uploader processing',
-                        retryCallback: () => this.processFiles(files)
-                    });
+                // Check if we're in the compression tab before auto-processing
+                // Wait for tab navigation to be available if not already
+                let currentTab = 'compress'; // Default to not auto-processing if tab nav is not ready
+                if (window.tabNavigation) {
+                    currentTab = window.tabNavigation.getCurrentTab();
+                } else {
+                    // Tab navigation not ready, don't auto-process
+                    console.warn('Tab navigation not ready, not auto-processing files');
+                    appState.set('selectedFiles', files);
+                    return;
+                }
+                
+                if (currentTab === 'compress') {
+                    try {
+                        await this.processFiles(files);
+                    } catch (error) {
+                        errorHandlingService.handleError(error, {
+                            context: 'File uploader processing',
+                            retryCallback: () => this.processFiles(files)
+                        });
+                    }
+                }
+                // For other tabs, just store the files and wait for user action
+                else {
+                    appState.set('selectedFiles', files);
                 }
             }
         });
@@ -221,13 +239,31 @@ export class UIIntegrationService {
 
         if (uploader.onBatchStart) {
             uploader.onBatchStart = async (files) => {
-                try {
-                    await this.processFiles(files);
-                } catch (error) {
-                    errorHandlingService.handleError(error, { 
-                        context: 'Bulk uploader processing',
-                        retryCallback: () => this.processFiles(files)
-                    });
+                // Check if we're in the compression tab before auto-processing
+                // Wait for tab navigation to be available if not already
+                let currentTab = 'compress'; // Default to not auto-processing if tab nav is not ready
+                if (window.tabNavigation) {
+                    currentTab = window.tabNavigation.getCurrentTab();
+                } else {
+                    // Tab navigation not ready, don't auto-process
+                    console.warn('Tab navigation not ready, not auto-processing files');
+                    appState.set('selectedFiles', files);
+                    return;
+                }
+                
+                if (currentTab === 'compress') {
+                    try {
+                        await this.processFiles(files);
+                    } catch (error) {
+                        errorHandlingService.handleError(error, {
+                            context: 'Bulk uploader processing',
+                            retryCallback: () => this.processFiles(files)
+                        });
+                    }
+                }
+                // For other tabs, just store the files and wait for user action
+                else {
+                    appState.set('selectedFiles', files);
                 }
             };
         }

@@ -422,11 +422,11 @@ export class AIPanel extends BaseComponent {
         this.setupFileUpload('summaryUpload', 'summaryFileInput', 'summaryOptions', 'generateSummary');
         this.setupFileUpload('translationUpload', 'translationFileInput', 'translationOptions', 'translatePDF');
         
-        this.shadowRoot.getElementById('generateSummary').addEventListener('click', () => {
+        this.addEventListener(this.shadowRoot.getElementById('generateSummary'), 'click', () => {
             this.generateSummary();
         });
         
-        this.shadowRoot.getElementById('translatePDF').addEventListener('click', () => {
+        this.addEventListener(this.shadowRoot.getElementById('translatePDF'), 'click', () => {
             this.translatePDF();
         });
     }

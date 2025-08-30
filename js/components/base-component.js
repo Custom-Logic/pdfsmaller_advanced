@@ -14,6 +14,7 @@ export class BaseComponent extends HTMLElement {
         this._state = {};
         this._props = {};
         this._renderScheduled = false;
+        this.namespace = this.constructor.name; // Use component name as default namespace
     }
 
     // Lifecycle methods
@@ -190,7 +191,6 @@ export class BaseComponent extends HTMLElement {
     }
 
     // Event handling
-// Event handling
 addEventListener(element, type, listener, options = false) {
     // Validate the target element
     let target;
@@ -215,13 +215,14 @@ addEventListener(element, type, listener, options = false) {
     }
 
     try {
-        target.addEventListener(type, listener, options);
+        const namespacedType = `${this.namespace}:${type}`; // Namespace the event type
+        target.addEventListener(namespacedType, listener, options);
 
         // Store reference for cleanup
         if (!this._eventListeners.has(target)) {
             this._eventListeners.set(target, []);
         }
-        this._eventListeners.get(target).push({ type, listener, options });
+        this._eventListeners.get(target).push({ type: namespacedType, listener, options });
     } catch (error) {
         console.error('Error adding event listener:', error);
     }
@@ -252,13 +253,14 @@ removeEventListener(element, type, listener, options = false) {
     }
 
     try {
-        target.removeEventListener(type, listener, options);
+        const namespacedType = `${this.namespace}:${type}`; // Namespace the event type
+        target.removeEventListener(namespacedType, listener, options);
 
         // Remove from stored references
         if (this._eventListeners.has(target)) {
             const listeners = this._eventListeners.get(target);
             const index = listeners.findIndex(l =>
-                l.type === type && l.listener === listener && l.options === options
+                l.type === namespacedType && l.listener === listener && l.options === options
             );
             if (index !== -1) {
                 listeners.splice(index, 1);
@@ -281,7 +283,8 @@ removeEventListener(element, type, listener, options = false) {
     }
 
     emit(eventName, detail = null, options = {}) {
-        const event = new CustomEvent(eventName, {
+        const namespacedEventName = `${this.namespace}:${eventName}`; // Namespace the event name
+        const event = new CustomEvent(namespacedEventName, {
             detail,
             bubbles: true,
             cancelable: true,

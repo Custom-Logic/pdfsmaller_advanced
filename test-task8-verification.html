@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task 8 Verification - Backward Compatibility</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .test-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        file-uploader {
+            display: block;
+            margin: 10px 0;
+        }
+        
+        button {
+            margin: 5px;
+            padding: 8px 16px;
+            border: 1px solid #007bff;
+            background: #007bff;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Task 8 Verification: Backward Compatibility and Attribute Handling</h1>
+    
+    <!-- Requirement 4.1: Set initial toggle state based on existing 'multiple' attribute -->
+    <div class="test-section">
+        <h3>Requirement 4.1: Initial toggle state based on 'multiple' attribute</h3>
+        <p>Component with multiple attribute should start in batch mode:</p>
+        <file-uploader id="test-4-1" multiple accept=".pdf"></file-uploader>
+        <button onclick="testRequirement41()">Test Requirement 4.1</button>
+        <div id="result-4-1" class="test-result info">Ready to test...</div>
+    </div>
+
+    <!-- Requirement 4.2: All existing component methods continue to work unchanged -->
+    <div class="test-section">
+        <h3>Requirement 4.2: All existing methods work unchanged</h3>
+        <p>All existing component methods should be available and functional:</p>
+        <file-uploader id="test-4-2" accept=".pdf"></file-uploader>
+        <button onclick="testRequirement42()">Test Requirement 4.2</button>
+        <div id="result-4-2" class="test-result info">Ready to test...</div>
+    </div>
+
+    <!-- Requirement 4.3: Default-mode attribute processing with fallback -->
+    <div class="test-section">
+        <h3>Requirement 4.3: Default-mode attribute processing</h3>
+        <p>Valid default-mode should be respected, invalid should fallback to single:</p>
+        <file-uploader id="test-4-3a" default-mode="batch" accept=".pdf"></file-uploader>
+        <file-uploader id="test-4-3b" default-mode="invalid" accept=".pdf"></file-uploader>
+        <button onclick="testRequirement43()">Test Requirement 4.3</button>
+        <div id="result-4-3" class="test-result info">Ready to test...</div>
+    </div>
+
+    <!-- Requirement 4.4: Maintain existing event names and data structures -->
+    <div class="test-section">
+        <h3>Requirement 4.4: Existing event names and data structures</h3>
+        <p>Events should maintain compatibility:</p>
+        <file-uploader id="test-4-4" accept=".pdf"></file-uploader>
+        <button onclick="testRequirement44()">Test Requirement 4.4</button>
+        <div id="result-4-4" class="test-result info">Ready to test...</div>
+    </div>
+
+    <!-- Requirement 4.5: Comprehensive error handling for invalid mode values -->
+    <div class="test-section">
+        <h3>Requirement 4.5: Comprehensive error handling</h3>
+        <p>Invalid mode values should be handled gracefully:</p>
+        <file-uploader id="test-4-5" accept=".pdf"></file-uploader>
+        <button onclick="testRequirement45()">Test Requirement 4.5</button>
+        <div id="result-4-5" class="test-result info">Ready to test...</div>
+    </div>
+
+    <script type="module">
+        import { FileUploader } from './js/components/file-uploader.js';
+        
+        // Test Requirement 4.1: Set initial toggle state based on existing 'multiple' attribute
+        window.testRequirement41 = function() {
+            const uploader = document.getElementById('test-4-1');
+            const result = document.getElementById('result-4-1');
+            
+            try {
+                const hasMultiple = uploader.hasAttribute('multiple');
+                const currentMode = uploader.getMode();
+                
+                if (hasMultiple && currentMode === 'batch') {
+                    result.className = 'test-result success';
+                    result.textContent = '✓ PASS: Component with multiple attribute correctly starts in batch mode';
+                } else if (!hasMultiple && currentMode === 'single') {
+                    result.className = 'test-result success';
+                    result.textContent = '✓ PASS: Component without multiple attribute correctly starts in single mode';
+                } else {
+                    result.className = 'test-result error';
+                    result.textContent = `✗ FAIL: Expected ${hasMultiple ? 'batch' : 'single'} mode but got ${currentMode}`;
+                }
+            } catch (error) {
+                result.className = 'test-result error';
+                result.textContent = `✗ ERROR: ${error.message}`;
+            }
+        };
+
+        // Test Requirement 4.2: All existing component methods continue to work unchanged
+        window.testRequirement42 = function() {
+            const uploader = document.getElementById('test-4-2');
+            const result = document.getElementById('result-4-2');
+            
+            try {
+                const compatibility = uploader.verifyBackwardCompatibility();
+                
+                if (compatibility.compatible) {
+                    // Test some key methods
+                    const files = uploader.getFiles();
+                    uploader.setFiles([]);
+                    const hasFiles = uploader.hasFiles();
+                    const isProcessing = uploader.isProcessing();
+                    const fileCount = uploader.getFileCount();
+                    
+                    result.className = 'test-result success';
+                    result.textContent = `✓ PASS: All ${compatibility.totalAvailable} methods available and working`;
+                } else {
+                    result.className = 'test-result error';
+                    result.textContent = `✗ FAIL: Missing methods: ${compatibility.missingMethods.join(', ')}`;
+                }
+            } catch (error) {
+                result.className = 'test-result error';
+                result.textContent = `✗ ERROR: ${error.message}`;
+            }
+        };
+
+        // Test Requirement 4.3: Default-mode attribute processing with fallback
+        window.testRequirement43 = function() {
+            const uploaderA = document.getElementById('test-4-3a');
+            const uploaderB = document.getElementById('test-4-3b');
+            const result = document.getElementById('result-4-3');
+            
+            try {
+                const modeA = uploaderA.getMode();
+                const modeB = uploaderB.getMode();
+                const defaultModeA = uploaderA.getAttribute('default-mode');
+                const defaultModeB = uploaderB.getAttribute('default-mode');
+                
+                if (modeA === 'batch' && modeB === 'single') {
+                    result.className = 'test-result success';
+                    result.textContent = `✓ PASS: Valid default-mode="${defaultModeA}" → ${modeA}, Invalid default-mode="${defaultModeB}" → ${modeB} (fallback)`;
+                } else {
+                    result.className = 'test-result error';
+                    result.textContent = `✗ FAIL: Expected batch and single modes, got ${modeA} and ${modeB}`;
+                }
+            } catch (error) {
+                result.className = 'test-result error';
+                result.textContent = `✗ ERROR: ${error.message}`;
+            }
+        };
+
+        // Test Requirement 4.4: Maintain existing event names and data structures
+        window.testRequirement44 = function() {
+            const uploader = document.getElementById('test-4-4');
+            const result = document.getElementById('result-4-4');
+            
+            let eventsCaught = [];
+            
+            // Listen for key events
+            const expectedEvents = ['mode-changed', 'mode-set', 'initialized'];
+            
+            expectedEvents.forEach(eventName => {
+                uploader.addEventListener(eventName, (e) => {
+                    eventsCaught.push({
+                        name: eventName,
+                        hasDetail: !!e.detail,
+                        detailKeys: e.detail ? Object.keys(e.detail) : []
+                    });
+                });
+            });
+            
+            // Trigger mode change
+            uploader.setMode('batch');
+            
+            setTimeout(() => {
+                if (eventsCaught.length > 0) {
+                    result.className = 'test-result success';
+                    result.textContent = `✓ PASS: Events fired: ${eventsCaught.map(e => e.name).join(', ')}`;
+                } else {
+                    result.className = 'test-result error';
+                    result.textContent = '✗ FAIL: No events were fired';
+                }
+            }, 100);
+        };
+
+        // Test Requirement 4.5: Comprehensive error handling for invalid mode values
+        window.testRequirement45 = function() {
+            const uploader = document.getElementById('test-4-5');
+            const result = document.getElementById('result-4-5');
+            
+            try {
+                const invalidModes = ['invalid', 'multiple', '', null, undefined, 123, {}, []];
+                let errorCount = 0;
+                let errorEvents = [];
+                
+                // Listen for error events
+                uploader.addEventListener('mode-change-error', (e) => {
+                    errorEvents.push(e.detail);
+                });
+                
+                // Test invalid modes
+                invalidModes.forEach(mode => {
+                    try {
+                        const success = uploader.setMode(mode);
+                        if (!success) errorCount++;
+                    } catch (error) {
+                        errorCount++;
+                    }
+                });
+                
+                // Test that component still works after errors
+                const finalModeSet = uploader.setMode('single');
+                const finalMode = uploader.getMode();
+                
+                if (errorCount === invalidModes.length && finalModeSet && finalMode === 'single') {
+                    result.className = 'test-result success';
+                    result.textContent = `✓ PASS: All ${invalidModes.length} invalid modes rejected, component still functional`;
+                } else {
+                    result.className = 'test-result error';
+                    result.textContent = `✗ FAIL: Only ${errorCount}/${invalidModes.length} errors caught, recovery: ${finalModeSet}`;
+                }
+            } catch (error) {
+                result.className = 'test-result error';
+                result.textContent = `✗ ERROR: ${error.message}`;
+            }
+        };
+
+        // Auto-run tests when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                testRequirement41();
+                testRequirement42();
+                testRequirement43();
+                testRequirement44();
+                testRequirement45();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
