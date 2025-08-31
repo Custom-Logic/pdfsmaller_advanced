@@ -665,42 +665,41 @@ export class SettingsPanel extends BaseComponent {
         };
         return strategies[strategy] || strategy;
     }
-
     // Add these methods to the SettingsPanel class
-setUser(user) {
-    this.user = user;
-    this.updateUIForUser();
-}
+    setUser(user) {
+        this.user = user;
+        this.updateUIForUser();
+    }
 
-updateUIForUser() {
-    // Enable/disable features based on user tier
-    const hasProAccess = this.user && (this.user.plan === 'pro' || this.user.plan === 'premium');
-    
-    // Update UI based on user access
-    this.updateProFeaturesAvailability(hasProAccess);
-}
+    updateUIForUser() {
+        // Enable/disable features based on user tier
+        const hasProAccess = this.user && (this.user.plan === 'pro' || this.user.plan === 'premium');
+        
+        // Update UI based on user access
+        this.updateProFeaturesAvailability(hasProAccess);
+    }
 
-updateProFeaturesAvailability(hasProAccess) {
-    // Disable pro features if user doesn't have access
-    const proFeatures = this.shadowRoot.querySelectorAll('[data-pro-feature]');
-    proFeatures.forEach(feature => {
-        if (!hasProAccess) {
-            feature.disabled = true;
-            feature.title = 'Pro feature - upgrade to access';
-            feature.classList.add('pro-feature-disabled');
-        } else {
-            feature.disabled = false;
-            feature.title = '';
-            feature.classList.remove('pro-feature-disabled');
-        }
-    });
-}
+    updateProFeaturesAvailability(hasProAccess) {
+        // Disable pro features if user doesn't have access
+        const proFeatures = this.shadowRoot.querySelectorAll('[data-pro-feature]');
+        proFeatures.forEach(feature => {
+            if (!hasProAccess) {
+                feature.disabled = true;
+                feature.title = 'Pro feature - upgrade to access';
+                feature.classList.add('pro-feature-disabled');
+            } else {
+                feature.disabled = false;
+                feature.title = '';
+                feature.classList.remove('pro-feature-disabled');
+            }
+        });
+    }
 
-// Add initialization method
-async init() {
-    await this.loadSettings();
-    this.setupEventListeners();
-}
+    // Add initialization method
+    async init() {
+        await this.loadSettings();
+        this.setupEventListeners();
+    }
 
 }
 

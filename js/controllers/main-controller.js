@@ -11,7 +11,9 @@ import { AnalyticsService } from '../services/analytics-service.js';
 import { AIService } from '../services/ai-service.js';
 import { OCRService } from '../services/ocr-service.js';
 import { CloudStorageService } from '../services/cloud-integration-service.js';
+import { RouterService } from '../services/RouterService.js';
 import { ErrorHandler } from '../utils/error-handler.js';
+import { RouterService } from '../services/RouterService.js';
 
 export class MainController extends EventTarget {
   constructor() {
@@ -56,6 +58,25 @@ export class MainController extends EventTarget {
 
   async initializeServices() {
     console.log('MainController: Initializing services...');
+
+
+      // Define routes
+      const routes = [
+        { path: '/', component: 'compressTab' },
+        { path: '/convert', component: 'convertTab' },
+        { path: '/ocr', component: 'ocrTab' },
+        { path: '/ai-tools', component: 'ai_toolsTab' },
+        { path: '/files', component: 'filesTab' },
+        { path: '/settings', component: 'settingsTab' },
+        { path: '/pricing', component: 'pricingTab' },
+        { path: '/profile', component: 'profileTab' },
+    ];
+
+    // Initialize RouterService
+    const routerService = new RouterService(routes);
+    await routerService.init();
+    this.services.set('router', routerService);
+
         
     // Initialize StorageService
     const storageService = new StorageService();
@@ -91,6 +112,8 @@ export class MainController extends EventTarget {
     const cloudService = new CloudStorageService();
     await cloudService.init();
     this.services.set('cloud', cloudService);
+
+
         
     // Setup service event listeners
     this.setupServiceEventListeners();
@@ -117,6 +140,17 @@ export class MainController extends EventTarget {
         this.handleServiceStatusChange(serviceName, event);
       });
     });
+
+    // Listen for router events
+    const routerService = this.services.get('router');
+    if (routerService) {
+        routerService.addEventListener('routeChanged', (event) => {
+            this.handleRouteChanged(event.detail);
+        });
+        routerService.addEventListener('routeNotFound', (event) => {
+            this.handleRouteNotFound(event.detail);
+        });
+    }
   }
 
   setupEventListeners() {
@@ -146,6 +180,80 @@ export class MainController extends EventTarget {
     document.addEventListener('fileRequested', this.handleFileRequested.bind(this));
     
     console.log('MainController: Event listeners setup complete');
+
+    // Navigation listener
+    document.addEventListener('click', (event) => {
+        const link = event.target.closest('a');
+        if (link && link.getAttribute('href') && !link.getAttribute('href').startsWith('#')) {
+            const href = link.getAttribute('href');
+            // check if the link is internal to the app
+            if (href.startsWith('/') || href.startsWith(window.location.origin)) {
+                event.preventDefault();
+                const path = new URL(href, window.location.origin).pathname;
+                const router = this.getService('router');
+                if (router) {
+                    router.navigate(path);
+                }
+            }
+        }
+    });
+}
+handleRouteChanged(route) {
+  console.log('MainController: Route changed:', route);
+  const { component } = route;
+
+  // Hide all tab panels
+  const tabPanels = document.querySelectorAll('.tab-panel');
+  tabPanels.forEach(panel => {
+      panel.classList.remove('active');
+  });
+
+  // Show the active tab panel
+  const activePanel = document.getElementById(component);
+  if (activePanel) {
+      activePanel.classList.add('active');
+  }
+
+  // Update active tab button
+  const tabButtons = document.querySelectorAll('.tab-button');
+  tabButtons.forEach(button => {
+      if (button.getAttribute('href') === route.path) {
+          button.classList.add('active');
+          button.setAttribute('aria-selected', 'true');
+          button.setAttribute('tabindex', '0');
+      } else {
+          button.classList.remove('active');
+          button.setAttribute('aria-selected', 'false');
+          button.setAttribute('tabindex', '-1');
+      }
+  });
+
+  // Update browser title based on route
+  this.updateDocumentTitle(route.path);
+}
+
+handleRouteNotFound(detail) {
+  console.warn('MainController: Route not found:', detail.path);
+  // Redirect to home page
+  const router = this.services.get('router');
+  if (router) {
+      router.navigate('/', true);
+  }
+}
+
+updateDocumentTitle(path) {
+  const titleMap = {
+      '/': 'Compress PDF - PDFSmaller',
+      '/convert': 'Convert PDF - PDFSmaller',
+      '/ocr': 'OCR PDF - PDFSmaller',
+      '/ai-tools': 'AI Tools - PDFSmaller',
+      '/files': 'Files - PDFSmaller',
+      '/settings': 'Settings - PDFSmaller',
+      '/pricing': 'Pricing - PDFSmaller',
+      '/profile': 'Profile - PDFSmaller'
+  };
+  
+  document.title = titleMap[path] || 'PDFSmaller';
 }
 
 async handleServiceStartRequest(event) {

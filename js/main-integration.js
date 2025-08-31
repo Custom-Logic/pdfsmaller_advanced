@@ -145,39 +145,17 @@ export class MainIntegration {
         sideNavToggle.classList.remove('active');
       });
         
-      // Add click handlers for nav links
+      // Add click handlers for nav links - let router handle navigation
       const navLinks = sideNav.querySelectorAll('.nav-menu-link');
       navLinks.forEach(link => {
         link.addEventListener('click', (event) => {
-          event.preventDefault();
-          const section = link.getAttribute('data-section');
-          const action = link.getAttribute('data-action');
-                
-          // Close the side nav
-          sideNav.classList.remove('active');
-          sideNavToggle.classList.remove('active');
-          sideNavToggle.setAttribute('aria-expanded', 'false');
-          sideNav.setAttribute('aria-hidden', 'true');
-                
-          if (section) {
-            // Handle regular navigation
-            if (window.mainIntegration) {
-              window.mainIntegration.switchTab(section);
-            }
-          } else if (action) {
-            // Handle auth actions
-            this.handleAuthAction(action);
-          }
+          // Let the main click handler in MainController handle the navigation
+          // This ensures consistent routing behavior
         });
       });
-        
-      // Setup auth modal handlers
-      this.setupAuthModal();
-    } else {
-      console.warn('Side navigation elements not found');
     }
   }
-
+  
   setupAuthModal() {
     const authModal = document.getElementById('authModal');
     const modalOverlay = authModal?.querySelector('.auth-modal-overlay');
@@ -336,9 +314,58 @@ export class MainIntegration {
     this.addEventListener('auth-state-changed', (event) => {
       this.handleAuthStateChange(event.detail);
     });
-
+    document.addEventListener('routeChanged', (event) => {
+      this.handleRouteChange(event.detail);
+    });
     // Setup side navigation listener
     this.setupSideNavListener();
+  }
+  handleRouteChange(route) {
+    const { path } = route;
+    
+    // Update active navigation
+    this.updateActiveNavigation(path);
+    
+    // Handle any route-specific logic
+    switch (path) {
+      case '/profile':
+        if (!this.isAuthenticated) {
+          // Redirect to login if trying to access profile without authentication
+          this.showAuthModal('login');
+          const router = window.mainController?.getService('router');
+          if (router) {
+            router.navigate('/');
+          }
+        }
+        break;
+      // Add other route-specific logic as needed
+    }
+  }
+
+  updateActiveNavigation(path) {
+    // Update tab navigation
+    const tabButtons = document.querySelectorAll('.tab-button');
+    tabButtons.forEach(button => {
+      if (button.getAttribute('href') === path) {
+        button.classList.add('active');
+        button.setAttribute('aria-selected', 'true');
+        button.setAttribute('tabindex', '0');
+      } else {
+        button.classList.remove('active');
+        button.setAttribute('aria-selected', 'false');
+        button.setAttribute('tabindex', '-1');
+      }
+    });
+
+    // Update side navigation
+    const navLinks = document.querySelectorAll('.nav-menu-link');
+    navLinks.forEach(link => {
+      if (link.getAttribute('href') === path) {
+        link.classList.add('active');
+      } else {
+        link.classList.remove('active');
+      }
+    });
   }
 
   setupNavigation() {

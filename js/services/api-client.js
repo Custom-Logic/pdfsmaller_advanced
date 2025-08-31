@@ -1,18 +1,22 @@
 /**
  * API Client Service
  * Handles all communication with the backend API
+ * Updated to match actual API endpoints and improve reliability
  */
 
 import { ErrorHandler } from '../utils/error-handler.js';
 
 export class APIClient {
     constructor() {
-        this.baseURL = 'https://api.pdfsmaller.site/api/v1';
+        this.baseURL = 'https://api.pdfsmaller.site/api';
         this.timeout = 30000;
         this.retryAttempts = 3;
         this.retryDelay = 1000;
     }
 
+    /**
+     * Make HTTP request with retry logic and error handling
+     */
     async makeRequest(endpoint, options = {}) {
         const url = `${this.baseURL}${endpoint}`;
         const config = {
@@ -30,7 +34,7 @@ export class APIClient {
             config.headers['Authorization'] = `Bearer ${token}`;
         }
 
-        // Remove Content-Type for FormData
+        // Remove Content-Type for FormData to let browser set it automatically
         if (options.body instanceof FormData) {
             delete config.headers['Content-Type'];
         }
@@ -79,57 +83,49 @@ export class APIClient {
             }
         }
         
+        ErrorHandler.handleError(lastError, { context: 'API Request', endpoint });
         throw lastError;
     }
 
-    async uploadEncryptedFile(encryptedFileData, metadata) {
-        const formData = new FormData();
-        formData.append('encrypted_file', new Blob([encryptedFileData.encryptedData]));
-        formData.append('encryption_key', this.arrayBufferToBase64(encryptedFileData.key));
-        formData.append('iv', this.arrayBufferToBase64(encryptedFileData.iv));
-        formData.append('metadata', JSON.stringify(metadata));
-        
-        return await this.makeRequest('/upload', {
-            method: 'POST',
-            body: formData
-        });
-    }
+    // ==================== AUTH ENDPOINTS ====================
 
-    async getProcessingStatus(jobId) {
-        return await this.makeRequest(`/status/${jobId}`);
-    }
-
-    async downloadProcessedFile(jobId, decryptionKey) {
-        const response = await this.makeRequest(`/download/${jobId}`, {
-            method: 'GET',
-            responseType: 'blob'
-        });
-        
-        // In a real implementation, this would decrypt the downloaded file
-        return response;
-    }
-
-    async login(credentials) {
+    async login(email, password) {
         return await this.makeRequest('/auth/login', {
             method: 'POST',
-            body: JSON.stringify(credentials)
+            body: JSON.stringify({ email, password })
         });
     }
 
-    async register(userData) {
+    async register(name, email, password) {
         return await this.makeRequest('/auth/register', {
             method: 'POST',
-            body: JSON.stringify(userData)
+            body: JSON.stringify({ name, email, password })
         });
     }
 
-    async logout(token) {
-        return await this.makeRequest('/auth/logout', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+    async getProfile() {
+        return await this.makeRequest('/auth/profile', {
+            method: 'GET'
         });
+    }
+
+    async logout() {
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+            try {
+                await this.makeRequest('/auth/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+            } catch (error) {
+                // Even if logout fails, clear local storage
+                console.warn('Logout API call failed, but clearing local storage:', error);
+            }
+        }
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user_data');
     }
 
     async validateToken(token) {
@@ -141,23 +137,89 @@ export class APIClient {
                 }
             });
         } catch (error) {
-            return null;
+            return { valid: false, error: error.message };
         }
     }
 
-    async getUserProfile() {
-        return await this.makeRequest('/user/profile');
-    }
+    // ==================== COMPRESSION ENDPOINTS ====================
 
-    async updateUserProfile(profileData) {
-        return await this.makeRequest('/user/profile', {
-            method: 'PUT',
-            body: JSON.stringify(profileData)
+    async compressSingle(file, compressionLevel = 'medium', imageQuality = 80) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('compressionLevel', compressionLevel);
+        formData.append('imageQuality', imageQuality.toString());
+
+        return await this.makeRequest('/compress/single', {
+            method: 'POST',
+            body: formData,
+            timeout: 120000 // 2 minutes for file uploads
         });
     }
 
-    async getUsageStats() {
-        return await this.makeRequest('/user/usage');
+    async compressBulk(files, compressionLevel = 'medium', imageQuality = 80) {
+        const formData = new FormData();
+        
+        // Append each file with proper indexing
+        files.forEach((file, index) => {
+            formData.append(`files[${index}]`, file);
+        });
+        
+        formData.append('compressionLevel', compressionLevel);
+        formData.append('imageQuality', imageQuality.toString());
+
+        return await this.makeRequest('/compress/bulk', {
+            method: 'POST',
+            body: formData,
+            timeout: 300000 // 5 minutes for bulk uploads
+        });
+    }
+
+    async uploadEncryptedFile(encryptedFileData, metadata) {
+        const formData = new FormData();
+        formData.append('encrypted_file', new Blob([encryptedFileData.encryptedData]));
+        formData.append('encryption_key', this.arrayBufferToBase64(encryptedFileData.key));
+        formData.append('iv', this.arrayBufferToBase64(encryptedFileData.iv));
+        formData.append('metadata', JSON.stringify(metadata));
+        
+        return await this.makeRequest('/upload', {
+            method: 'POST',
+            body: formData,
+            timeout: 120000
+        });
+    }
+
+    async getProcessingStatus(jobId) {
+        return await this.makeRequest(`/status/${jobId}`, {
+            method: 'GET'
+        });
+    }
+
+    async downloadProcessedFile(jobId) {
+        return await this.makeRequest(`/download/${jobId}`, {
+            method: 'GET',
+            responseType: 'blob'
+        });
+    }
+
+    // ==================== SUBSCRIPTION ENDPOINTS ====================
+
+    async getSubscription() {
+        return await this.makeRequest('/subscriptions', {
+            method: 'GET'
+        });
+    }
+
+    async createSubscription(planId, paymentMethodId) {
+        return await this.makeRequest('/subscriptions/create', {
+            method: 'POST',
+            body: JSON.stringify({ planId, paymentMethodId })
+        });
+    }
+
+    async cancelSubscription() {
+        return await this.makeRequest('/subscriptions/cancel', {
+            method: 'POST'
+        });
     }
 
     async createStripeSession(priceId) {
@@ -168,16 +230,34 @@ export class APIClient {
     }
 
     async getBillingInfo() {
-        return await this.makeRequest('/billing/info');
-    }
-
-    async cancelSubscription() {
-        return await this.makeRequest('/billing/cancel', {
-            method: 'POST'
+        return await this.makeRequest('/billing/info', {
+            method: 'GET'
         });
     }
 
-    // Utility methods
+    // ==================== USER ENDPOINTS ====================
+
+    async getUserProfile() {
+        return await this.makeRequest('/user/profile', {
+            method: 'GET'
+        });
+    }
+
+    async updateUserProfile(profileData) {
+        return await this.makeRequest('/user/profile', {
+            method: 'PUT',
+            body: JSON.stringify(profileData)
+        });
+    }
+
+    async getUsageStats() {
+        return await this.makeRequest('/user/usage', {
+            method: 'GET'
+        });
+    }
+
+    // ==================== UTILITY METHODS ====================
+
     arrayBufferToBase64(buffer) {
         const bytes = new Uint8Array(buffer);
         let binary = '';
@@ -203,9 +283,49 @@ export class APIClient {
     // Health check endpoint
     async healthCheck() {
         try {
-            return await this.makeRequest('/health');
+            const response = await fetch(`${this.baseURL}/health`, {
+                method: 'GET',
+                timeout: 5000
+            });
+            return await response.json();
         } catch (error) {
-            return { status: 'error', message: error.message };
+            return { 
+                status: 'error', 
+                message: error.message,
+                online: false 
+            };
+        }
+    }
+
+    // Check if API is reachable
+    async isApiReachable() {
+        try {
+            const health = await this.healthCheck();
+            return health.status === 'ok' || health.online === true;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    // Get API status with detailed information
+    async getApiStatus() {
+        try {
+            const health = await this.healthCheck();
+            return {
+                online: true,
+                status: health.status,
+                timestamp: health.timestamp,
+                version: health.version
+            };
+        } catch (error) {
+            return {
+                online: false,
+                error: error.message,
+                timestamp: new Date().toISOString()
+            };
         }
     }
 }
+
+// Create and export a singleton instance
+export const apiClient = new APIClient();

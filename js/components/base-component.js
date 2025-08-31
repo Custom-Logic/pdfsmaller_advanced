@@ -191,44 +191,45 @@ export class BaseComponent extends HTMLElement {
   }
 
   // Event handling
-  addEventListener(element, type, listener, options = false) {
-    // Validate the target element
-    let target;
+// In base-component.js, enhance the addEventListener method:
+addEventListener(element, type, listener, options = false) {
+  // Validate the target element
+  let target;
 
-    if (element === null || element === undefined) {
-      target = this;
-    } else if (typeof element === 'string') {
-      // If string selector passed, find the element
-      target = this.shadowRoot.querySelector(element);
-      if (!target) {
-        console.warn(`Element not found for selector: ${element}`);
-        return this;
-      }
-    } else {
-      target = element;
-    }
-
-    // Validate that target has addEventListener method
-    if (!target || typeof target.addEventListener !== 'function') {
-      console.warn('Invalid event target - missing addEventListener method:', target);
+  if (element === null || element === undefined) {
+    target = this;
+  } else if (typeof element === 'string') {
+    // If string selector passed, find the element
+    target = this.shadowRoot.querySelector(element);
+    if (!target) {
+      console.warn(`Element not found for selector: ${element}`);
       return this;
     }
+  } else {
+    target = element;
+  }
 
-    try {
-      // Use regular event type for standard DOM events
-      target.addEventListener(type, listener, options);
-
-      // Store reference for cleanup
-      if (!this._eventListeners.has(target)) {
-        this._eventListeners.set(target, []);
-      }
-      this._eventListeners.get(target).push({ type, listener, options });
-    } catch (error) {
-      console.error('Error adding event listener:', error);
-    }
-
+  // Validate that target has addEventListener method
+  if (!target || typeof target.addEventListener !== 'function') {
+    console.warn('Invalid event target - missing addEventListener method:', target);
     return this;
   }
+
+  try {
+    // Use regular event type for standard DOM events
+    target.addEventListener(type, listener, options);
+
+    // Store reference for cleanup
+    if (!this._eventListeners.has(target)) {
+      this._eventListeners.set(target, []);
+    }
+    this._eventListeners.get(target).push({ type, listener, options });
+  } catch (error) {
+    console.error('Error adding event listener:', error);
+  }
+
+  return this;
+}
 
   removeEventListener(element, type, listener, options = false) {
     // Validate the target element

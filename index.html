@@ -141,13 +141,13 @@
     <div class="nav-menu-overlay"></div>
     <div class="nav-menu-content">
         <nav class="nav-menu-list">
-            <a href="#" class="nav-menu-link" data-section="compress">Compress</a>
-            <a href="#" class="nav-menu-link" data-section="convert">Convert</a>
-            <a href="#" class="nav-menu-link" data-section="ocr">OCR</a>
-            <a href="#" class="nav-menu-link" data-section="ai_tools">AI Tools</a>
-            <a href="#" class="nav-menu-link" data-section="files">Files</a>
-            <a href="#" class="nav-menu-link" data-section="settings">Settings</a>
-            <a href="#" class="nav-menu-link" data-section="pricing">Pricing</a>
+            <a href="/" class="nav-menu-link" data-section="compress">Compress</a>
+            <a href="/convert" class="nav-menu-link" data-section="convert">Convert</a>
+            <a href="/ocr" class="nav-menu-link" data-section="ocr">OCR</a>
+            <a href="/ai-tools" class="nav-menu-link" data-section="ai_tools">AI Tools</a>
+            <a href="/files" class="nav-menu-link" data-section="files">Files</a>
+            <a href="/settings" class="nav-menu-link" data-section="settings">Settings</a>
+            <a href="/pricing" class="nav-menu-link" data-section="pricing">Pricing</a>
         </nav>
         <div class="nav-menu-divider"></div>
         
@@ -171,26 +171,25 @@
 
 <!-- Auth Modal (will be shown when login/register links are clicked) -->
 <div id="authModal" class="auth-modal hidden">
-    <div class="auth-modal-overlay" data-action="close-auth-modal"></div>
+    <div class="auth-modal-overlay"></div>
     <div class="auth-modal-content">
-        <button class="auth-modal-close" data-action="close-auth-modal">&times;</button>
-        <auth-panel id="modalAuthPanel"></auth-panel>
+      <button class="close-auth-modal" data-action="close-auth-modal">×</button>
+      <auth-panel id="modalAuthPanel"></auth-panel>
     </div>
-</div>
-
+  </div>
     <!-- Main Application Container -->
     <main class="main-content">
         <!-- Application Shell Component -->
         <app-shell id="mainApp">
             <!-- Tab Navigation -->
             <nav class="tab-nav" slot="navigation" role="tablist">
-                <button class="tab-button active" data-tab="compress" role="tab" aria-selected="true" tabindex="0" id="tab-compress" aria-controls="compressTab">Compress</button>
-                <button class="tab-button" data-tab="convert" role="tab" aria-selected="false" tabindex="-1" id="tab-convert" aria-controls="convertTab">Convert</button>
-                <button class="tab-button" data-tab="ocr" role="tab" aria-selected="false" tabindex="-1" id="tab-ocr" aria-controls="ocrTab">OCR</button>
-                <button class="tab-button" data-tab="ai_tools" role="tab" aria-selected="false" tabindex="-1" id="tab-ai_tools" aria-controls="ai_toolsTab">AI Tools</button>
-                <button class="tab-button" data-tab="files" role="tab" aria-selected="false" tabindex="-1" id="tab-files" aria-controls="filesTab">Files</button>
-                <button class="tab-button" data-tab="settings" role="tab" aria-selected="false" tabindex="-1" id="tab-settings" aria-controls="settingsTab">Settings</button>
-                <button class="tab-button" data-tab="pricing" role="tab" aria-selected="false" tabindex="-1" id="tab-pricing" aria-controls="pricingTab">Pricing</button>
+                <a href="/" class="tab-button active" role="tab" aria-selected="true" tabindex="0" id="tab-compress" aria-controls="compressTab">Compress</a>
+                <a href="/convert" class="tab-button" role="tab" aria-selected="false" tabindex="-1" id="tab-convert" aria-controls="convertTab">Convert</a>
+                <a href="/ocr" class="tab-button" role="tab" aria-selected="false" tabindex="-1" id="tab-ocr" aria-controls="ocrTab">OCR</a>
+                <a href="/ai-tools" class="tab-button" role="tab" aria-selected="false" tabindex="-1" id="tab-ai_tools" aria-controls="ai_toolsTab">AI Tools</a>
+                <a href="/files" class="tab-button" role="tab" aria-selected="false" tabindex="-1" id="tab-files" aria-controls="filesTab">Files</a>
+                <a href="/settings" class="tab-button" role="tab" aria-selected="false" tabindex="-1" id="tab-settings" aria-controls="settingsTab">Settings</a>
+                <a href="/pricing" class="tab-button" role="tab" aria-selected="false" tabindex="-1" id="tab-pricing" aria-controls="pricingTab">Pricing</a>
             </nav>
 
             <!-- Tab Content Container -->
@@ -299,7 +298,8 @@
                 <!-- Settings Tab -->
                 <div id="settingsTab" class="tab-panel" role="tabpanel" aria-labelledby="tab-settings">
                     <div class="content-card">
-                        <settings-panel id="mainSettingsPanel"></settings-panel>                    </div>
+                    <settings-panel id="mainSettingsPanel"></settings-panel>                    
+                    </div>
                 </div>
 
                 <!-- Pricing Tab -->
@@ -341,8 +341,7 @@
 
     <!-- Component Scripts -->
     <script type="module">
-        // Import tab navigation first
-        import './js/modules/tab-navigation.js';
+        
         
         // Import all components
         import './js/components/app-shell.js';
@@ -486,9 +485,7 @@
         }
     </script>
 
-    <!-- Legacy script integration (if needed) -->
-    <!-- <script src="static/js/interface.js"></script>
-    <script src="static/js/navigation.js"></script> -->
+    
 </body>
 
 </html>

@@ -1885,8 +1885,8 @@ body.menu-open-mobile {
     .bulk-upload-area {
         padding: var(--space-12) var(--space-4);
     }
-}tive;
 }
+
 
 .bulk-upload-area::before {
     content: 'PRO';
