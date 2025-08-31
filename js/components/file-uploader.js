@@ -1,11 +1,10 @@
 /**
- * File Uploader Web Component (Refactored)
- * Simplified version that follows the new event-driven architecture
+ * File Uploader Web Component (Architecture Compliant)
+ * Follows the new event-driven architecture with complete component isolation
  * Maintains backward compatibility with existing API
  */
 
 import { BaseComponent } from './base-component.js';
-import { StorageService } from '../services/storage-service.js';
 
 export class FileUploader extends BaseComponent {
   static get observedAttributes() {
@@ -20,7 +19,6 @@ export class FileUploader extends BaseComponent {
     this.acceptedTypes = ['.pdf'];
     this.isMultiple = false;
     this.isDisabled = false;
-    this.storageService = new StorageService();
         
     // Maintain backward compatibility properties
     this.hasInitializationError = false;
@@ -34,8 +32,7 @@ export class FileUploader extends BaseComponent {
 
   async init() {
     try {
-      // Initialize storage service
-      await this.storageService.init();
+      // ARCHITECTURE COMPLIANT: No service initialization - components are isolated
             
       // Initialize props from attributes with fallbacks
       this.updateProp('accept', this.getAttribute('accept') || '.pdf');
@@ -106,36 +103,47 @@ export class FileUploader extends BaseComponent {
 
   render() {
     this.shadowRoot.innerHTML = `
-            <div class="file-uploader ${this.isDisabled ? 'disabled' : ''}" 
-                 data-drag-over="${this.getState('isDragOver') || false}">
-                <div class="upload-area">
-                    <div class="upload-icon">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                            <polyline points="7,10 12,15 17,10"/>
-                            <line x1="12" y1="15" x2="12" y2="3"/>
-                        </svg>
-                    </div>
-                    <div class="upload-text">
-                        <p class="upload-title">
-                            ${this.isMultiple ? 'Drop files here or click to browse' : 'Drop file here or click to browse'}
-                        </p>
-                        <p class="upload-subtitle">
-                            Supports: ${this.acceptedTypes.join(', ')} 
-                            (Max: ${this.formatFileSize(this.maxFileSize)})
-                        </p>
-                    </div>
-                    <input type="file" 
-                           class="file-input" 
-                           accept="${this.acceptedTypes.join(',')}"
-                           ${this.isMultiple ? 'multiple' : ''}
-                           ${this.isDisabled ? 'disabled' : ''}>
-                </div>
-                
-                ${this.renderFileList()}
-                ${this.renderError()}
-            </div>
-        `;
+      <style>
+        .file-uploader { border: 2px dashed #ccc; padding: 2rem; text-align: center; }
+        .file-uploader.disabled { opacity: 0.5; pointer-events: none; }
+        .file-uploader[data-drag-over="true"] { border-color: #007bff; background-color: #f8f9fa; }
+        .upload-area { cursor: pointer; }
+        .file-input { position: absolute; left: -9999px; }
+        .file-list { margin-top: 1rem; text-align: left; }
+        .file-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; border-bottom: 1px solid #eee; }
+        .remove-file { background: #dc3545; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; }
+        .error-message { color: #dc3545; margin-top: 1rem; padding: 0.5rem; background: #f8d7da; border-radius: 4px; }
+      </style>
+      <div class="file-uploader ${this.isDisabled ? 'disabled' : ''}" 
+           data-drag-over="${this.getState('isDragOver') || false}">
+        <div class="upload-area">
+          <div class="upload-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7,10 12,15 17,10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          </div>
+          <div class="upload-text">
+            <p class="upload-title">
+              ${this.isMultiple ? 'Drop files here or click to browse' : 'Drop file here or click to browse'}
+            </p>
+            <p class="upload-subtitle">
+              Supports: ${this.acceptedTypes.join(', ')} 
+              (Max: ${this.formatFileSize(this.maxFileSize)})
+            </p>
+          </div>
+          <input type="file" 
+                 class="file-input" 
+                 accept="${this.acceptedTypes.join(',')}"
+                 ${this.isMultiple ? 'multiple' : ''}
+                 ${this.isDisabled ? 'disabled' : ''}>
+        </div>
+        
+        ${this.renderFileList()}
+        ${this.renderError()}
+      </div>
+    `;
   }
 
   renderFileList() {
@@ -143,17 +151,17 @@ export class FileUploader extends BaseComponent {
     if (files.length === 0) return '';
 
     return `
-            <div class="file-list">
-                <h4>Selected Files:</h4>
-                ${files.map(file => `
-                    <div class="file-item">
-                        <span class="file-name">${file.name}</span>
-                        <span class="file-size">${this.formatFileSize(file.size)}</span>
-                        <button class="remove-file" data-file-name="${file.name}">×</button>
-                    </div>
-                `).join('')}
-            </div>
-        `;
+      <div class="file-list">
+        <h4>Selected Files:</h4>
+        ${files.map(file => `
+          <div class="file-item">
+            <span class="file-name">${file.name}</span>
+            <span class="file-size">${this.formatFileSize(file.size)}</span>
+            <button class="remove-file" data-file-name="${file.name}">×</button>
+          </div>
+        `).join('')}
+      </div>
+    `;
   }
 
   renderError() {
@@ -161,16 +169,16 @@ export class FileUploader extends BaseComponent {
     if (!error) return '';
 
     return `
-            <div class="error-message">
-                <span class="error-icon">⚠️</span>
-                <span class="error-text">${error}</span>
-            </div>
-        `;
+      <div class="error-message">
+        <span class="error-icon">⚠️</span>
+        <span class="error-text">${error}</span>
+      </div>
+    `;
   }
 
   setupEventListeners() {
-    const uploadArea = this.querySelector('.upload-area');
-    const fileInput = this.querySelector('.file-input');
+    const uploadArea = this.shadowRoot.querySelector('.upload-area');
+    const fileInput = this.shadowRoot.querySelector('.file-input');
 
     if (!uploadArea || !fileInput) return;
 
@@ -193,7 +201,7 @@ export class FileUploader extends BaseComponent {
     });
 
     // Remove file buttons
-    this.addEventListener('click', (e) => {
+    this.shadowRoot.addEventListener('click', (e) => {
       if (e.target.classList.contains('remove-file')) {
         const fileName = e.target.dataset.fileName;
         this.removeFile(fileName);
@@ -250,8 +258,8 @@ export class FileUploader extends BaseComponent {
       const newFiles = this.isMultiple ? [...currentFiles, ...validatedFiles] : validatedFiles;
       this.setState({ files: newFiles });
 
-      // Save files to StorageService and emit events
-      await this.saveFilesToStorage(validatedFiles);
+      // ARCHITECTURE COMPLIANT: Emit events only, no service calls
+      this.emitFileUploadedEvent(validatedFiles);
             
       this.setState({ isProcessing: false });
       this.render();
@@ -302,49 +310,37 @@ export class FileUploader extends BaseComponent {
     return validFiles;
   }
 
-  async saveFilesToStorage(files) {
-    const savedFiles = [];
-
-    for (const file of files) {
-      try {
-        // Generate unique file ID
-        const fileId = this.storageService.generateFileId();
-                
-        // Create metadata
-        const metadata = {
-          name: file.name,
-          type: 'original', // Always original for uploads
-          mimeType: file.type,
-          uploadedAt: Date.now()
-        };
-
-        // Save to storage service
-        const success = await this.storageService.saveFile(fileId, file, metadata);
-                
-        if (success) {
-          savedFiles.push({
-            fileId: fileId,
-            name: file.name,
-            size: file.size,
-            type: file.type,
-            metadata: metadata
-          });
-        }
-      } catch (error) {
-        console.error('Failed to save file:', file.name, error);
+  emitFileUploadedEvent(files) {
+    // ARCHITECTURE COMPLIANCE: Components only emit events with file data
+    // MainController handles storage via StorageService
+    
+    const fileData = files.map(file => ({
+      fileId: this.generateFileId(),
+      file: file, // Raw file object for MainController to handle
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      metadata: {
+        name: file.name,
+        type: 'original',
+        mimeType: file.type,
+        uploadedAt: Date.now()
       }
-    }
+    }));
 
-    // Emit fileUploaded event with saved files (NEW ARCHITECTURE)
-    if (savedFiles.length > 0) {
-      this.dispatchEvent(new CustomEvent('fileUploaded', {
-        detail: {
-          files: savedFiles,
-          source: 'selection',
-          timestamp: Date.now()
-        }
-      }));
-    }
+    // Emit fileUploaded event - MainController will handle storage
+    this.dispatchEvent(new CustomEvent('fileUploaded', {
+      detail: {
+        files: fileData,
+        source: 'selection',
+        timestamp: Date.now()
+      }
+    }));
+  }
+
+  generateFileId() {
+    // Simple file ID generation (component-level only)
+    return `file_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
   removeFile(fileName) {
@@ -371,7 +367,6 @@ export class FileUploader extends BaseComponent {
   }
 
   // ===== BACKWARD COMPATIBILITY API =====
-  // These methods maintain compatibility with existing code
 
   getSelectedFiles() {
     return this.getState('files') || [];
@@ -381,7 +376,6 @@ export class FileUploader extends BaseComponent {
     this.setState({ files: [], error: null });
     this.render();
         
-    // Emit files cleared event
     this.dispatchEvent(new CustomEvent('filesCleared', {
       detail: { timestamp: Date.now() }
     }));
@@ -407,12 +401,10 @@ export class FileUploader extends BaseComponent {
     this.render();
   }
 
-  // Legacy emit method for backward compatibility
   emit(eventName, detail) {
     this.dispatchEvent(new CustomEvent(eventName, { detail }));
   }
 
-  // Stub methods for backward compatibility (business logic removed)
   getMode() {
     return this.isMultiple ? 'batch' : 'single';
   }
@@ -422,9 +414,7 @@ export class FileUploader extends BaseComponent {
     return true;
   }
 
-  // Placeholder methods that were in original (now just emit events)
   initializeMode() {
-    // Business logic removed - now just emits event
     this.emit('mode-initialized', {
       initialMode: this.getMode(),
       success: true
@@ -432,7 +422,6 @@ export class FileUploader extends BaseComponent {
   }
 
   ensureBackwardCompatibility() {
-    // Always return true - compatibility maintained through API
     return true;
   }
 

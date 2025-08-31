@@ -394,21 +394,11 @@ export class UIIntegrationService {
         console.log('Files analyzed:', data.analysisResults);
     }
 
-    handleFileCompressionStart(data) {
-        const { fileName } = data;
-        this.updateProgressTrackers(null, `Compressing ${fileName}...`);
-    }
+    
 
-    handleFileCompressionComplete(data) {
-        const { fileName, result } = data;
-        const reductionPercent = ((result.originalSize - result.compressedSize) / result.originalSize * 100).toFixed(1);
-        console.log(`${fileName} compressed: ${reductionPercent}% reduction`);
-    }
+    
 
-    handleFileCompressionError(data) {
-        const { fileName, error } = data;
-        console.error(`Failed to compress ${fileName}:`, error);
-    }
+    
 
     handleModeChange(mode) {
         // Update UI based on mode
@@ -609,30 +599,7 @@ export class UIIntegrationService {
         }
     }
 
-    getProgressStatusText(status, progress) {
-        switch (status) {
-            case 'initializing':
-                return 'Initializing...';
-            case 'validating':
-                return 'Validating files...';
-            case 'analyzing':
-                return 'Analyzing files...';
-            case 'preparing':
-                return 'Preparing compression...';
-            case 'processing':
-                return `Compressing files... ${Math.round(progress)}%`;
-            case 'finalizing':
-                return 'Finalizing results...';
-            case 'completed':
-                return 'Processing completed!';
-            case 'failed':
-                return 'Processing failed';
-            case 'cancelled':
-                return 'Processing cancelled';
-            default:
-                return `Processing... ${Math.round(progress)}%`;
-        }
-    }
+    
 
     // Public API methods
     async validateFile(file) {

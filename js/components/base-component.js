@@ -215,14 +215,14 @@ export class BaseComponent extends HTMLElement {
     }
 
     try {
-      const namespacedType = `${this.namespace}:${type}`; // Namespace the event type
-      target.addEventListener(namespacedType, listener, options);
+      // Use regular event type for standard DOM events
+      target.addEventListener(type, listener, options);
 
       // Store reference for cleanup
       if (!this._eventListeners.has(target)) {
         this._eventListeners.set(target, []);
       }
-      this._eventListeners.get(target).push({ type: namespacedType, listener, options });
+      this._eventListeners.get(target).push({ type, listener, options });
     } catch (error) {
       console.error('Error adding event listener:', error);
     }
@@ -253,14 +253,14 @@ export class BaseComponent extends HTMLElement {
     }
 
     try {
-      const namespacedType = `${this.namespace}:${type}`; // Namespace the event type
-      target.removeEventListener(namespacedType, listener, options);
+      // Use regular event type to match addEventListener
+      target.removeEventListener(type, listener, options);
 
       // Remove from stored references
       if (this._eventListeners.has(target)) {
         const listeners = this._eventListeners.get(target);
         const index = listeners.findIndex(l =>
-          l.type === namespacedType && l.listener === listener && l.options === options
+          l.type === type && l.listener === listener && l.options === options
         );
         if (index !== -1) {
           listeners.splice(index, 1);

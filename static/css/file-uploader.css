@@ -1,422 +1,133 @@
-/**
- * File Uploader Styles - Updated for Component Compatibility
- * Matches the class names and structure used in file-uploader.js
+/*
+ * Modern File Uploader Styles
+ * Inspired by the application's design system and modern UI trends.
  */
 
- .file-uploader {
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+:root {
+    --uploader-primary-color: #3182ce;
+    --uploader-background: rgba(255, 255, 255, 0.1);
+    --uploader-border-color: rgba(255, 255, 255, 0.2);
+    --uploader-text-color: #f7fafc;
+    --uploader-hover-background: rgba(255, 255, 255, 0.2);
+    --uploader-hover-border-color: var(--uploader-primary-color);
+    --uploader-drop-background: rgba(49, 130, 206, 0.3);
+    --uploader-drop-border-color: var(--uploader-primary-color);
 }
 
-/* Upload Area - matches component structure */
+.file-uploader {
+    width: 100%;
+    max-width: 600px;
+    margin: 2rem auto;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
 .upload-area {
-    border: 2px dashed #d1d5db;
-    border-radius: 12px;
-    padding: 2rem;
+    background: var(--uploader-background);
+    backdrop-filter: blur(10px);
+    border: 2px dashed var(--uploader-border-color);
+    border-radius: 20px;
+    padding: 3rem;
     text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    background: #f9fafb;
     position: relative;
-    min-height: 200px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 .upload-area:hover {
-    border-color: #3b82f6;
-    background: #eff6ff;
+    transform: translateY(-5px);
+    background: var(--uploader-hover-background);
+    border-color: var(--uploader-hover-border-color);
 }
 
-/* Drag over state - matches component's data-drag-over attribute */
 .file-uploader[data-drag-over="true"] .upload-area {
-    border-color: #3b82f6;
-    background: #dbeafe;
-    transform: scale(1.02);
+    background: var(--uploader-drop-background);
+    border-color: var(--uploader-drop-border-color);
+    transform: scale(1.05);
 }
 
-/* Disabled state */
-.file-uploader.disabled .upload-area {
-    opacity: 0.5;
-    cursor: not-allowed;
-    background: #f3f4f6;
-}
-
-/* Upload icon */
 .upload-icon {
-    margin-bottom: 1rem;
-    color: #6b7280;
+    font-size: 4rem;
+    color: var(--uploader-text-color);
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
 }
 
-.file-uploader[data-drag-over="true"] .upload-icon {
-    color: #3b82f6;
-}
-
-/* Upload text */
-.upload-text {
-    margin-bottom: 1rem;
+.upload-area:hover .upload-icon {
+    transform: scale(1.1);
+    color: var(--uploader-primary-color);
 }
 
 .upload-title {
-    font-size: 1.125rem;
+    font-size: 1.5rem;
     font-weight: 600;
-    color: #374151;
+    color: var(--uploader-text-color);
     margin: 0 0 0.5rem 0;
 }
 
 .upload-subtitle {
-    font-size: 0.875rem;
-    color: #6b7280;
+    font-size: 1rem;
+    color: rgba(247, 250, 252, 0.8);
     margin: 0;
 }
 
-/* File input - hidden but functional */
 .file-input {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
+    display: none;
 }
 
-.file-input:disabled {
-    cursor: not-allowed;
-}
-
-/* File List - matches component's renderFileList() output */
 .file-list {
-    margin-top: 1.5rem;
-    padding: 1rem;
-    background: white;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
-}
-
-.file-list h4 {
-    margin: 0 0 1rem 0;
-    font-size: 1rem;
-    font-weight: 600;
-    color: #374151;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    margin-top: 2rem;
 }
 
 .file-item {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(5px);
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid #f3f4f6;
-}
-
-.file-item:last-child {
-    border-bottom: none;
+    margin-bottom: 1rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .file-name {
     font-weight: 500;
-    color: #374151;
-    flex: 1;
-    text-align: left;
-    font-size: 0.95rem;
+    color: #2d3748;
+    font-size: 1rem;
 }
 
 .file-size {
-    font-size: 0.875rem;
-    color: #6b7280;
+    font-size: 0.9rem;
+    color: #718096;
     margin: 0 1rem;
-    flex-shrink: 0;
 }
 
 .remove-file {
-    background: #ef4444;
+    background: #e53e3e;
     color: white;
     border: none;
     border-radius: 50%;
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 24px;
+    height: 24px;
     cursor: pointer;
-    font-size: 18px;
-    line-height: 1;
+    font-size: 14px;
     transition: all 0.2s ease;
-    flex-shrink: 0;
 }
 
 .remove-file:hover {
-    background: #dc2626;
+    background: #c53030;
     transform: scale(1.1);
 }
 
-/* Error Message - matches component's renderError() */
 .error-message {
-    margin-top: 1rem;
+    background: #fed7d7;
+    color: #c53030;
     padding: 1rem;
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.error-icon {
-    font-size: 1.5rem;
-    flex-shrink: 0;
-}
-
-.error-text {
-    color: #dc2626;
-    font-size: 0.95rem;
+    border-radius: 12px;
+    margin-top: 1.5rem;
+    text-align: center;
     font-weight: 500;
-    flex: 1;
-}
-
-/* Processing State - matches component's isProcessing state */
-.file-uploader.processing .upload-area {
-    opacity: 0.7;
-    pointer-events: none;
-}
-
-.file-uploader.processing .upload-area::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 32px;
-    height: 32px;
-    margin: -16px 0 0 -16px;
-    border: 3px solid #3b82f6;
-    border-top-color: transparent;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    z-index: 10;
-}
-
-/* Processing state for file list */
-.file-uploader.processing .file-item {
-    opacity: 0.7;
-}
-
-.file-uploader.processing .remove-file {
-    opacity: 0.5;
-    pointer-events: none;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .upload-area {
-        padding: 1.5rem;
-        min-height: 180px;
-    }
-    
-    .upload-title {
-        font-size: 1rem;
-    }
-    
-    .upload-subtitle {
-        font-size: 0.8rem;
-    }
-    
-    .file-list {
-        margin-top: 1rem;
-        padding: 0.75rem;
-    }
-    
-    .file-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-        padding: 1rem 0;
-    }
-    
-    .file-size {
-        margin: 0;
-        order: 2;
-    }
-    
-    .remove-file {
-        align-self: flex-end;
-        margin-top: -2rem;
-        position: relative;
-        order: 3;
-    }
-    
-    .file-name {
-        order: 1;
-        width: 100%;
-    }
-}
-
-@media (max-width: 480px) {
-    .upload-area {
-        padding: 1rem;
-        min-height: 160px;
-    }
-    
-    .upload-icon {
-        width: 36px;
-        height: 36px;
-        margin-bottom: 0.75rem;
-    }
-    
-    .upload-title {
-        font-size: 0.95rem;
-        margin-bottom: 0.25rem;
-    }
-    
-    .upload-subtitle {
-        font-size: 0.75rem;
-    }
-    
-    .file-list h4 {
-        font-size: 0.9rem;
-        margin-bottom: 0.75rem;
-    }
-    
-    .error-message {
-        padding: 0.75rem;
-        flex-direction: column;
-        text-align: center;
-        gap: 0.5rem;
-    }
-    
-    .error-icon {
-        font-size: 1.25rem;
-    }
-    
-    .error-text {
-        font-size: 0.85rem;
-    }
-}
-
-/* Accessibility Improvements */
-.upload-area:focus-within {
-    outline: 2px solid #3b82f6;
-    outline-offset: 2px;
-}
-
-.file-input:focus {
-    outline: none;
-}
-
-.remove-file:focus {
-    outline: 2px solid #3b82f6;
-    outline-offset: 2px;
-}
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-    .upload-area {
-        border-width: 3px;
-    }
-    
-    .file-item {
-        border-bottom-width: 2px;
-    }
-    
-    .error-message {
-        border-width: 2px;
-    }
-    
-    .remove-file {
-        border: 2px solid currentColor;
-    }
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-    .upload-area,
-    .remove-file {
-        transition: none;
-    }
-    
-    .file-uploader[data-drag-over="true"] .upload-area {
-        transform: none;
-    }
-    
-    .remove-file:hover {
-        transform: none;
-    }
-    
-    @keyframes spin {
-        to {
-            transform: none;
-        }
-    }
-    
-    .file-uploader.processing .upload-area::after {
-        animation: none;
-        border: 3px solid #3b82f6;
-    }
-}
-
-/* Dark mode support (optional) */
-@media (prefers-color-scheme: dark) {
-    .file-uploader {
-        color-scheme: dark;
-    }
-    
-    .upload-area {
-        background: #1f2937;
-        border-color: #374151;
-    }
-    
-    .upload-area:hover {
-        background: #374151;
-        border-color: #3b82f6;
-    }
-    
-    .file-uploader[data-drag-over="true"] .upload-area {
-        background: #1e40af;
-        border-color: #3b82f6;
-    }
-    
-    .upload-title {
-        color: #f9fafb;
-    }
-    
-    .upload-subtitle {
-        color: #d1d5db;
-    }
-    
-    .file-list {
-        background: #111827;
-        border-color: #374151;
-    }
-    
-    .file-list h4 {
-        color: #f9fafb;
-    }
-    
-    .file-name {
-        color: #f9fafb;
-    }
-    
-    .file-item {
-        border-bottom-color: #374151;
-    }
-    
-    .error-message {
-        background: #7f1d1d;
-        border-color: #dc2626;
-    }
-    
-    .error-text {
-        color: #fecaca;
-    }
 }

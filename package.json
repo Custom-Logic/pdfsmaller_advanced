@@ -38,6 +38,7 @@
     "ws": "^8.14.2"
   },
   "dependencies": {
+    "@babel/eslint-parser": "^7.28.0",
     "pdf-lib": "^1.17.1"
   },
   "browserslist": [

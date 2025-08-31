@@ -121,40 +121,189 @@ export class MainController extends EventTarget {
 
   setupEventListeners() {
     console.log('MainController: Setting up event listeners...');
-        
+    
     // Listen for FileUploader events
     document.addEventListener('fileUploaded', this.handleFileUploaded.bind(this));
     document.addEventListener('fileValidationError', this.handleFileValidationError.bind(this));
-        
-    // Listen for processing requests
+    
+    // NEW: Listen for service start requests (from control panels)
+    document.addEventListener('serviceStartRequest', this.handleServiceStartRequest.bind(this));
+    
+    // Listen for processing requests (legacy events)
     document.addEventListener('compressionRequested', this.handleCompressionRequested.bind(this));
     document.addEventListener('conversionRequested', this.handleConversionRequested.bind(this));
-        
-    // Listen for UI events
+    
+    // Rest of existing listeners...
     document.addEventListener('downloadRequested', this.handleDownloadRequested.bind(this));
     document.addEventListener('fileDeleteRequested', this.handleFileDeleteRequested.bind(this));
-        
-    // Listen for FileManager events
     document.addEventListener('requestFileList', this.handleRequestFileList.bind(this));
     document.addEventListener('fileDownloadRequested', this.handleFileDownloadRequested.bind(this));
     document.addEventListener('clearAllFilesRequested', this.handleClearAllFilesRequested.bind(this));
-        
-    // Listen for AI service events
     document.addEventListener('aiProcessingRequested', this.handleAIProcessingRequested.bind(this));
-        
-    // Listen for OCR service events
     document.addEventListener('ocrProcessingRequested', this.handleOCRProcessingRequested.bind(this));
-        
-    // Listen for Cloud service events
     document.addEventListener('cloudUploadRequested', this.handleCloudUploadRequested.bind(this));
     document.addEventListener('cloudDownloadRequested', this.handleCloudDownloadRequested.bind(this));
-        
-    // Listen for file requests from services
     document.addEventListener('fileRequested', this.handleFileRequested.bind(this));
-        
+    
     console.log('MainController: Event listeners setup complete');
-  }
+}
 
+async handleServiceStartRequest(event) {
+  console.log('MainController: Service start request received:', event.detail);
+  
+  const { serviceType, options, fileIds } = event.detail;
+  
+  try {
+      // 1. Validate the payload
+      if (!serviceType) {
+          throw new Error('Service type is required');
+      }
+      
+      // 2. Get the service instance
+      const service = this.services.get(serviceType);
+      if (!service) {
+          throw new Error(`Service '${serviceType}' not found`);
+      }
+      
+      // 3. Get files to process
+      let filesToProcess = [];
+      
+      if (fileIds && fileIds.length > 0) {
+          // Use specific file IDs if provided
+          const storageService = this.services.get('storage');
+          for (const fileId of fileIds) {
+              const fileData = await storageService.getFile(fileId);
+              if (fileData) {
+                  filesToProcess.push({
+                      fileId: fileId,
+                      file: fileData.blob,
+                      metadata: fileData.metadata
+                  });
+              }
+          }
+      } else {
+          // Use current files if no specific IDs provided
+          const currentFiles = this.getCurrentFiles();
+          if (currentFiles.length === 0) {
+              throw new Error('No files available for processing. Please upload files first.');
+          }
+          filesToProcess = currentFiles;
+      }
+      
+      if (filesToProcess.length === 0) {
+          throw new Error('No valid files found for processing');
+      }
+      
+      console.log(`MainController: Processing ${filesToProcess.length} files with ${serviceType} service`);
+      
+      // 4. Disable control panel while processing
+      this.setControlPanelState(serviceType, 'processing');
+      
+      // 5. Call the appropriate service method
+      await this.callServiceMethod(service, serviceType, filesToProcess, options);
+      
+  } catch (error) {
+      console.error('MainController: Service start request failed:', error);
+      this.handleError(error, { 
+          context: 'handleServiceStartRequest', 
+          serviceType, 
+          options 
+      });
+      
+      // Re-enable control panel on error
+      this.setControlPanelState(serviceType, 'ready');
+  }
+}
+
+/**
+* NEW METHOD: Call the appropriate service method based on service type
+*/
+async callServiceMethod(service, serviceType, files, options) {
+  switch (serviceType) {
+      case 'compression':
+          // Process each file for compression
+          for (const fileData of files) {
+              await service.compressFile(fileData.file || fileData, options);
+          }
+          break;
+          
+      case 'conversion':
+          // Process each file for conversion
+          const targetFormat = options.targetFormat || 'docx';
+          for (const fileData of files) {
+              await service.convertPDF(fileData.file || fileData, targetFormat, options);
+          }
+          break;
+          
+      case 'ocr':
+          // Process each file for OCR
+          for (const fileData of files) {
+              await service.extractText(fileData.fileId || fileData.id, options);
+          }
+          break;
+          
+      case 'ai':
+          // Process each file with AI
+          const operation = options.operation || 'analyze';
+          for (const fileData of files) {
+              await service.processWithAI(fileData.fileId || fileData.id, {
+                  operation,
+                  ...options
+              });
+          }
+          break;
+          
+      default:
+          throw new Error(`Unknown service type: ${serviceType}`);
+  }
+}
+
+/**
+* NEW METHOD: Set control panel state (enable/disable buttons)
+*/
+setControlPanelState(serviceType, state) {
+  // Find control panels for this service type
+  const controlPanels = document.querySelectorAll(`${serviceType}-controls, [data-service="${serviceType}"]`);
+  
+  controlPanels.forEach(panel => {
+      const buttons = panel.querySelectorAll('button');
+      
+      switch (state) {
+          case 'processing':
+              buttons.forEach(btn => {
+                  btn.disabled = true;
+                  btn.classList.add('processing');
+              });
+              break;
+              
+          case 'ready':
+              buttons.forEach(btn => {
+                  btn.disabled = false;
+                  btn.classList.remove('processing');
+              });
+              break;
+      }
+  });
+  const customElements = document.querySelectorAll(`${serviceType}-controls`);
+  customElements.forEach(element => {
+      if (element.shadowRoot) {
+          const shadowButtons = element.shadowRoot.querySelectorAll('button');
+          shadowButtons.forEach(btn => {
+              switch (state) {
+                  case 'processing':
+                      btn.disabled = true;
+                      btn.textContent = btn.textContent.replace('Start', 'Processing...');
+                      break;
+                      
+                  case 'ready':
+                      btn.disabled = false;
+                      btn.textContent = btn.textContent.replace('Processing...', 'Start');
+                      break;
+              }
+          });
+      }
+  });
+}
   discoverComponents() {
     // Discover and register components in the DOM
     const fileUploaders = document.querySelectorAll('file-uploader');

@@ -106,13 +106,7 @@ export class CompressionService extends StandardService {
         }
     }
 
-    mergeSettings(recommended, user) {
-        return {
-            compressionLevel: user.compressionLevel || recommended.compressionLevel || 'medium',
-            imageQuality: user.imageQuality || recommended.imageQuality || 80,
-            ...user
-        };
-    }
+    
 
     getCompressionSaveOptions(settings) {
         const baseOptions = {

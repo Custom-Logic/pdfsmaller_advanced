@@ -679,13 +679,7 @@ export class MainIntegration {
       }
     }
   }
-  // Example of what handleAuthStateChange might look like
-  handleAuthStateChange(authDetail) {
-    this.isAuthenticated = authDetail.isAuthenticated;
-    this.currentUser = authDetail.user;
-    this.updateUI(); // Update the UI based on the new auth state
-    console.log('Auth state changed:', authDetail);
-  }
+  
 
   async handleSettingsSave(event) {
     try {

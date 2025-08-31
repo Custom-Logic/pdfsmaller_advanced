@@ -165,12 +165,12 @@ export class ConversionService extends StandardService {
             // Send conversion request
             const response = await this.apiClient.post(`/convert/pdf-to-${targetFormat}`, formData, {
                 responseType: 'blob',
-                onProgress: (progress) => {
-                    // Emit progress event
-                    this.emitProgress(progress);
+                onProgress: (progressPercent) => {
+                    // Use inherited emitProgress with proper parameters
+                    this.emitProgress(50 + (progressPercent * 0.4), `Converting to ${targetFormat}... ${Math.round(progressPercent)}%`);
                 }
             });
-            
+                        
             if (!response.ok) {
                 const errorText = await response.text();
                 throw new Error(`Conversion failed: ${errorText}`);

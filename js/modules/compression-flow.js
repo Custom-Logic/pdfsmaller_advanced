@@ -6,6 +6,7 @@
 import { APIClient } from '../services/api-client.js';
 import { SecurityService } from '../services/security-service.js';
 import { ErrorHandler } from '../utils/error-handler.js';
+import { getTabNavigation } from './tab-navigation.js';
 
 export class CompressionFlow {
     constructor() {
@@ -94,9 +95,12 @@ export class CompressionFlow {
     }
 
     async startCompression(fileId, file, settings) {
+        // Define jobId at the beginning so it's accessible in catch block
+        let jobId;
+        
         try {
             // Generate job ID
-            const jobId = this.generateJobId();
+            jobId = this.generateJobId();
 
             // Store job info
             this.activeJobs.set(jobId, {

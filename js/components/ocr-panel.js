@@ -835,16 +835,17 @@ export class OCRPanel extends BaseComponent {
             } else {
                 // For batch processing, emit multiple single file events for now
                 // TODO: Implement proper batch processing via events
-                logEvent('⚠️ Batch OCR processing not yet implemented via events');
+                console.warn('⚠️ Batch OCR processing not yet implemented via events');
                 this.showError('Batch OCR processing not yet implemented. Please process files individually.');
                 
                 this.hideProgress();
-                this.showResults(results);
+                // For now, just show an empty results array
+                this.showResults([]);
                 this.addToHistory({
                     timestamp: new Date(),
                     files: this.selectedFiles.map(f => f.name),
                     options: this.ocrOptions,
-                    results: results
+                    results: []
                 });
                 this.isProcessing = false;
                 this.updateButtonStates();
@@ -869,7 +870,8 @@ export class OCRPanel extends BaseComponent {
             const file = this.selectedFiles[0];
             // TODO: Implement OCR preview via events
             this.showError('OCR preview not yet implemented via events');
-            this.showPreview(preview);
+            // For now, pass null as preview since it's not implemented
+            this.showPreview(null);
             
         } catch (error) {
             console.error('OCR preview failed:', error);

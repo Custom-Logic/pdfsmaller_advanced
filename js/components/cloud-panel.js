@@ -514,6 +514,13 @@ export class CloudPanel extends BaseComponent {
         
         // File upload
         this.setupFileUpload();
+
+        // Listen for changes on file checkboxes to update download button state
+        this.shadowRoot.addEventListener('change', (e) => {
+            if (e.target.matches('#filesList input[type="checkbox"]')) {
+                this.updateDownloadButton();
+            }
+        });
     }
 
     setupFileUpload() {
@@ -641,7 +648,7 @@ export class CloudPanel extends BaseComponent {
         
         const filesHTML = this.files.map(file => `
             <div class="file-item">
-                <input type="checkbox" value="${file.id}" onchange="this.parentElement.parentElement.parentElement.updateDownloadButton()">
+                <input type="checkbox" class="file-checkbox" value="${file.id}">
                 <span class="file-icon">📄</span>
                 <div class="file-info">
                     <p class="file-name">${file.name}</p>
@@ -654,11 +661,7 @@ export class CloudPanel extends BaseComponent {
         downloadBtn.disabled = true;
     }
 
-    updateDownloadButton() {
-        const downloadBtn = this.shadowRoot.getElementById('downloadSelected');
-        const selectedFiles = this.shadowRoot.querySelectorAll('#filesList input[type="checkbox"]:checked');
-        downloadBtn.disabled = selectedFiles.length === 0;
-    }
+    
 
     async uploadFiles() {
         if (!this.cloudService || !this.currentProvider) return;
@@ -777,12 +780,17 @@ export class CloudPanel extends BaseComponent {
 
     updateDownloadButton(loading) {
         const downloadBtn = this.shadowRoot.getElementById('downloadSelected');
-        if (loading) {
-            downloadBtn.disabled = true;
-            downloadBtn.textContent = '⏳ Downloading...';
-        } else {
-            downloadBtn.disabled = false;
-            downloadBtn.textContent = '📥 Download Selected';
+        if (typeof loading === 'boolean') { // If loading parameter is provided
+            if (loading) {
+                downloadBtn.disabled = true;
+                downloadBtn.textContent = '⏳ Downloading...';
+            } else {
+                downloadBtn.disabled = false;
+                downloadBtn.textContent = '📥 Download Selected';
+            }
+        } else { // If no loading parameter, update based on selected files
+            const selectedFiles = this.shadowRoot.querySelectorAll('#filesList input[type="checkbox"]:checked');
+            downloadBtn.disabled = selectedFiles.length === 0;
         }
     }
 

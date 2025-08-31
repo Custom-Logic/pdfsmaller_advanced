@@ -718,6 +718,14 @@ export class AIPanel extends BaseComponent {
 
     async viewHistoryItem(id) {
         try {
+            // Find the item in history by id
+            const item = this.history.find(historyItem => historyItem.id === id);
+            
+            if (!item) {
+                this.showError('History item not found');
+                return;
+            }
+            
             // TODO: Implement history item loading via events
             this.showError('History item loading not yet implemented via events');
             this.displayResults(item.type, item.result);

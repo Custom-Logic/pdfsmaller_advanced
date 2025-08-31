@@ -72,12 +72,12 @@ global.FileReader = class MockFileReader extends EventTarget {
 
 // Mock localStorage
 const localStorageMock = {
-  getItem: vi.fn(),
-  setItem: vi.fn(),
-  removeItem: vi.fn(),
-  clear: vi.fn(),
+  getItem: jest.fn(),
+  setItem: jest.fn(),
+  removeItem: jest.fn(),
+  clear: jest.fn(),
   length: 0,
-  key: vi.fn()
+  key: jest.fn()
 };
 global.localStorage = localStorageMock;
 
@@ -85,11 +85,11 @@ global.localStorage = localStorageMock;
 global.sessionStorage = localStorageMock;
 
 // Mock fetch
-global.fetch = vi.fn();
+global.fetch = jest.fn();
 
 // Mock URL.createObjectURL
-global.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
-global.URL.revokeObjectURL = vi.fn();
+global.URL.createObjectURL = jest.fn(() => 'blob:mock-url');
+global.URL.revokeObjectURL = jest.fn();
 
 // Mock CustomEvent
 global.CustomEvent = class MockCustomEvent extends Event {
@@ -122,11 +122,11 @@ global.ResizeObserver = class MockResizeObserver {
 // Mock PDF-lib
 global.PDFLib = {
   PDFDocument: {
-    load: vi.fn(),
-    create: vi.fn()
+    load: jest.fn(),
+    create: jest.fn()
   },
-  degrees: vi.fn(),
-  rgb: vi.fn()
+  degrees: jest.fn(),
+  rgb: jest.fn()
 };
 
 // Console setup for tests

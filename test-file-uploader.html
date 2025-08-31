@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Uploader Test</title>
+    <link rel="stylesheet" href="static/css/file-uploader.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <file-uploader accept=".pdf,.jpg,.png" multiple></file-uploader>
+
+    <script type="module">
+        import './js/components/file-uploader.js';
+    </script>
+</body>
+</html>

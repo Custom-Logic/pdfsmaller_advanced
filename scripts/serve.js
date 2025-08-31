@@ -132,11 +132,13 @@ class ProductionServer {
 }
 
 // Check if dist directory exists
-try {
-  await stat(DIST_DIR);
-  const server = new ProductionServer();
-  server.start();
-} catch (error) {
-  console.error('❌ Dist directory not found. Please run "npm run build" first.');
-  process.exit(1);
-}
+(async () => {
+  try {
+    await stat(DIST_DIR);
+    const server = new ProductionServer();
+    server.start();
+  } catch (error) {
+    console.error('❌ Dist directory not found. Please run "npm run build" first.');
+    process.exit(1);
+  }
+})();
