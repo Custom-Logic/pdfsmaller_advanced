@@ -7,7 +7,7 @@
 import { AuthPanel } from './components/auth-panel.js';
 import { ProfilePanel } from './components/profile-panel.js';
 import { SubscriptionPanel } from './components/subscription-panel.js';
-import { EnhancedSettingsPanel } from './components/enhanced-settings-panel.js';
+import { SettingsPanel } from './components/settings-panel.js';
 import { APIClient } from './services/api-client.js';
 import { StorageService } from './services/storage-service.js';
 import { getTabNavigation } from './modules/tab-navigation.js';
@@ -116,7 +116,8 @@ export class MainIntegration {
     this.components.set('subscription', subscriptionPanel);
 
     // Initialize enhanced settings panel
-    const settingsPanel = new EnhancedSettingsPanel();
+    const settingsPanel = document.createElement('settings-panel');
+    settingsPanel.id = 'mainSettingsPanel';
     this.components.set('settings', settingsPanel);
 
     // Set initial states
@@ -317,6 +318,7 @@ export class MainIntegration {
 
     // Settings events
     this.addEventListener('settings:save', this.handleSettingsSave.bind(this));
+    this.addEventListener('settings:loadRequested', this.handleSettingsLoadRequested.bind(this));
     this.addEventListener('settings:edit-profile', this.handleEditProfile.bind(this));
     this.addEventListener('settings:manage-subscription', this.handleManageSubscription.bind(this));
 
@@ -442,14 +444,21 @@ export class MainIntegration {
     }
   }
 
-  renderSettingsTab(container) {
+renderSettingsTab(container) {
     const settingsPanel = this.components.get('settings');
     if (settingsPanel) {
-      settingsPanel.setUser(this.currentUser);
-      container.appendChild(settingsPanel);
+        settingsPanel.setUser(this.currentUser);
+        
+        // Clear container and append the settings panel
+        container.innerHTML = '';
+        container.appendChild(settingsPanel);
+        
+        // Initialize the settings panel if it has an init method
+        if (settingsPanel.init) {
+            settingsPanel.init();
+        }
     }
-  }
-
+}
   renderSubscriptionTab(container) {
     const subscriptionPanel = this.components.get('subscription');
     if (subscriptionPanel) {
@@ -680,17 +689,31 @@ export class MainIntegration {
     }
   }
   
-
+  async handleSettingsLoadRequested() {
+    try {
+        const settings = await this.storageService.getItem('user_settings');
+        if (settings) {
+            const parsedSettings = JSON.parse(settings);
+            
+            // Emit settings to the panel
+            const settingsPanel = this.components.get('settings');
+            if (settingsPanel && settingsPanel.setSettings) {
+                settingsPanel.setSettings(parsedSettings);
+            }
+        }
+    } catch (error) {
+        console.error('Failed to load settings:', error);
+    }
+}
   async handleSettingsSave(event) {
     try {
-      const settings = event.detail;
-      // Save settings to storage or server
-      this.storageService.setItem('user_settings', JSON.stringify(settings));
-      this.showNotification('Settings saved successfully!', 'success');
+        const { settings } = event.detail;
+        await this.storageService.setItem('user_settings', JSON.stringify(settings));
+        this.showNotification('Settings saved successfully!', 'success');
     } catch (error) {
-      this.handleError(error);
+        this.handleError(error);
     }
-  }
+}
 
   handleTabChange(event) {
     const { tabId } = event.detail;

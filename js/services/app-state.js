@@ -1,7 +1,7 @@
 /**
  * Application State Management Service
  * Centralized state management for PDFSmaller application
- * Handles settings, mode changes, and state persistence
+ * Follows event-driven architecture as per UI_UPDATES_SPECIFICATION
  */
 
 export class AppStateManager {
@@ -9,12 +9,15 @@ export class AppStateManager {
         this.state = {
             // UI State
             activeTab: 'compress',
+            currentSettingsTab: 'general',
 
             // Processing Settings
             compressionLevel: 'medium',
-            imageQuality: 70,
+            imageQuality: 80,
+            targetSize: 'auto',
+            optimizationStrategy: 'balanced',
             useServerProcessing: false,
-            processingMode: 'single', // 'single' | 'bulk'
+            processingMode: 'single',
 
             // File Processing State
             files: [],
@@ -23,15 +26,117 @@ export class AppStateManager {
 
             // User State
             isAuthenticated: false,
-            userTier: 'free', // 'free' | 'pro' | 'premium'
+            userTier: 'free',
 
             // UI Preferences
-            theme: 'light',
+            theme: 'auto',
+            language: 'en',
             notifications: true
         };
 
         this.listeners = new Map();
+        this.setupEventListeners();
         this.loadPersistedState();
+    }
+
+    /**
+     * Setup event listeners for communication with other components
+     */
+    setupEventListeners() {
+        // Listen for settings changes from settings panel
+        document.addEventListener('settingsChanged', (event) => {
+            this.handleSettingsChange(event.detail);
+        });
+
+        // Listen for tab change requests
+        document.addEventListener('settingsTabRequested', (event) => {
+            this.set('currentSettingsTab', event.detail.tab);
+        });
+
+        // Listen for settings load requests
+        document.addEventListener('settingsLoadRequested', () => {
+            this.emitSettings();
+        });
+
+        // Listen for settings save requests
+        document.addEventListener('settingsSaveRequested', (event) => {
+            this.persistState();
+        });
+
+        // Listen for service events that might affect state
+        document.addEventListener('serviceComplete', (event) => {
+            this.handleServiceComplete(event.detail);
+        });
+
+        document.addEventListener('serviceError', (event) => {
+            this.handleServiceError(event.detail);
+        });
+
+        // Listen for authentication events
+        document.addEventListener('authStateChanged', (event) => {
+            this.handleAuthChange(event.detail);
+        });
+    }
+
+    /**
+     * Handle settings changes from settings panel
+     * @param {Object} change - Settings change detail
+     */
+    handleSettingsChange(change) {
+        const { key, value, category } = change;
+        
+        // Update state with new setting
+        this.set(key, value);
+        
+        // Emit event for other components that might care about this specific setting
+        this.emit(`settingChanged:${key}`, { value, category });
+    }
+
+    /**
+     * Handle service completion events
+     * @param {Object} detail - Service completion details
+     */
+    handleServiceComplete(detail) {
+        if (detail.service === 'CompressionService') {
+            this.set('processing', false);
+            this.addResults(detail.result);
+        }
+    }
+
+    /**
+     * Handle service error events
+     * @param {Object} detail - Service error details
+     */
+    handleServiceError(detail) {
+        if (detail.service === 'CompressionService') {
+            this.set('processing', false);
+            
+            // Emit error notification event
+            this.emit('showNotification', {
+                message: `Processing error: ${detail.error}`,
+                type: 'error'
+            });
+        }
+    }
+
+    /**
+     * Handle authentication state changes
+     * @param {Object} detail - Auth change details
+     */
+    handleAuthChange(detail) {
+        this.update({
+            isAuthenticated: detail.authenticated,
+            userTier: detail.tier || 'free'
+        });
+    }
+
+    /**
+     * Emit current settings to settings panel
+     */
+    emitSettings() {
+        this.emit('settingsUpdateRequested', {
+            settings: this.getSettings()
+        });
     }
 
     /**
@@ -75,13 +180,19 @@ export class AppStateManager {
      */
     set(key, value) {
         const oldValue = this.state[key];
+        
+        // Don't update if value hasn't changed
+        if (oldValue === value) return;
+        
         this.state[key] = value;
 
         // Notify listeners
         this.notifyListeners(key, value, oldValue);
 
-        // Persist certain state changes
-        this.persistState();
+        // Persist state changes if they should be saved
+        if (this.shouldPersistKey(key)) {
+            this.persistState();
+        }
     }
 
     /**
@@ -93,16 +204,37 @@ export class AppStateManager {
 
         for (const [key, value] of Object.entries(updates)) {
             const oldValue = this.state[key];
-            this.state[key] = value;
-            changes.push({ key, value, oldValue });
+            
+            // Only update if value has changed
+            if (oldValue !== value) {
+                this.state[key] = value;
+                changes.push({ key, value, oldValue });
+            }
         }
 
-        // Notify all listeners
+        // Notify all listeners for changed values
         changes.forEach(({ key, value, oldValue }) => {
             this.notifyListeners(key, value, oldValue);
         });
 
-        this.persistState();
+        // Persist if any persistable keys changed
+        if (changes.some(change => this.shouldPersistKey(change.key))) {
+            this.persistState();
+        }
+    }
+
+    /**
+     * Check if a key should be persisted
+     * @param {string} key - State key
+     * @returns {boolean} Whether to persist this key
+     */
+    shouldPersistKey(key) {
+        const persistableKeys = [
+            'compressionLevel', 'imageQuality', 'targetSize', 'optimizationStrategy',
+            'useServerProcessing', 'processingMode', 'theme', 'language', 'notifications'
+        ];
+        
+        return persistableKeys.includes(key);
     }
 
     /**
@@ -142,6 +274,14 @@ export class AppStateManager {
                 }
             });
         }
+
+        // Emit state change event for event-driven architecture
+        this.emit('stateChanged', {
+            key,
+            value,
+            oldValue,
+            timestamp: Date.now()
+        });
     }
 
     /**
@@ -149,14 +289,14 @@ export class AppStateManager {
      */
     persistState() {
         try {
-            const persistableState = {
-                compressionLevel: this.state.compressionLevel,
-                imageQuality: this.state.imageQuality,
-                useServerProcessing: this.state.useServerProcessing,
-                processingMode: this.state.processingMode,
-                theme: this.state.theme,
-                notifications: this.state.notifications
-            };
+            const persistableState = {};
+            
+            // Only persist settings that should be saved
+            Object.keys(this.state).forEach(key => {
+                if (this.shouldPersistKey(key)) {
+                    persistableState[key] = this.state[key];
+                }
+            });
 
             localStorage.setItem('pdfsmaller_app_state', JSON.stringify(persistableState));
         } catch (error) {
@@ -172,7 +312,7 @@ export class AppStateManager {
             const persisted = localStorage.getItem('pdfsmaller_app_state');
             if (persisted) {
                 const parsed = JSON.parse(persisted);
-                this.state = { ...this.state, ...parsed };
+                this.update(parsed);
             }
         } catch (error) {
             console.warn('Failed to load persisted state:', error);
@@ -185,8 +325,11 @@ export class AppStateManager {
     reset() {
         const defaultState = {
             activeTab: 'compress',
+            currentSettingsTab: 'general',
             compressionLevel: 'medium',
-            imageQuality: 70,
+            imageQuality: 80,
+            targetSize: 'auto',
+            optimizationStrategy: 'balanced',
             useServerProcessing: false,
             processingMode: 'single',
             files: [],
@@ -194,7 +337,8 @@ export class AppStateManager {
             results: [],
             isAuthenticated: false,
             userTier: 'free',
-            theme: 'light',
+            theme: 'auto',
+            language: 'en',
             notifications: true
         };
 
@@ -205,38 +349,9 @@ export class AppStateManager {
         Object.keys(defaultState).forEach(key => {
             this.notifyListeners(key, defaultState[key], undefined);
         });
-    }
 
-    // Convenience methods for common operations
-
-    /**
-     * Update compression settings
-     * @param {Object} settings - Compression settings
-     */
-    updateCompressionSettings(settings) {
-        this.update({
-            compressionLevel: settings.compressionLevel || this.state.compressionLevel,
-            imageQuality: settings.imageQuality || this.state.imageQuality,
-            useServerProcessing: settings.useServerProcessing !== undefined
-                ? settings.useServerProcessing
-                : this.state.useServerProcessing,
-            processingMode: settings.processingMode || this.state.processingMode
-        });
-    }
-
-    /**
-     * Set processing mode
-     * @param {string} mode - Processing mode ('single' | 'bulk')
-     */
-    setProcessingMode(mode) {
-        if (mode === 'bulk' && this.state.userTier === 'free') {
-            // Emit event for Pro upgrade prompt
-            this.emit('pro-upgrade-required', { feature: 'bulk-processing' });
-            return false;
-        }
-
-        this.set('processingMode', mode);
-        return true;
+        // Emit reset event
+        this.emit('stateReset', { timestamp: Date.now() });
     }
 
     /**
@@ -248,14 +363,28 @@ export class AppStateManager {
         const newFiles = Array.isArray(files) ? files : [files];
 
         this.set('files', [...currentFiles, ...newFiles]);
+        
+        // Emit files added event
+        this.emit('filesAdded', { count: newFiles.length, totalFiles: this.state.files.length });
     }
 
     /**
      * Clear files from processing queue
      */
     clearFiles() {
+        const hadFiles = this.state.files.length > 0;
+        const hadResults = this.state.results.length > 0;
+        
         this.set('files', []);
         this.set('results', []);
+        
+        // Emit events if there was content to clear
+        if (hadFiles) {
+            this.emit('filesCleared');
+        }
+        if (hadResults) {
+            this.emit('resultsCleared');
+        }
     }
 
     /**
@@ -264,6 +393,9 @@ export class AppStateManager {
      */
     setProcessing(processing) {
         this.set('processing', processing);
+        
+        // Emit processing state change event
+        this.emit('processingStateChanged', { processing });
     }
 
     /**
@@ -275,6 +407,9 @@ export class AppStateManager {
         const newResults = Array.isArray(results) ? results : [results];
 
         this.set('results', [...currentResults, ...newResults]);
+        
+        // Emit results added event
+        this.emit('resultsAdded', { count: newResults.length, totalResults: this.state.results.length });
     }
 
     /**
@@ -283,6 +418,9 @@ export class AppStateManager {
      */
     setActiveTab(tab) {
         this.set('activeTab', tab);
+        
+        // Emit tab change event
+        this.emit('activeTabChanged', { tab });
     }
 
     /**
@@ -295,6 +433,9 @@ export class AppStateManager {
             isAuthenticated: authenticated,
             userTier: tier
         });
+        
+        // Emit auth change event
+        this.emit('authStateChanged', { authenticated, tier });
     }
 
     /**
@@ -311,9 +452,10 @@ export class AppStateManager {
      * @param {*} detail - Event detail
      */
     emit(eventName, detail) {
-        const event = new CustomEvent(`app-state:${eventName}`, {
+        const event = new CustomEvent(`appState:${eventName}`, {
             detail,
-            bubbles: true
+            bubbles: true,
+            composed: true
         });
 
         document.dispatchEvent(event);
@@ -327,8 +469,26 @@ export class AppStateManager {
         return {
             compressionLevel: this.state.compressionLevel,
             imageQuality: this.state.imageQuality,
+            targetSize: this.state.targetSize,
+            optimizationStrategy: this.state.optimizationStrategy,
             useServerProcessing: this.state.useServerProcessing,
-            processingMode: this.state.processingMode
+            processingMode: this.state.processingMode,
+            theme: this.state.theme,
+            language: this.state.language,
+            notifications: this.state.notifications
+        };
+    }
+
+    /**
+     * Get processing options for service calls
+     * @returns {Object} Processing options
+     */
+    getProcessingOptions() {
+        return {
+            compressionLevel: this.state.compressionLevel,
+            imageQuality: this.state.imageQuality,
+            targetSize: this.state.targetSize,
+            optimizationStrategy: this.state.optimizationStrategy
         };
     }
 }

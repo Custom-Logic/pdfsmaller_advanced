@@ -1,499 +1,447 @@
 /**
  * Settings Integration Module
- * Connects the modern settings panel with application state and other components
+ * Connects the modern settings panel with application state using event-driven architecture
+ * Follows UI_UPDATES_SPECIFICATION and SERVICE_CONTROL_SPECIFICATION
  */
 
 import { appState } from '../services/app-state.js';
 
 export class SettingsIntegration {
-  constructor() {
-    this.settingsPanel = null;
-    this.initialized = false;
-  }
+    constructor() {
+        this.settingsPanel = null;
+        this.initialized = false;
+    }
 
-  /**
+    /**
      * Initialize the settings integration
      */
-  async init() {
-    if (this.initialized) return;
+    async init() {
+        if (this.initialized) return;
 
-    // Wait for DOM to be ready
-    if (document.readyState === 'loading') {
-      await new Promise(resolve => {
-        document.addEventListener('DOMContentLoaded', resolve);
-      });
+        // Wait for DOM to be ready
+        if (document.readyState === 'loading') {
+            await new Promise(resolve => {
+                document.addEventListener('DOMContentLoaded', resolve);
+            });
+        }
+
+        // Wait for the settings panel to be available
+        await this.waitForSettingsPanel();
+        
+        this.setupEventListeners();
+        this.setupStateListeners();
+        
+        // Load initial settings
+        this.emitSettingsRequest();
+        
+        this.initialized = true;
+        console.log('Settings integration initialized with event-driven architecture');
     }
 
-    // Wait for the settings panel to be available
-    await this.waitForSettingsPanel();
-        
-    this.setupSettingsPanel();
-    this.setupStateListeners();
-    this.setupEventListeners();
-        
-    this.initialized = true;
-    console.log('Settings integration initialized');
-  }
-
-  /**
+    /**
      * Wait for the settings panel component to be available
      */
-  async waitForSettingsPanel() {
-    return new Promise((resolve) => {
-      const checkForPanel = () => {
-        this.settingsPanel = document.getElementById('compressionSettings');
-        if (this.settingsPanel && this.settingsPanel.shadowRoot) {
-          resolve();
-        } else {
-          setTimeout(checkForPanel, 100);
-        }
-      };
-      checkForPanel();
-    });
-  }
+    async waitForSettingsPanel() {
+        return new Promise((resolve) => {
+            const checkForPanel = () => {
+                this.settingsPanel = document.querySelector('settings-panel');
+                if (this.settingsPanel) {
+                    resolve();
+                } else {
+                    setTimeout(checkForPanel, 100);
+                }
+            };
+            checkForPanel();
+        });
+    }
 
-  /**
-     * Setup the settings panel with current state
+    /**
+     * Setup event listeners for communication
      */
-  setupSettingsPanel() {
-    if (!this.settingsPanel) return;
+    setupEventListeners() {
+        // Listen for settings changes from the panel
+        document.addEventListener('settingsChanged', (event) => {
+            this.handleSettingsChange(event.detail);
+        });
 
-    // Set initial settings from app state
-    const currentSettings = appState.getSettings();
-    this.settingsPanel.setSettings(currentSettings);
+        // Listen for tab change requests
+        document.addEventListener('settingsTabChanged', (event) => {
+            this.handleTabChange(event.detail);
+        });
 
-    // Setup callbacks
-    this.settingsPanel.onSettingsChange = (settings) => {
-      this.handleSettingsChange(settings);
-    };
+        // Listen for recommendations application
+        document.addEventListener('applyRecommendationsRequested', () => {
+            this.handleApplyRecommendations();
+        });
 
-    this.settingsPanel.onModeChange = (mode) => {
-      this.handleModeChange(mode);
-    };
-  }
+        // Listen for service events that might affect settings
+        document.addEventListener('serviceComplete', (event) => {
+            this.handleServiceResult(event.detail);
+        });
 
-  /**
+        document.addEventListener('serviceError', (event) => {
+            this.handleServiceError(event.detail);
+        });
+
+        // Listen for authentication changes
+        document.addEventListener('authStateChanged', (event) => {
+            this.handleAuthChange(event.detail);
+        });
+
+        // Listen for UI state changes
+        document.addEventListener('activeTabChanged', (event) => {
+            this.handleActiveTabChange(event.detail);
+        });
+    }
+
+    /**
      * Setup listeners for app state changes
      */
-  setupStateListeners() {
-    // Listen for compression level changes
-    appState.subscribe('compressionLevel', (value) => {
-      if (this.settingsPanel) {
-        this.settingsPanel.setSettings({ compressionLevel: value });
-      }
-    });
+    setupStateListeners() {
+        // Subscribe to relevant state changes
+        const settingsKeys = [
+            'compressionLevel', 'imageQuality', 'targetSize', 'optimizationStrategy',
+            'useServerProcessing', 'processingMode', 'theme', 'language', 'notifications'
+        ];
 
-    // Listen for image quality changes
-    appState.subscribe('imageQuality', (value) => {
-      if (this.settingsPanel) {
-        this.settingsPanel.setSettings({ imageQuality: value });
-      }
-    });
-
-    // Listen for server processing changes
-    appState.subscribe('useServerProcessing', (value) => {
-      if (this.settingsPanel) {
-        this.settingsPanel.setSettings({ useServerProcessing: value });
-      }
-    });
-
-    // Listen for processing mode changes
-    appState.subscribe('processingMode', (value) => {
-      if (this.settingsPanel) {
-        this.settingsPanel.setSettings({ processingMode: value });
-      }
-      this.updateUIForMode(value);
-    });
-
-    // Listen for user tier changes
-    appState.subscribe('userTier', (value) => {
-      this.updateProFeatures(value);
-    });
-  }
-
-  /**
-     * Setup event listeners for component events
-     */
-  setupEventListeners() {
-    // Listen for settings changes from the panel
-    document.addEventListener('settings-changed', (event) => {
-      const settings = event.detail;
-      this.syncSettingsToState(settings);
-    });
-
-    // Listen for mode changes from the panel
-    document.addEventListener('mode-changed', (event) => {
-      const { mode } = event.detail;
-      const success = appState.setProcessingMode(mode);
-            
-      if (!success) {
-        // Mode change was rejected (e.g., Pro required)
-        // Reset the panel to the current state
-        this.settingsPanel.setSettings({ 
-          processingMode: appState.get('processingMode') 
+        settingsKeys.forEach(key => {
+            appState.subscribe(key, (value) => {
+                this.updateSettingsPanel(key, value);
+            });
         });
-      }
-    });
 
-    // Listen for Pro upgrade requests
-    document.addEventListener('show-pro-upgrade', (event) => {
-      this.showProUpgradeModal(event.detail);
-    });
+        // Subscribe to user tier changes
+        appState.subscribe('userTier', (value) => {
+            this.updateProFeaturesAvailability(value);
+        });
 
-    // Listen for app state Pro upgrade requirements
-    document.addEventListener('app-state:pro-upgrade-required', (event) => {
-      this.showProUpgradeModal(event.detail);
-    });
-  }
+        // Subscribe to authentication changes
+        appState.subscribe('isAuthenticated', (value) => {
+            this.updateAuthenticationState(value);
+        });
+    }
 
-  /**
+    /**
      * Handle settings changes from the panel
-     * @param {Object} settings - New settings
+     * @param {Object} detail - Settings change details
      */
-  handleSettingsChange(settings) {
-    // Update app state with new settings
-    appState.updateCompressionSettings(settings);
+    handleSettingsChange(detail) {
+        const { key, value, category } = detail;
         
-    // Notify other components of settings change
-    this.notifySettingsChange(settings);
-  }
+        // Update app state with the changed setting
+        appState.set(key, value);
+        
+        // Emit event for other components that might need to know
+        this.emit('settingsUpdated', { key, value, category });
+        
+        // Special handling for certain settings
+        if (key === 'processingMode') {
+            this.handleProcessingModeChange(value);
+        }
+    }
 
-  /**
-     * Handle mode changes from the panel
+    /**
+     * Handle tab changes from the panel
+     * @param {Object} detail - Tab change details
+     */
+    handleTabChange(detail) {
+        const { tab } = detail;
+        appState.set('currentSettingsTab', tab);
+        
+        // Emit event for UI components that might need to react
+        this.emit('settingsTabChanged', { tab });
+    }
+
+    /**
+     * Handle processing mode changes
      * @param {string} mode - New processing mode
      */
-  handleModeChange(mode) {
-    const success = appState.setProcessingMode(mode);
+    handleProcessingModeChange(mode) {
+        if (mode === 'bulk' && !appState.hasProAccess()) {
+            // Show Pro upgrade required
+            this.emit('proUpgradeRequired', { 
+                feature: 'bulk-processing',
+                reason: 'Bulk processing requires Pro subscription'
+            });
+            
+            // Revert to single mode
+            appState.set('processingMode', 'single');
+            this.updateSettingsPanel('processingMode', 'single');
+            return;
+        }
         
-    if (success) {
-      this.updateUIForMode(mode);
-      this.notifyModeChange(mode);
+        // Update UI based on mode
+        this.updateUIForMode(mode);
+        
+        // Emit mode change event
+        this.emit('processingModeChanged', { mode });
     }
-  }
 
-  /**
-     * Sync settings from panel to app state
-     * @param {Object} settings - Settings to sync
+    /**
+     * Handle apply recommendations request
      */
-  syncSettingsToState(settings) {
-    appState.updateCompressionSettings(settings);
-  }
+    handleApplyRecommendations() {
+        // This would typically come from an AI service analysis
+        const recommendations = this.generateDefaultRecommendations();
+        
+        // Update settings with recommendations
+        appState.update(recommendations);
+        
+        // Emit success notification
+        this.emit('showNotification', {
+            message: 'AI recommendations applied successfully!',
+            type: 'success',
+            duration: 3000
+        });
+    }
 
-  /**
+    /**
+     * Generate default recommendations (placeholder)
+     */
+    generateDefaultRecommendations() {
+        // In a real implementation, this would come from AI analysis
+        return {
+            compressionLevel: 'high',
+            imageQuality: 75,
+            optimizationStrategy: 'balanced'
+        };
+    }
+
+    /**
+     * Handle service results
+     * @param {Object} detail - Service result details
+     */
+    handleServiceResult(detail) {
+        if (detail.service === 'CompressionService') {
+            // Update settings based on successful compression results
+            this.learnFromCompressionResults(detail.result);
+        }
+    }
+
+    /**
+     * Learn from compression results to improve future recommendations
+     * @param {Object} result - Compression results
+     */
+    learnFromCompressionResults(result) {
+        // This would typically update AI models or learning algorithms
+        console.log('Learning from compression results:', result);
+        
+        // Emit learning complete event
+        this.emit('compressionAnalysisComplete', { result });
+    }
+
+    /**
+     * Handle service errors
+     * @param {Object} detail - Service error details
+     */
+    handleServiceError(detail) {
+        if (detail.service === 'CompressionService') {
+            // Adjust settings based on error type
+            this.adjustSettingsForError(detail.error);
+        }
+    }
+
+    /**
+     * Adjust settings based on error type
+     * @param {string} error - Error message or type
+     */
+    adjustSettingsForError(error) {
+        // Simple error-based adjustment logic
+        const adjustments = {};
+        
+        if (error.includes('memory') || error.includes('large')) {
+            adjustments.compressionLevel = 'medium';
+            adjustments.imageQuality = Math.max(60, appState.get('imageQuality') - 10);
+        }
+        
+        if (Object.keys(adjustments).length > 0) {
+            appState.update(adjustments);
+            
+            this.emit('showNotification', {
+                message: 'Settings adjusted automatically to handle error condition',
+                type: 'warning',
+                duration: 4000
+            });
+        }
+    }
+
+    /**
+     * Handle authentication changes
+     * @param {Object} detail - Auth change details
+     */
+    handleAuthChange(detail) {
+        const { authenticated, tier } = detail;
+        
+        // Update pro features availability
+        this.updateProFeaturesAvailability(tier);
+        
+        // Update settings that might be tier-dependent
+        if (authenticated && tier === 'free') {
+            // Ensure free tier doesn't use pro features
+            if (appState.get('processingMode') === 'bulk') {
+                appState.set('processingMode', 'single');
+                this.updateSettingsPanel('processingMode', 'single');
+            }
+            
+            if (appState.get('useServerProcessing')) {
+                appState.set('useServerProcessing', false);
+                this.updateSettingsPanel('useServerProcessing', false);
+            }
+        }
+    }
+
+    /**
+     * Handle active tab changes
+     * @param {Object} detail - Tab change details
+     */
+    handleActiveTabChange(detail) {
+        const { tab } = detail;
+        
+        // Show/hide settings panel based on active tab
+        if (this.settingsPanel) {
+            if (tab === 'settings') {
+                this.settingsPanel.style.display = 'block';
+                // Request latest settings when settings tab is opened
+                this.emitSettingsRequest();
+            } else {
+                this.settingsPanel.style.display = 'none';
+            }
+        }
+    }
+
+    /**
+     * Update the settings panel with a specific value
+     * @param {string} key - Setting key
+     * @param {*} value - Setting value
+     */
+    updateSettingsPanel(key, value) {
+        if (this.settingsPanel) {
+            this.settingsPanel.setSettings({ [key]: value });
+        }
+    }
+
+    /**
      * Update UI based on processing mode
      * @param {string} mode - Processing mode
      */
-  updateUIForMode(mode) {
-    // Update bulk uploader visibility
-    const bulkUploader = document.getElementById('bulkUploader');
-    if (bulkUploader) {
-      if (mode === 'bulk') {
-        bulkUploader.classList.remove('hidden');
-      } else {
-        bulkUploader.classList.add('hidden');
-      }
+    updateUIForMode(mode) {
+        // Emit event for UI components to update
+        this.emit('uiUpdateRequired', {
+            component: 'bulkUploader',
+            action: mode === 'bulk' ? 'show' : 'hide'
+        });
+        
+        this.emit('uiUpdateRequired', {
+            component: 'modeSpecificUI',
+            data: { mode }
+        });
     }
 
-    // Update other UI elements based on mode
-    this.updateModeSpecificUI(mode);
-  }
-
-  /**
-     * Update mode-specific UI elements
-     * @param {string} mode - Processing mode
-     */
-  updateModeSpecificUI(mode) {
-    // Add mode-specific classes to body for CSS targeting
-    document.body.classList.remove('mode-single', 'mode-bulk');
-    document.body.classList.add(`mode-${mode}`);
-
-    // Update any mode-specific instructions or UI
-    const modeInstructions = document.querySelectorAll('[data-mode-instruction]');
-    modeInstructions.forEach(element => {
-      const targetMode = element.dataset.modeInstruction;
-      element.style.display = targetMode === mode ? 'block' : 'none';
-    });
-  }
-
-  /**
-     * Update Pro features based on user tier
+    /**
+     * Update Pro features availability based on user tier
      * @param {string} tier - User tier
      */
-  updateProFeatures(tier) {
-    const hasProAccess = tier === 'pro' || tier === 'premium';
+    updateProFeaturesAvailability(tier) {
+        const hasProAccess = tier === 'pro' || tier === 'premium';
         
-    // Update Pro feature availability in UI
-    const proFeatures = document.querySelectorAll('[data-pro-feature]');
-    proFeatures.forEach(element => {
-      if (hasProAccess) {
-        element.classList.remove('pro-disabled');
-        element.removeAttribute('disabled');
-      } else {
-        element.classList.add('pro-disabled');
-        element.setAttribute('disabled', 'true');
-      }
-    });
-  }
-
-  /**
-     * Show Pro upgrade modal
-     * @param {Object} detail - Upgrade detail
-     */
-  showProUpgradeModal(detail) {
-    // Create and show Pro upgrade modal
-    const modal = document.createElement('div');
-    modal.className = 'pro-upgrade-modal';
-    modal.innerHTML = `
-            <div class="modal-overlay">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3>Upgrade to Pro</h3>
-                        <button class="modal-close">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <p>This feature requires a Pro subscription.</p>
-                        <p><strong>${this.getFeatureDescription(detail.feature)}</strong></p>
-                        <div class="pro-benefits">
-                            <ul>
-                                <li>Bulk file processing</li>
-                                <li>Server-side compression</li>
-                                <li>Priority processing</li>
-                                <li>Advanced settings</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn-secondary modal-cancel">Cancel</button>
-                        <button class="btn-primary modal-upgrade">Upgrade to Pro</button>
-                    </div>
-                </div>
-            </div>
-        `;
-
-    // Add modal styles
-    const style = document.createElement('style');
-    style.textContent = `
-            .pro-upgrade-modal {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                z-index: var(--z-modal);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            
-            .modal-overlay {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.5);
-                backdrop-filter: blur(4px);
-            }
-            
-            .modal-content {
-                position: relative;
-                background: white;
-                border-radius: var(--radius-2xl);
-                box-shadow: var(--shadow-2xl);
-                max-width: 500px;
-                width: 90%;
-                max-height: 90vh;
-                overflow: auto;
-            }
-            
-            .modal-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: var(--space-6);
-                border-bottom: 1px solid var(--gray-200);
-            }
-            
-            .modal-header h3 {
-                margin: 0;
-                font-size: var(--text-xl);
-                font-weight: var(--font-semibold);
-                color: var(--gray-800);
-            }
-            
-            .modal-close {
-                background: none;
-                border: none;
-                font-size: var(--text-2xl);
-                color: var(--gray-400);
-                cursor: pointer;
-                padding: var(--space-1);
-                border-radius: var(--radius-md);
-                transition: color var(--duration-200);
-            }
-            
-            .modal-close:hover {
-                color: var(--gray-600);
-            }
-            
-            .modal-body {
-                padding: var(--space-6);
-            }
-            
-            .modal-body p {
-                margin: 0 0 var(--space-4) 0;
-                color: var(--gray-600);
-            }
-            
-            .pro-benefits ul {
-                list-style: none;
-                padding: 0;
-                margin: var(--space-4) 0 0 0;
-            }
-            
-            .pro-benefits li {
-                padding: var(--space-2) 0;
-                color: var(--gray-700);
-                position: relative;
-                padding-left: var(--space-6);
-            }
-            
-            .pro-benefits li::before {
-                content: '✓';
-                position: absolute;
-                left: 0;
-                color: var(--color-success);
-                font-weight: bold;
-            }
-            
-            .modal-footer {
-                display: flex;
-                gap: var(--space-3);
-                padding: var(--space-6);
-                border-top: 1px solid var(--gray-200);
-                justify-content: flex-end;
-            }
-            
-            .btn-primary, .btn-secondary {
-                padding: var(--space-3) var(--space-6);
-                border-radius: var(--radius-lg);
-                font-size: var(--text-sm);
-                font-weight: var(--font-medium);
-                cursor: pointer;
-                transition: all var(--duration-200);
-                border: none;
-            }
-            
-            .btn-primary {
-                background: var(--color-primary);
-                color: white;
-            }
-            
-            .btn-primary:hover {
-                background: var(--color-primary-hover);
-            }
-            
-            .btn-secondary {
-                background: var(--gray-100);
-                color: var(--gray-700);
-                border: 1px solid var(--gray-300);
-            }
-            
-            .btn-secondary:hover {
-                background: var(--gray-200);
-            }
-        `;
-
-    document.head.appendChild(style);
-    document.body.appendChild(modal);
-
-    // Setup modal event listeners
-    const closeModal = () => {
-      document.body.removeChild(modal);
-      document.head.removeChild(style);
-    };
-
-    modal.querySelector('.modal-close').addEventListener('click', closeModal);
-    modal.querySelector('.modal-cancel').addEventListener('click', closeModal);
-    modal.querySelector('.modal-overlay').addEventListener('click', closeModal);
+        // Emit events to enable/disable pro features
+        this.emit('proFeaturesAvailabilityChanged', {
+            hasProAccess,
+            features: ['bulk-processing', 'server-processing', 'advanced-settings']
+        });
         
-    modal.querySelector('.modal-upgrade').addEventListener('click', () => {
-      // Navigate to pricing page or trigger upgrade flow
-      appState.setActiveTab('pricing');
-      closeModal();
-    });
+        // Update settings panel if it has pro feature indicators
+        if (this.settingsPanel && this.settingsPanel.updateProFeatures) {
+            this.settingsPanel.updateProFeatures(hasProAccess);
+        }
+    }
 
-    // Close on escape key
-    const handleEscape = (e) => {
-      if (e.key === 'Escape') {
-        closeModal();
-        document.removeEventListener('keydown', handleEscape);
-      }
-    };
-    document.addEventListener('keydown', handleEscape);
-  }
-
-  /**
-     * Get feature description for Pro upgrade modal
-     * @param {string} feature - Feature name
-     * @returns {string} Feature description
+    /**
+     * Update authentication state in UI
+     * @param {boolean} authenticated - Authentication status
      */
-  getFeatureDescription(feature) {
-    const descriptions = {
-      'bulk-processing': 'Process multiple files at once with bulk compression',
-      'server-processing': 'Use our powerful servers for maximum compression',
-      'advanced-settings': 'Access advanced compression settings and options'
-    };
+    updateAuthenticationState(authenticated) {
+        // Emit event for UI components
+        this.emit('authenticationStateChanged', { authenticated });
+    }
+
+    /**
+     * Emit settings request to load current settings
+     */
+    emitSettingsRequest() {
+        this.emit('settingsLoadRequested');
+    }
+
+    /**
+     * Emit a custom event
+     * @param {string} eventName - Event name
+     * @param {*} detail - Event details
+     */
+    emit(eventName, detail) {
+        const event = new CustomEvent(`settings:${eventName}`, {
+            detail,
+            bubbles: true,
+            composed: true
+        });
         
-    return descriptions[feature] || 'Access this premium feature';
-  }
+        document.dispatchEvent(event);
+    }
 
-  /**
-     * Notify other components of settings changes
-     * @param {Object} settings - New settings
-     */
-  notifySettingsChange(settings) {
-    const event = new CustomEvent('compression-settings-changed', {
-      detail: settings,
-      bubbles: true
-    });
-    document.dispatchEvent(event);
-  }
-
-  /**
-     * Notify other components of mode changes
-     * @param {string} mode - New processing mode
-     */
-  notifyModeChange(mode) {
-    const event = new CustomEvent('processing-mode-changed', {
-      detail: { mode },
-      bubbles: true
-    });
-    document.dispatchEvent(event);
-  }
-
-  /**
-     * Get current settings from the panel
+    /**
+     * Get current settings for external components
      * @returns {Object} Current settings
      */
-  getCurrentSettings() {
-    return this.settingsPanel ? this.settingsPanel.getSettings() : appState.getSettings();
-  }
+    getCurrentSettings() {
+        return appState.getSettings();
+    }
 
-  /**
+    /**
      * Reset settings to defaults
      */
-  resetSettings() {
-    if (this.settingsPanel) {
-      this.settingsPanel.resetToDefaults();
+    resetSettings() {
+        const defaultSettings = {
+            compressionLevel: 'medium',
+            imageQuality: 80,
+            targetSize: 'auto',
+            optimizationStrategy: 'balanced',
+            useServerProcessing: false,
+            processingMode: 'single'
+        };
+        
+        appState.update(defaultSettings);
+        
+        this.emit('showNotification', {
+            message: 'Settings reset to defaults',
+            type: 'success',
+            duration: 2000
+        });
     }
-    appState.updateCompressionSettings({
-      compressionLevel: 'medium',
-      imageQuality: 70,
-      useServerProcessing: false
-    });
-    appState.setProcessingMode('single');
-  }
+
+    /**
+     * Show Pro upgrade modal
+     * @param {Object} detail - Upgrade details
+     */
+    showProUpgradeModal(detail) {
+        this.emit('showModal', {
+            type: 'proUpgrade',
+            title: 'Upgrade to Pro',
+            message: `This feature requires a Pro subscription: ${detail.feature}`,
+            actions: [
+                {
+                    label: 'Cancel',
+                    type: 'secondary',
+                    action: 'close'
+                },
+                {
+                    label: 'Upgrade Now',
+                    type: 'primary',
+                    action: () => {
+                        this.emit('navigateTo', { page: 'pricing' });
+                    }
+                }
+            ]
+        });
+    }
 }
 
 // Create and export singleton instance
@@ -501,3 +449,6 @@ export const settingsIntegration = new SettingsIntegration();
 
 // Auto-initialize when module is loaded
 settingsIntegration.init().catch(console.error);
+
+// Export for global access if needed
+window.settingsIntegration = settingsIntegration;

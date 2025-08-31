@@ -1,6 +1,6 @@
 /**
- * Settings Panel Component
- * Provides compression settings configuration and intelligent recommendations
+ * Standardized Settings Panel Component
+ * Follows event-driven architecture and UI/UX specifications
  */
 
 import { BaseComponent } from './base-component.js';
@@ -8,19 +8,21 @@ import { BaseComponent } from './base-component.js';
 export class SettingsPanel extends BaseComponent {
     constructor() {
         super();
-        this.settings = {
-            compressionLevel: 'medium',
-            imageQuality: 80,
-            targetSize: 'auto',
-            optimizationStrategy: 'balanced'
+        this.currentTab = 'general';
+        this.settings = {};
+        this.availableTabs = {
+            'general': 'General Settings',
+            'processing': 'Processing Settings',
+            'storage': 'Storage Settings',
+            'privacy': 'Privacy Settings',
+            'account': 'Account Settings'
         };
-        this.recommendations = null;
-        this.onSettingsChange = null;
     }
 
     connectedCallback() {
         super.connectedCallback();
         this.setupEventListeners();
+        this.loadSettings();
     }
 
     render() {
@@ -28,117 +30,157 @@ export class SettingsPanel extends BaseComponent {
             <style>
                 :host {
                     display: block;
-                    background: #ffffff;
+                    background: var(--bg-primary, #ffffff);
                     border-radius: 8px;
-                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-                    padding: 20px;
+                    box-shadow: var(--shadow-sm);
                     margin: 20px 0;
                 }
 
-                .settings-header {
+                .settings-container {
                     display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    margin-bottom: 20px;
-                    padding-bottom: 15px;
-                    border-bottom: 1px solid #e5e7eb;
+                    min-height: 400px;
                 }
 
-                .settings-title {
-                    font-size: 18px;
+                .settings-sidebar {
+                    width: 250px;
+                    background: var(--bg-secondary, #f8fafc);
+                    border-right: 1px solid var(--border-color, #e2e8f0);
+                    padding: 20px 0;
+                }
+
+                .settings-nav {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+                }
+
+                .nav-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 12px 20px;
+                    color: var(--text-secondary, #64748b);
+                    text-decoration: none;
+                    transition: all 0.2s;
+                    border-left: 3px solid transparent;
+                }
+
+                .nav-item:hover {
+                    background: var(--bg-hover, #f1f5f9);
+                    color: var(--text-primary, #1e293b);
+                }
+
+                .nav-item.active {
+                    background: var(--bg-active, #e0f2fe);
+                    color: var(--text-primary, #1e293b);
+                    border-left-color: var(--primary, #0ea5e9);
+                    font-weight: 500;
+                }
+
+                .nav-item icon {
+                    width: 18px;
+                    height: 18px;
+                }
+
+                .settings-content {
+                    flex: 1;
+                    padding: 20px;
+                }
+
+                .settings-panel {
+                    display: none;
+                }
+
+                .settings-panel.active {
+                    display: block;
+                }
+
+                .panel-header {
+                    margin-bottom: 24px;
+                }
+
+                .panel-header h2 {
+                    font-size: 20px;
                     font-weight: 600;
-                    color: #1f2937;
+                    color: var(--text-primary, #1e293b);
+                    margin: 0 0 8px 0;
+                }
+
+                .panel-header p {
+                    color: var(--text-secondary, #64748b);
                     margin: 0;
                 }
 
-                .reset-button {
-                    background: #f3f4f6;
-                    border: 1px solid #d1d5db;
-                    border-radius: 6px;
-                    padding: 6px 12px;
-                    font-size: 14px;
-                    color: #6b7280;
-                    cursor: pointer;
-                    transition: all 0.2s;
+                .settings-group {
+                    margin-bottom: 32px;
                 }
 
-                .reset-button:hover {
-                    background: #e5e7eb;
-                    color: #374151;
+                .settings-group h3 {
+                    font-size: 16px;
+                    font-weight: 600;
+                    color: var(--text-primary, #1e293b);
+                    margin: 0 0 16px 0;
+                    padding-bottom: 8px;
+                    border-bottom: 1px solid var(--border-color, #e2e8f0);
                 }
 
-                .settings-grid {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 20px;
-                    margin-bottom: 20px;
-                }
-
-                .setting-group {
-                    display: flex;
-                    flex-direction: column;
+                .setting-item {
+                    margin-bottom: 16px;
                 }
 
                 .setting-label {
-                    font-size: 14px;
-                    font-weight: 500;
-                    color: #374151;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
                     margin-bottom: 8px;
                 }
 
+                .label-text {
+                    font-size: 14px;
+                    font-weight: 500;
+                    color: var(--text-primary, #1e293b);
+                }
+
                 .setting-control {
+                    width: 100%;
                     padding: 8px 12px;
-                    border: 1px solid #d1d5db;
+                    border: 1px solid var(--border-color, #d1d5db);
                     border-radius: 6px;
                     font-size: 14px;
-                    background: #ffffff;
-                    transition: border-color 0.2s;
+                    background: var(--bg-primary, #ffffff);
+                    transition: all 0.2s;
                 }
 
                 .setting-control:focus {
                     outline: none;
-                    border-color: #3b82f6;
-                    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-                }
-
-                .setting-control select {
-                    width: 100%;
-                }
-
-                .setting-control input[type="range"] {
-                    width: 100%;
+                    border-color: var(--primary, #3b82f6);
+                    box-shadow: 0 0 0 3px var(--primary-opacity, rgba(59, 130, 246, 0.1));
                 }
 
                 .quality-display {
                     display: flex;
                     justify-content: space-between;
                     font-size: 12px;
-                    color: #6b7280;
+                    color: var(--text-secondary, #6b7280);
                     margin-top: 4px;
                 }
 
                 .recommendations-section {
-                    background: #f8fafc;
-                    border: 1px solid #e2e8f0;
+                    background: var(--bg-secondary, #f8fafc);
+                    border: 1px solid var(--border-color, #e2e8f0);
                     border-radius: 6px;
-                    padding: 15px;
-                    margin-top: 20px;
+                    padding: 16px;
+                    margin-top: 24px;
                 }
 
                 .recommendations-header {
                     font-size: 14px;
                     font-weight: 600;
-                    color: #1f2937;
-                    margin-bottom: 10px;
+                    color: var(--text-primary, #1f2937);
+                    margin-bottom: 12px;
                     display: flex;
                     align-items: center;
                     gap: 8px;
-                }
-
-                .recommendations-icon {
-                    width: 16px;
-                    height: 16px;
-                    fill: #3b82f6;
                 }
 
                 .recommendation-item {
@@ -146,7 +188,7 @@ export class SettingsPanel extends BaseComponent {
                     justify-content: space-between;
                     align-items: center;
                     padding: 8px 0;
-                    border-bottom: 1px solid #e2e8f0;
+                    border-bottom: 1px solid var(--border-color, #e2e8f0);
                 }
 
                 .recommendation-item:last-child {
@@ -155,17 +197,17 @@ export class SettingsPanel extends BaseComponent {
 
                 .recommendation-label {
                     font-size: 14px;
-                    color: #374151;
+                    color: var(--text-secondary, #374151);
                 }
 
                 .recommendation-value {
                     font-size: 14px;
                     font-weight: 500;
-                    color: #059669;
+                    color: var(--success, #059669);
                 }
 
                 .apply-recommendations {
-                    background: #3b82f6;
+                    background: var(--primary, #3b82f6);
                     color: white;
                     border: none;
                     border-radius: 6px;
@@ -174,189 +216,359 @@ export class SettingsPanel extends BaseComponent {
                     font-weight: 500;
                     cursor: pointer;
                     transition: background-color 0.2s;
-                    margin-top: 15px;
+                    margin-top: 16px;
                     width: 100%;
                 }
 
                 .apply-recommendations:hover {
-                    background: #2563eb;
+                    background: var(--primary-dark, #2563eb);
                 }
 
-                .apply-recommendations:disabled {
-                    background: #9ca3af;
+                .pro-feature-disabled {
+                    opacity: 0.6;
                     cursor: not-allowed;
+                    position: relative;
                 }
 
-                .hidden {
-                    display: none;
+                .pro-feature-disabled::after {
+                    content: "⭐";
+                    position: absolute;
+                    top: -5px;
+                    right: -5px;
+                    font-size: 12px;
+                    color: #f59e0b;
+                }
+
+                .pro-feature-disabled:hover::before {
+                    content: "Pro feature - upgrade to access";
+                    position: absolute;
+                    top: -30px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: #1f2937;
+                    color: white;
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    white-space: nowrap;
+                    z-index: 1000;
                 }
 
                 @media (max-width: 768px) {
-                    .settings-grid {
-                        grid-template-columns: 1fr;
-                        gap: 15px;
+                    .settings-container {
+                        flex-direction: column;
+                    }
+                    
+                    .settings-sidebar {
+                        width: 100%;
+                        border-right: none;
+                        border-bottom: 1px solid var(--border-color, #e2e8f0);
+                    }
+                    
+                    .settings-nav {
+                        flex-direction: row;
+                        overflow-x: auto;
+                        padding: 0 16px;
+                    }
+                    
+                    .nav-item {
+                        border-left: none;
+                        border-bottom: 3px solid transparent;
+                        white-space: nowrap;
+                    }
+                    
+                    .nav-item.active {
+                        border-left-color: transparent;
+                        border-bottom-color: var(--primary, #0ea5e9);
                     }
                 }
             </style>
 
-            <div class="settings-header">
-                <h3 class="settings-title">Compression Settings</h3>
-                <button class="reset-button" id="resetSettings">Reset</button>
-            </div>
-
-            <div class="settings-grid">
-                <div class="setting-group">
-                    <label class="setting-label" for="compressionLevel">Compression Level</label>
-                    <select class="setting-control" id="compressionLevel">
-                        <option value="low">Low (Best Quality)</option>
-                        <option value="medium" selected>Medium (Balanced)</option>
-                        <option value="high">High (Smaller Size)</option>
-                        <option value="maximum">Maximum (Smallest Size)</option>
-                    </select>
+            <div class="settings-container">
+                <div class="settings-sidebar">
+                    <nav class="settings-nav" role="tablist">
+                        <a href="#general" class="nav-item active" data-tab="general" role="tab" aria-selected="true">
+                            <icon name="settings"></icon>
+                            General
+                        </a>
+                        <a href="#processing" class="nav-item" data-tab="processing" role="tab" aria-selected="false">
+                            <icon name="cpu"></icon>
+                            Processing
+                        </a>
+                        <a href="#storage" class="nav-item" data-tab="storage" role="tab" aria-selected="false">
+                            <icon name="database"></icon>
+                            Storage
+                        </a>
+                        <a href="#privacy" class="nav-item" data-tab="privacy" role="tab" aria-selected="false">
+                            <icon name="shield"></icon>
+                            Privacy
+                        </a>
+                        <a href="#account" class="nav-item" data-tab="account" role="tab" aria-selected="false">
+                            <icon name="user"></icon>
+                            Account
+                        </a>
+                    </nav>
                 </div>
-
-                <div class="setting-group">
-                    <label class="setting-label" for="imageQuality">Image Quality</label>
-                    <input type="range" class="setting-control" id="imageQuality" 
-                           min="10" max="100" value="80" step="5">
-                    <div class="quality-display">
-                        <span>10%</span>
-                        <span id="qualityValue">80%</span>
-                        <span>100%</span>
+                
+                <div class="settings-content">
+                    <!-- General Settings Panel -->
+                    <div class="settings-panel active" id="general" role="tabpanel">
+                        <div class="panel-header">
+                            <h2>General Settings</h2>
+                            <p>Configure general application preferences</p>
+                        </div>
+                        
+                        <div class="settings-group">
+                            <h3>Interface</h3>
+                            <div class="setting-item">
+                                <label class="setting-label">
+                                    <span class="label-text">Theme</span>
+                                </label>
+                                <select class="setting-control" data-setting="theme">
+                                    <option value="auto">Auto</option>
+                                    <option value="light">Light</option>
+                                    <option value="dark">Dark</option>
+                                </select>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <label class="setting-label">
+                                    <span class="label-text">Language</span>
+                                </label>
+                                <select class="setting-control" data-setting="language">
+                                    <option value="en">English</option>
+                                    <option value="es">Español</option>
+                                    <option value="fr">Français</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Processing Settings Panel -->
+                    <div class="settings-panel" id="processing" role="tabpanel">
+                        <div class="panel-header">
+                            <h2>Processing Settings</h2>
+                            <p>Configure how files are processed</p>
+                        </div>
+                        
+                        <div class="settings-group">
+                            <h3>Default Compression</h3>
+                            <div class="setting-item">
+                                <label class="setting-label">
+                                    <span class="label-text">Compression Level</span>
+                                </label>
+                                <select class="setting-control" data-setting="compressionLevel">
+                                    <option value="low">Low (Best Quality)</option>
+                                    <option value="medium" selected>Medium (Balanced)</option>
+                                    <option value="high">High (Smaller Size)</option>
+                                    <option value="maximum">Maximum (Smallest Size)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <label class="setting-label">
+                                    <span class="label-text">Image Quality</span>
+                                </label>
+                                <input type="range" class="setting-control" data-setting="imageQuality" 
+                                       min="10" max="100" value="80" step="5">
+                                <div class="quality-display">
+                                    <span>10%</span>
+                                    <span data-quality-value>80%</span>
+                                    <span>100%</span>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <label class="setting-label">
+                                    <span class="label-text">Target Size</span>
+                                </label>
+                                <select class="setting-control" data-setting="targetSize">
+                                    <option value="auto" selected>Auto (Recommended)</option>
+                                    <option value="90">90% of original</option>
+                                    <option value="75">75% of original</option>
+                                    <option value="50">50% of original</option>
+                                    <option value="25">25% of original</option>
+                                </select>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <label class="setting-label">
+                                    <span class="label-text">Optimization Strategy</span>
+                                </label>
+                                <select class="setting-control" data-setting="optimizationStrategy">
+                                    <option value="balanced" selected>Balanced</option>
+                                    <option value="image_optimized">Image Optimized</option>
+                                    <option value="text_optimized">Text Optimized</option>
+                                    <option value="batch_optimized">Batch Optimized</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="recommendations-section" data-recommendations style="display: none;">
+                            <div class="recommendations-header">
+                                <icon name="sparkles"></icon>
+                                AI Recommendations
+                            </div>
+                            
+                            <div data-recommendations-list></div>
+                            
+                            <button class="apply-recommendations" data-apply-recommendations>
+                                Apply Recommendations
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Other panels would follow the same pattern -->
+                    <div class="settings-panel" id="storage" role="tabpanel">
+                        <div class="panel-header">
+                            <h2>Storage Settings</h2>
+                            <p>Configure file storage preferences</p>
+                        </div>
+                        <!-- Storage settings content -->
+                    </div>
+                    
+                    <div class="settings-panel" id="privacy" role="tabpanel">
+                        <div class="panel-header">
+                            <h2>Privacy Settings</h2>
+                            <p>Configure your privacy preferences</p>
+                        </div>
+                        <!-- Privacy settings content -->
+                    </div>
+                    
+                    <div class="settings-panel" id="account" role="tabpanel">
+                        <div class="panel-header">
+                            <h2>Account Settings</h2>
+                            <p>Manage your account preferences</p>
+                        </div>
+                        <!-- Account settings content -->
                     </div>
                 </div>
-
-                <div class="setting-group">
-                    <label class="setting-label" for="targetSize">Target Size</label>
-                    <select class="setting-control" id="targetSize">
-                        <option value="auto" selected>Auto (Recommended)</option>
-                        <option value="90">90% of original</option>
-                        <option value="75">75% of original</option>
-                        <option value="50">50% of original</option>
-                        <option value="25">25% of original</option>
-                    </select>
-                </div>
-
-                <div class="setting-group">
-                    <label class="setting-label" for="optimizationStrategy">Optimization Strategy</label>
-                    <select class="setting-control" id="optimizationStrategy">
-                        <option value="balanced" selected>Balanced</option>
-                        <option value="image_optimized">Image Optimized</option>
-                        <option value="text_optimized">Text Optimized</option>
-                        <option value="batch_optimized">Batch Optimized</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="recommendations-section hidden" id="recommendationsSection">
-                <div class="recommendations-header">
-                    <svg class="recommendations-icon" viewBox="0 0 20 20">
-                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    AI Recommendations
-                </div>
-                
-                <div id="recommendationsList"></div>
-                
-                <button class="apply-recommendations" id="applyRecommendations">
-                    Apply Recommendations
-                </button>
             </div>
         `;
     }
 
     setupEventListeners() {
-        const shadow = this.shadowRoot;
-        
-        // Compression level change
-        this.addEventListener(shadow.getElementById('compressionLevel'), 'change', (e) => {
-            this.settings.compressionLevel = e.target.value;
-            this.updateSettings();
+        // Tab navigation
+        this.shadowRoot.addEventListener('click', (event) => {
+            if (event.target.matches('[data-tab]')) {
+                event.preventDefault();
+                const tab = event.target.dataset.tab;
+                this.switchTab(tab);
+            }
         });
 
-        // Image quality change
-        const imageQualitySlider = shadow.getElementById('imageQuality');
-        const qualityValue = shadow.getElementById('qualityValue');
-        
-        this.addEventListener(imageQualitySlider, 'input', (e) => {
-            const value = e.target.value;
-            qualityValue.textContent = `${value}%`;
-            this.settings.imageQuality = parseInt(value);
-            this.updateSettings();
+        // Setting changes
+        this.shadowRoot.addEventListener('change', (event) => {
+            if (event.target.matches('[data-setting]')) {
+                const key = event.target.dataset.setting;
+                const value = event.target.value;
+                this.handleSettingChange(key, value);
+            }
         });
 
-        // Target size change
-        this.addEventListener(shadow.getElementById('targetSize'), 'change', (e) => {
-            this.settings.targetSize = e.target.value;
-            this.updateSettings();
-        });
-
-        // Optimization strategy change
-        this.addEventListener(shadow.getElementById('optimizationStrategy'), 'change', (e) => {
-            this.settings.optimizationStrategy = e.target.value;
-            this.updateSettings();
-        });
-
-        // Reset settings
-        this.addEventListener(shadow.getElementById('resetSettings'), 'click', () => {
-            this.resetToDefaults();
+        // Input events for sliders
+        this.shadowRoot.addEventListener('input', (event) => {
+            if (event.target.matches('[data-setting="imageQuality"]')) {
+                const value = event.target.value;
+                this.shadowRoot.querySelector('[data-quality-value]').textContent = `${value}%`;
+                this.handleSettingChange('imageQuality', parseInt(value));
+            }
         });
 
         // Apply recommendations
-        this.addEventListener(shadow.getElementById('applyRecommendations'), 'click', () => {
-            this.applyRecommendations();
+        this.shadowRoot.addEventListener('click', (event) => {
+            if (event.target.matches('[data-apply-recommendations]')) {
+                this.applyRecommendations();
+            }
         });
+
+        // Listen for external events
+        document.addEventListener('settingsTabRequested', this.handleTabRequest.bind(this));
+        document.addEventListener('settingsUpdateRequested', this.handleSettingsUpdate.bind(this));
+        document.addEventListener('settingsRecommendationsProvided', this.handleRecommendations.bind(this));
     }
 
-    updateSettings() {
-        if (this.onSettingsChange) {
-            this.onSettingsChange(this.settings);
-        }
-        
-        // Store settings in localStorage
-        localStorage.setItem('pdfsmaller_settings', JSON.stringify(this.settings));
+    switchTab(tabName) {
+        if (!this.availableTabs[tabName]) return;
+
+        // Update active states
+        this.shadowRoot.querySelectorAll('[data-tab]').forEach(item => {
+            const isActive = item.dataset.tab === tabName;
+            item.classList.toggle('active', isActive);
+            item.setAttribute('aria-selected', isActive);
+        });
+
+        // Show/hide panels
+        this.shadowRoot.querySelectorAll('.settings-panel').forEach(panel => {
+            panel.classList.toggle('active', panel.id === tabName);
+        });
+
+        this.currentTab = tabName;
+
+        // Emit tab change event
+        this.dispatchEvent(new CustomEvent('settingsTabChanged', {
+            detail: { tab: tabName }
+        }));
     }
 
-    resetToDefaults() {
-        this.settings = {
-            compressionLevel: 'medium',
-            imageQuality: 80,
-            targetSize: 'auto',
-            optimizationStrategy: 'balanced'
+    handleSettingChange(key, value) {
+        this.settings[key] = value;
+
+        // Emit settings change event
+        this.dispatchEvent(new CustomEvent('settingsChanged', {
+            detail: {
+                key,
+                value,
+                category: this.getSettingCategory(key)
+            }
+        }));
+
+        // Store settings
+        this.saveSettings();
+    }
+
+    getSettingCategory(key) {
+        // Map settings to categories
+        const categoryMap = {
+            'theme': 'general',
+            'language': 'general',
+            'compressionLevel': 'processing',
+            'imageQuality': 'processing',
+            'targetSize': 'processing',
+            'optimizationStrategy': 'processing'
+            // Add more mappings as needed
         };
+        
+        return categoryMap[key] || 'general';
+    }
 
-        // Update UI
-        const shadow = this.shadowRoot;
-        shadow.getElementById('compressionLevel').value = this.settings.compressionLevel;
-        shadow.getElementById('imageQuality').value = this.settings.imageQuality;
-        shadow.getElementById('targetSize').value = this.settings.targetSize;
-        shadow.getElementById('optimizationStrategy').value = this.settings.optimizationStrategy;
-        shadow.getElementById('qualityValue').textContent = `${this.settings.imageQuality}%`;
+    handleTabRequest(event) {
+        const { tab } = event.detail;
+        this.switchTab(tab);
+    }
 
-        this.updateSettings();
+    handleSettingsUpdate(event) {
+        const { settings } = event.detail;
+        this.setSettings(settings);
+    }
+
+    handleRecommendations(event) {
+        const { recommendations } = event.detail;
+        this.setRecommendations(recommendations);
     }
 
     setRecommendations(recommendations) {
-        this.recommendations = recommendations;
-        this.displayRecommendations();
-    }
-
-    displayRecommendations() {
-        if (!this.recommendations) return;
-
-        const shadow = this.shadowRoot;
-        const recommendationsSection = shadow.getElementById('recommendationsSection');
-        const recommendationsList = shadow.getElementById('recommendationsList');
-
-        if (!this.recommendations.recommendedSettings) {
-            recommendationsSection.classList.add('hidden');
+        if (!recommendations) {
+            this.shadowRoot.querySelector('[data-recommendations]').style.display = 'none';
             return;
         }
 
-        const rec = this.recommendations.recommendedSettings;
-        const analysis = this.recommendations.analysis;
+        const rec = recommendations.recommendedSettings;
+        const analysis = recommendations.analysis;
+        const listElement = this.shadowRoot.querySelector('[data-recommendations-list]');
+        const sectionElement = this.shadowRoot.querySelector('[data-recommendations]');
 
-        recommendationsList.innerHTML = `
+        listElement.innerHTML = `
             <div class="recommendation-item">
                 <span class="recommendation-label">Compression Level</span>
                 <span class="recommendation-value">${this.formatCompressionLevel(rec.compressionLevel)}</span>
@@ -373,22 +585,74 @@ export class SettingsPanel extends BaseComponent {
                 <span class="recommendation-label">Compression Potential</span>
                 <span class="recommendation-value">${Math.round(analysis.compressionPotential * 100)}%</span>
             </div>
-            <div class="recommendation-item">
-                <span class="recommendation-label">Document Type</span>
-                <span class="recommendation-value">${this.formatDocumentType(analysis.documentType)}</span>
-            </div>
         `;
 
-        recommendationsSection.classList.remove('hidden');
+        sectionElement.style.display = 'block';
+        this.recommendations = recommendations;
     }
 
+    applyRecommendations() {
+        if (!this.recommendations?.recommendedSettings) return;
+
+        const rec = this.recommendations.recommendedSettings;
+        this.setSettings(rec);
+
+        // Show success feedback via event
+        this.dispatchEvent(new CustomEvent('showNotification', {
+            detail: {
+                message: 'Recommendations applied successfully!',
+                type: 'success'
+            }
+        }));
+    }
+
+    setSettings(settings) {
+        this.settings = { ...this.settings, ...settings };
+        
+        // Update UI controls
+        Object.entries(settings).forEach(([key, value]) => {
+            const control = this.shadowRoot.querySelector(`[data-setting="${key}"]`);
+            if (control) {
+                control.value = value;
+                if (key === 'imageQuality') {
+                    this.shadowRoot.querySelector('[data-quality-value]').textContent = `${value}%`;
+                }
+            }
+        });
+
+        this.saveSettings();
+    }
+
+    // Replace the saveSettings method with:
+    saveSettings() {
+        // Emit event for external storage with proper detail structure
+        const event = new CustomEvent('settings:save', {
+            detail: { 
+                settings: this.settings,
+                category: 'userPreferences'
+            },
+            bubbles: true,
+            composed: true
+        });
+        
+        this.dispatchEvent(event);
+    }
+
+
+    // Update the loadSettings method:
+    loadSettings() {
+        // Emit event to request settings
+        const event = new CustomEvent('settings:loadRequested', {
+            bubbles: true,
+            composed: true
+        });
+        
+        this.dispatchEvent(event);
+    }
+
+    // Helper methods for formatting
     formatCompressionLevel(level) {
-        const levels = {
-            'low': 'Low',
-            'medium': 'Medium',
-            'high': 'High',
-            'maximum': 'Maximum'
-        };
+        const levels = { 'low': 'Low', 'medium': 'Medium', 'high': 'High', 'maximum': 'Maximum' };
         return levels[level] || level;
     }
 
@@ -402,114 +666,42 @@ export class SettingsPanel extends BaseComponent {
         return strategies[strategy] || strategy;
     }
 
-    formatDocumentType(type) {
-        const types = {
-            'single_image': 'Single Image',
-            'single_page_document': 'Single Page',
-            'long_document': 'Long Document',
-            'form_document': 'Form Document',
-            'mixed_content': 'Mixed Content',
-            'image_heavy': 'Image Heavy',
-            'text_heavy': 'Text Heavy',
-            'general_document': 'General Document'
-        };
-        return types[type] || type;
-    }
+    // Add these methods to the SettingsPanel class
+setUser(user) {
+    this.user = user;
+    this.updateUIForUser();
+}
 
-    applyRecommendations() {
-        if (!this.recommendations?.recommendedSettings) return;
+updateUIForUser() {
+    // Enable/disable features based on user tier
+    const hasProAccess = this.user && (this.user.plan === 'pro' || this.user.plan === 'premium');
+    
+    // Update UI based on user access
+    this.updateProFeaturesAvailability(hasProAccess);
+}
 
-        const rec = this.recommendations.recommendedSettings;
-        
-        // Update settings
-        this.settings = {
-            ...this.settings,
-            ...rec
-        };
-
-        // Update UI
-        const shadow = this.shadowRoot;
-        shadow.getElementById('compressionLevel').value = this.settings.compressionLevel;
-        shadow.getElementById('imageQuality').value = this.settings.imageQuality;
-        shadow.getElementById('targetSize').value = this.settings.targetSize;
-        shadow.getElementById('optimizationStrategy').value = this.settings.optimizationStrategy;
-        shadow.getElementById('qualityValue').textContent = `${this.settings.imageQuality}%`;
-
-        // Notify change
-        this.updateSettings();
-
-        // Show success feedback
-        this.showSuccessMessage('Recommendations applied successfully!');
-    }
-
-    showSuccessMessage(message) {
-        // Create temporary success message
-        const successDiv = document.createElement('div');
-        successDiv.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #059669;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 6px;
-            font-size: 14px;
-            z-index: 10000;
-            animation: slideIn 0.3s ease-out;
-        `;
-        successDiv.textContent = message;
-        
-        // Add animation styles
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideIn {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-        `;
-        document.head.appendChild(style);
-        
-        document.body.appendChild(successDiv);
-        
-        // Remove after 3 seconds
-        setTimeout(() => {
-            successDiv.remove();
-            style.remove();
-        }, 3000);
-    }
-
-    getSettings() {
-        return { ...this.settings };
-    }
-
-    setSettings(settings) {
-        this.settings = { ...this.settings, ...settings };
-        
-        // Update UI if component is connected
-        if (this.isConnected) {
-            const shadow = this.shadowRoot;
-            if (shadow.getElementById('compressionLevel')) {
-                shadow.getElementById('compressionLevel').value = this.settings.compressionLevel;
-                shadow.getElementById('imageQuality').value = this.settings.imageQuality;
-                shadow.getElementById('targetSize').value = this.settings.targetSize;
-                shadow.getElementById('optimizationStrategy').value = this.settings.optimizationStrategy;
-                shadow.getElementById('qualityValue').textContent = `${this.settings.imageQuality}%`;
-            }
+updateProFeaturesAvailability(hasProAccess) {
+    // Disable pro features if user doesn't have access
+    const proFeatures = this.shadowRoot.querySelectorAll('[data-pro-feature]');
+    proFeatures.forEach(feature => {
+        if (!hasProAccess) {
+            feature.disabled = true;
+            feature.title = 'Pro feature - upgrade to access';
+            feature.classList.add('pro-feature-disabled');
+        } else {
+            feature.disabled = false;
+            feature.title = '';
+            feature.classList.remove('pro-feature-disabled');
         }
-    }
+    });
+}
 
-    // Load settings from localStorage
-    loadSavedSettings() {
-        try {
-            const saved = localStorage.getItem('pdfsmaller_settings');
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                this.setSettings(parsed);
-            }
-        } catch (error) {
-            console.warn('Failed to load saved settings:', error);
-        }
-    }
+// Add initialization method
+async init() {
+    await this.loadSettings();
+    this.setupEventListeners();
+}
+
 }
 
 // Register the custom element
