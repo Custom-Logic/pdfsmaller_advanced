@@ -154,16 +154,17 @@
         <!-- Updated Auth Section - Simple Links -->
         <div class="nav-auth-section">
             <div class="auth-links" id="guestAuthSection">
-                <a href="#" class="nav-menu-link auth-link" data-action="show-login">Sign In</a>
-                <a href="#" class="nav-menu-link auth-link" data-action="show-register">Create Account</a>
+                <a href="/login" class="nav-menu-link auth-link" data-action="show-login">Sign In</a>
+                <a href="/subscribe" class="nav-menu-link auth-link" data-action="show-register">Create Account</a>
             </div>
+            <!-- Once logged in remove hidden and add hidden on the sign in menu-->
             <div class="auth-links hidden" id="userAuthSection">
                 <div class="user-info-nav">
                     <span class="user-name-nav" id="userNameNav"></span>
                     <span class="user-plan-nav" id="userPlanNav"></span>
                 </div>
-                <a href="#" class="nav-menu-link auth-link" data-action="show-profile">Profile</a>
-                <a href="#" class="nav-menu-link auth-link logout-link" data-action="logout">Sign Out</a>
+                <a href="/profile" class="nav-menu-link auth-link" data-action="show-profile">Profile</a>
+                <a href="/logout" class="nav-menu-link auth-link logout-link" data-action="logout">Sign Out</a>
             </div>
         </div>
     </div>
@@ -487,5 +488,4 @@
 
     
 </body>
-
 </html>
