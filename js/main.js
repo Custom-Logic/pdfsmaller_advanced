@@ -16,9 +16,6 @@ class PDFSmallerApp {
             // Initialize error handling first
             this.setupGlobalErrorHandling();
             
-            // Show loading indicator
-            this.showLoadingIndicator();
-            
             // Load core modules with dynamic imports for code splitting
             await this.loadCoreModules();
             
@@ -179,51 +176,11 @@ class PDFSmallerApp {
         });
     }
 
-    showLoadingIndicator() {
-        // Create minimal loading indicator
-        const loader = document.createElement('div');
-        loader.id = 'app-loader';
-        loader.innerHTML = `
-            <div style="
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(255, 255, 255, 0.9);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 9999;
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            ">
-                <div style="text-align: center;">
-                    <div style="
-                        width: 40px;
-                        height: 40px;
-                        border: 3px solid #f3f3f3;
-                        border-top: 3px solid #3182ce;
-                        border-radius: 50%;
-                        animation: spin 1s linear infinite;
-                        margin: 0 auto 16px;
-                    "></div>
-                    <div style="color: #4a5568; font-size: 14px;">Loading PDFSmaller...</div>
-                </div>
-            </div>
-            <style>
-                @keyframes spin {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                }
-            </style>
-        `;
-        document.body.appendChild(loader);
-    }
-
     hideLoadingIndicator() {
         const loader = document.getElementById('app-loader');
         if (loader) {
-            loader.remove();
+            loader.classList.add('hidden');
+            setTimeout(() => loader.remove(), 300);
         }
     }
 
