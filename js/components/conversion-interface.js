@@ -1,25 +1,20 @@
+import { BaseComponent } from './base-component.js';
+
 /**
  * Conversion Interface Component
  * Provides slots for conversion controls
  */
-
-class ConversionInterface extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
+class ConversionInterface extends BaseComponent {
+    getStyles() {
+        return `
+            :host { display: block; }
+            .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; }
+            .section-title { margin: 0 0 8px 0; font-weight: 600; color: #111827; font-size: 14px; }
+        `;
     }
 
-    connectedCallback() {
-        this.render();
-    }
-
-    render() {
-        this.shadowRoot.innerHTML = `
-            <style>
-                :host { display: block; }
-                .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; }
-                .section-title { margin: 0 0 8px 0; font-weight: 600; color: #111827; font-size: 14px; }
-            </style>
+    getTemplate() {
+        return `
             <div class="card">
                 <h3 class="section-title">Upload</h3>
                 <slot name="uploader"></slot>

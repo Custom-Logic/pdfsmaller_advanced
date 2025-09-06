@@ -16,263 +16,260 @@ export class BulkUploader extends BaseComponent {
         this.onBatchStart = null;
     }
 
-    connectedCallback() {
-        super.connectedCallback();
-        this.setupEventListeners();
-    }
+    getStyles() {
+        return `
+            :host {
+                display: block;
+                background: #ffffff;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                padding: 20px;
+                margin: 20px 0;
+            }
 
-    render() {
-        this.shadowRoot.innerHTML = `
-            <style>
-                :host {
-                    display: block;
-                    background: #ffffff;
-                    border-radius: 8px;
-                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-                    padding: 20px;
-                    margin: 20px 0;
-                }
+            .bulk-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 20px;
+                padding-bottom: 15px;
+                border-bottom: 1px solid #e5e7eb;
+            }
 
-                .bulk-header {
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    margin-bottom: 20px;
-                    padding-bottom: 15px;
-                    border-bottom: 1px solid #e5e7eb;
-                }
+            .bulk-title {
+                font-size: 18px;
+                font-weight: 600;
+                color: #1f2937;
+                margin: 0;
+            }
 
-                .bulk-title {
-                    font-size: 18px;
-                    font-weight: 600;
-                    color: #1f2937;
-                    margin: 0;
-                }
+            .file-count {
+                background: #3b82f6;
+                color: white;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 14px;
+                font-weight: 500;
+            }
 
-                .file-count {
-                    background: #3b82f6;
-                    color: white;
-                    padding: 4px 12px;
-                    border-radius: 20px;
-                    font-size: 14px;
-                    font-weight: 500;
-                }
+            .drop-zone {
+                border: 2px dashed #d1d5db;
+                border-radius: 8px;
+                padding: 40px 20px;
+                text-align: center;
+                background: #f9fafb;
+                transition: all 0.2s;
+                cursor: pointer;
+                margin-bottom: 20px;
+            }
 
-                .drop-zone {
-                    border: 2px dashed #d1d5db;
-                    border-radius: 8px;
-                    padding: 40px 20px;
-                    text-align: center;
-                    background: #f9fafb;
-                    transition: all 0.2s;
-                    cursor: pointer;
-                    margin-bottom: 20px;
-                }
+            .drop-zone:hover,
+            .drop-zone.drag-over {
+                border-color: #3b82f6;
+                background: #eff6ff;
+            }
 
-                .drop-zone:hover,
-                .drop-zone.drag-over {
-                    border-color: #3b82f6;
-                    background: #eff6ff;
-                }
+            .drop-zone.drag-over {
+                transform: scale(1.02);
+            }
 
-                .drop-zone.drag-over {
-                    transform: scale(1.02);
-                }
+            .drop-icon {
+                width: 48px;
+                height: 48px;
+                margin: 0 auto 16px;
+                fill: #9ca3af;
+            }
 
-                .drop-icon {
-                    width: 48px;
-                    height: 48px;
-                    margin: 0 auto 16px;
-                    fill: #9ca3af;
-                }
+            .drop-zone:hover .drop-icon,
+            .drop-zone.drag-over .drop-icon {
+                fill: #3b82f6;
+            }
 
-                .drop-zone:hover .drop-icon,
-                .drop-zone.drag-over .drop-icon {
-                    fill: #3b82f6;
-                }
+            .drop-text {
+                font-size: 16px;
+                color: #6b7280;
+                margin-bottom: 8px;
+            }
 
-                .drop-text {
-                    font-size: 16px;
-                    color: #6b7280;
-                    margin-bottom: 8px;
-                }
+            .drop-subtext {
+                font-size: 14px;
+                color: #9ca3af;
+            }
 
-                .drop-subtext {
-                    font-size: 14px;
-                    color: #9ca3af;
-                }
+            .file-input {
+                display: none;
+            }
 
-                .file-input {
-                    display: none;
-                }
+            .file-list {
+                max-height: 300px;
+                overflow-y: auto;
+                border: 1px solid #e5e7eb;
+                border-radius: 6px;
+                background: #f9fafb;
+            }
 
-                .file-list {
-                    max-height: 300px;
-                    overflow-y: auto;
-                    border: 1px solid #e5e7eb;
-                    border-radius: 6px;
-                    background: #f9fafb;
-                }
+            .file-item {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 12px 16px;
+                border-bottom: 1px solid #e5e7eb;
+                background: white;
+            }
 
-                .file-item {
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    padding: 12px 16px;
-                    border-bottom: 1px solid #e5e7eb;
-                    background: white;
-                }
+            .file-item:last-child {
+                border-bottom: none;
+            }
 
-                .file-item:last-child {
-                    border-bottom: none;
-                }
+            .file-info {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                flex: 1;
+            }
 
-                .file-info {
-                    display: flex;
-                    align-items: center;
-                    gap: 12px;
-                    flex: 1;
-                }
+            .file-icon {
+                width: 24px;
+                height: 24px;
+                fill: #ef4444;
+            }
 
-                .file-icon {
-                    width: 24px;
-                    height: 24px;
-                    fill: #ef4444;
-                }
+            .file-details {
+                display: flex;
+                flex-direction: column;
+            }
 
-                .file-details {
-                    display: flex;
+            .file-name {
+                font-size: 14px;
+                font-weight: 500;
+                color: #1f2937;
+                margin-bottom: 2px;
+            }
+
+            .file-size {
+                font-size: 12px;
+                color: #6b7280;
+            }
+
+            .file-actions {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .remove-file {
+                background: #fef2f2;
+                border: 1px solid #fecaca;
+                border-radius: 4px;
+                padding: 4px 8px;
+                font-size: 12px;
+                color: #dc2626;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+
+            .remove-file:hover {
+                background: #fee2e2;
+                border-color: #fca5a5;
+            }
+
+            .batch-actions {
+                display: flex;
+                gap: 12px;
+                margin-top: 20px;
+            }
+
+            .batch-button {
+                flex: 1;
+                padding: 12px 20px;
+                border: none;
+                border-radius: 6px;
+                font-size: 14px;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+
+            .batch-button:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            .start-batch {
+                background: #059669;
+                color: white;
+            }
+
+            .start-batch:hover:not(:disabled) {
+                background: #047857;
+            }
+
+            .clear-all {
+                background: #f3f4f6;
+                color: #374151;
+                border: 1px solid #d1d5db;
+            }
+
+            .clear-all:hover:not(:disabled) {
+                background: #e5e7eb;
+            }
+
+            .error-message {
+                background: #fef2f2;
+                border: 1px solid #fecaca;
+                border-radius: 6px;
+                padding: 12px;
+                margin: 16px 0;
+                color: #dc2626;
+                font-size: 14px;
+            }
+
+            .warning-message {
+                background: #fffbeb;
+                border: 1px solid #fed7aa;
+                border-radius: 6px;
+                padding: 12px;
+                margin: 16px 0;
+                color: #d97706;
+                font-size: 14px;
+            }
+
+            .progress-bar {
+                width: 100%;
+                height: 4px;
+                background: #e5e7eb;
+                border-radius: 2px;
+                overflow: hidden;
+                margin: 8px 0;
+            }
+
+            .progress-fill {
+                height: 100%;
+                background: #3b82f6;
+                transition: width 0.3s ease;
+                width: 0%;
+            }
+
+            @media (max-width: 768px) {
+                .batch-actions {
                     flex-direction: column;
                 }
 
-                .file-name {
-                    font-size: 14px;
-                    font-weight: 500;
-                    color: #1f2937;
-                    margin-bottom: 2px;
-                }
-
-                .file-size {
-                    font-size: 12px;
-                    color: #6b7280;
-                }
-
-                .file-actions {
-                    display: flex;
-                    align-items: center;
+                .file-item {
+                    flex-direction: column;
+                    align-items: flex-start;
                     gap: 8px;
                 }
 
-                .remove-file {
-                    background: #fef2f2;
-                    border: 1px solid #fecaca;
-                    border-radius: 4px;
-                    padding: 4px 8px;
-                    font-size: 12px;
-                    color: #dc2626;
-                    cursor: pointer;
-                    transition: all 0.2s;
+                .file-actions {
+                    align-self: flex-end;
                 }
+            }
+        `;
+    }
 
-                .remove-file:hover {
-                    background: #fee2e2;
-                    border-color: #fca5a5;
-                }
-
-                .batch-actions {
-                    display: flex;
-                    gap: 12px;
-                    margin-top: 20px;
-                }
-
-                .batch-button {
-                    flex: 1;
-                    padding: 12px 20px;
-                    border: none;
-                    border-radius: 6px;
-                    font-size: 14px;
-                    font-weight: 500;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                }
-
-                .batch-button:disabled {
-                    opacity: 0.5;
-                    cursor: not-allowed;
-                }
-
-                .start-batch {
-                    background: #059669;
-                    color: white;
-                }
-
-                .start-batch:hover:not(:disabled) {
-                    background: #047857;
-                }
-
-                .clear-all {
-                    background: #f3f4f6;
-                    color: #374151;
-                    border: 1px solid #d1d5db;
-                }
-
-                .clear-all:hover:not(:disabled) {
-                    background: #e5e7eb;
-                }
-
-                .error-message {
-                    background: #fef2f2;
-                    border: 1px solid #fecaca;
-                    border-radius: 6px;
-                    padding: 12px;
-                    margin: 16px 0;
-                    color: #dc2626;
-                    font-size: 14px;
-                }
-
-                .warning-message {
-                    background: #fffbeb;
-                    border: 1px solid #fed7aa;
-                    border-radius: 6px;
-                    padding: 12px;
-                    margin: 16px 0;
-                    color: #d97706;
-                    font-size: 14px;
-                }
-
-                .progress-bar {
-                    width: 100%;
-                    height: 4px;
-                    background: #e5e7eb;
-                    border-radius: 2px;
-                    overflow: hidden;
-                    margin: 8px 0;
-                }
-
-                .progress-fill {
-                    height: 100%;
-                    background: #3b82f6;
-                    transition: width 0.3s ease;
-                    width: 0%;
-                }
-
-                @media (max-width: 768px) {
-                    .batch-actions {
-                        flex-direction: column;
-                    }
-                    
-                    .file-item {
-                        flex-direction: column;
-                        align-items: flex-start;
-                        gap: 8px;
-                    }
-                    
-                    .file-actions {
-                        align-self: flex-end;
-                    }
-                }
-            </style>
-
+    getTemplate() {
+        return `
             <div class="bulk-header">
                 <h3 class="bulk-title">Bulk PDF Compression</h3>
                 <div class="file-count" id="fileCount">0 files</div>
